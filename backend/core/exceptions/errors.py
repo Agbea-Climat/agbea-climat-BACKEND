@@ -1,6 +1,6 @@
 """Erreurs métier. Les services lèvent ces exceptions, sans dépendre de HTTP.
 
-Format renvoyé au client : {"error": {"code": "...", "message": "...", "details"?: ...}}
+Format renvoyé au client : {"status": "error", "message": "...", "response": {"code": "...", "details": ...}}
 Codes en snake_case (voir CLAUDE.md, règle 3).
 """
 from typing import Any, Optional

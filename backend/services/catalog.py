@@ -48,7 +48,7 @@ def list_datasets() -> list[Dataset]:
 
 def get_dataset(dataset_id: str) -> Dataset:
     if dataset_id not in DATASETS:
-        raise NotFound("dataset_not_found", dataset_id)
+        raise NotFound("dataset_not_found", f"Dataset introuvable : {dataset_id}")
     return DATASETS[dataset_id]
 
 
@@ -137,5 +137,5 @@ def list_layers(mode: Mode = "public") -> list[MapLayer]:
 def get_layer(layer_id: str) -> MapLayer:
     layer = next((l for l in LAYERS if l.id == layer_id), None)
     if not layer:
-        raise NotFound("layer_not_found", layer_id)
+        raise NotFound("layer_not_found", f"Couche introuvable : {layer_id}")
     return layer

@@ -24,7 +24,7 @@ def list_regions() -> list[Region]:
 
 def get_region(region_id: str) -> Region:
     if region_id not in REGIONS:
-        raise NotFound("region_not_found", region_id)
+        raise NotFound("region_not_found", f"Région introuvable : {region_id}")
     return REGIONS[region_id]
 
 

@@ -2,6 +2,7 @@
  * AGBÉA CLIMAT — Contrat API partagé (front ⇄ back)
  * Miroir exact de backend/schemas/. Toute modif se fait des DEUX côtés.
  * Base URL : /api/v1
+ * Chaque réponse JSON est enveloppée : ApiResponse<T> (succès) ou ApiError (voir fin du fichier).
  */
 
 // ───────────────────────── Enums ─────────────────────────
@@ -313,6 +314,22 @@ export interface AppMeta {
   features: Feature[]; // affichage honnête des statuts (slide 9)
 }
 
-export interface ApiError {
-  error: { code: string; message: string; details?: unknown };
+// ───────────────────────── Enveloppe ─────────────────────────
+// Toutes les réponses JSON sont enveloppées (backend/schemas/envelope.py).
+// Sauf : flux SSE POST /chat/stream et fichiers GET /regions/{id}/timeseries/export.
+
+/** Succès (2xx) : les données sont dans `response`. Ex. GET /regions → ApiResponse<Region[]> */
+export interface ApiResponse<T> {
+  status: "success";
+  message: string; // "OK" ou message d'action ("Session créée", ...)
+  response: T;
 }
+
+/** Erreur (4xx / 5xx) : `message` lisible, `response.code` en snake_case (region_not_found, ...) */
+export interface ApiError {
+  status: "error";
+  message: string;
+  response: { code: string; details: unknown | null };
+}
+
+export type ApiResult<T> = ApiResponse<T> | ApiError;

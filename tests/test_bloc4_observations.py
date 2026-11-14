@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from conftest import API, err_code, months
+from conftest import API, data, err_code, months
 
 RANGES = {"precipitation": (0, 1000), "ndvi": (-1, 1), "lst_day": (-10, 75)}
 
@@ -22,7 +22,7 @@ def _trend_ok(s):
 def test_summary_shape(client):
     r = client.get(f"{API}/regions/kara/summary", params={"date": "2024-08"})
     assert r.status_code == 200
-    s = r.json()
+    s = data(r)
     assert {i["indicator"] for i in s["indicators"]} == {"precipitation", "ndvi", "lst_day"}
     for i in s["indicators"]:
         assert i["plain_summary"] and i["dataset_id"]
@@ -32,8 +32,8 @@ def test_summary_shape(client):
 @pytest.mark.real_data
 def test_summary_deterministic_and_consistent(client):
     p = {"date": "2024-08"}
-    a = client.get(f"{API}/regions/kara/summary", params=p).json()
-    b = client.get(f"{API}/regions/kara/summary", params=p).json()
+    a = data(client.get(f"{API}/regions/kara/summary", params=p))
+    b = data(client.get(f"{API}/regions/kara/summary", params=p))
     assert a == b, "le résumé doit être déterministe (plus de données aléatoires)"
     for s in a["indicators"]:
         lo, hi = RANGES[s["indicator"]]
@@ -56,7 +56,7 @@ def test_timeseries_contiguous(client):
     r = client.get(f"{API}/regions/savanes/timeseries",
                    params={"indicator": "precipitation", "start": "2023-01", "end": "2024-12"})
     assert r.status_code == 200
-    ts = r.json()
+    ts = data(r)
     assert [p["date"] for p in ts["points"]] == months("2023-01", "2024-12")
     assert ts["units"] == "mm" and ts["dataset_id"] == "gpm_imerg"
 
@@ -64,8 +64,8 @@ def test_timeseries_contiguous(client):
 @pytest.mark.m15
 @pytest.mark.real_data
 def test_timeseries_seasonality(client):
-    ts = client.get(f"{API}/regions/savanes/timeseries",
-                    params={"indicator": "precipitation", "start": "2023-01", "end": "2023-12"}).json()
+    ts = data(client.get(f"{API}/regions/savanes/timeseries",
+                    params={"indicator": "precipitation", "start": "2023-01", "end": "2023-12"}))
     v = {p["date"]: p["value"] for p in ts["points"]}
     assert v["2023-08"] > v["2023-01"], "Savanes : août doit être plus pluvieux que janvier"
     for p in ts["points"]:
@@ -88,7 +88,7 @@ def test_compare_math(client):
     r = client.get(f"{API}/regions/savanes/compare", params={
         "indicator": "precipitation", "a_start": "2001", "a_end": "2010", "b_start": "2015", "b_end": "2024"})
     assert r.status_code == 200
-    c = r.json()
+    c = data(r)
     a, b = c["period_a"]["mean"], c["period_b"]["mean"]
     assert abs(c["delta_abs"] - (b - a)) < 0.01
     assert abs(c["delta_pct"] - (b - a) / a * 100) < 0.1
@@ -99,8 +99,8 @@ def test_compare_math(client):
 @pytest.mark.real_data
 def test_compare_deterministic(client):
     p = {"indicator": "ndvi", "a_start": "2001", "a_end": "2010", "b_start": "2015", "b_end": "2024"}
-    assert client.get(f"{API}/regions/kara/compare", params=p).json() == \
-        client.get(f"{API}/regions/kara/compare", params=p).json()
+    assert data(client.get(f"{API}/regions/kara/compare", params=p)) == \
+        data(client.get(f"{API}/regions/kara/compare", params=p))
 
 
 @pytest.mark.m16
@@ -137,7 +137,7 @@ def test_before_after(client):
     r = client.get(f"{API}/layers/ndvi/before-after",
                    params={"before": "2016-09-14", "after": "2024-09-13", "region_id": "kara"})
     assert r.status_code == 200
-    ba = r.json()
+    ba = data(r)
     assert ba["before"]["url_template"] != ba["after"]["url_template"]
     assert "2016-09-14" in ba["before"]["url_template"]
     assert "{date}" not in ba["after"]["url_template"]

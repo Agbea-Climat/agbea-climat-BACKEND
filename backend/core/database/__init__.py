@@ -1,4 +1,5 @@
-"""Accès SQLite (sessions, threads). Tables créées par M03/M04, voir MISSIONS.md."""
-from .sqlite import get_connection
+"""PostgreSQL + pgvector (SQLAlchemy 2, psycopg 3). Migrations : Alembic (migrations/)."""
+from .base import Base
+from .engine import SessionLocal, engine, get_db, ping
 
-__all__ = ["get_connection"]
+__all__ = ["Base", "SessionLocal", "engine", "get_db", "ping"]

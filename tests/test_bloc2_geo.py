@@ -1,6 +1,6 @@
 import pytest
 
-from conftest import API, REGION_IDS, TOGO_LAT, TOGO_LON, err_code
+from conftest import API, REGION_IDS, TOGO_LAT, TOGO_LON, data, err_code
 
 
 def _in_togo(lon, lat):
@@ -11,7 +11,7 @@ def _in_togo(lon, lat):
 def test_regions(client):
     r = client.get(f"{API}/regions")
     assert r.status_code == 200
-    regions = r.json()
+    regions = data(r)
     assert {x["id"] for x in regions} == REGION_IDS
     for x in regions:
         lon, lat = x["centroid"]
@@ -21,7 +21,7 @@ def test_regions(client):
 
 @pytest.mark.m07
 def test_geojson_valid(client):
-    g = client.get(f"{API}/regions/geojson").json()
+    g = data(client.get(f"{API}/regions/geojson"))
     assert g["type"] == "FeatureCollection"
     assert {f["properties"]["id"] for f in g["features"]} == REGION_IDS
     for f in g["features"]:
@@ -31,7 +31,7 @@ def test_geojson_valid(client):
 @pytest.mark.m07
 @pytest.mark.real_data
 def test_geojson_real_boundaries(client):
-    g = client.get(f"{API}/regions/geojson").json()
+    g = data(client.get(f"{API}/regions/geojson"))
     for f in g["features"]:
         geom = f["geometry"]
         rings = geom["coordinates"] if geom["type"] == "Polygon" else [r for p in geom["coordinates"] for r in p]
@@ -42,7 +42,7 @@ def test_geojson_real_boundaries(client):
 
 @pytest.mark.m08
 def test_region_detail(client):
-    assert client.get(f"{API}/regions/kara").json()["id"] == "kara"
+    assert data(client.get(f"{API}/regions/kara"))["id"] == "kara"
     r = client.get(f"{API}/regions/abidjan")
     assert r.status_code == 404 and err_code(r) == "region_not_found"
 
@@ -58,7 +58,7 @@ def test_region_detail(client):
 def test_locate_cities(client, name, lon, lat, expected):
     r = client.get(f"{API}/locate", params={"lon": lon, "lat": lat})
     assert r.status_code == 200, name
-    assert r.json()["id"] == expected, name
+    assert data(r)["id"] == expected, name
 
 
 @pytest.mark.m09

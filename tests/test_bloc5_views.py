@@ -1,11 +1,11 @@
 import pytest
 
-from conftest import API, REGION_IDS, err_code
+from conftest import API, REGION_IDS, data, err_code
 
 
 @pytest.mark.m19
 def test_dashboard(client):
-    d = client.get(f"{API}/dashboard", params={"date": "2024-08"}).json()
+    d = data(client.get(f"{API}/dashboard", params={"date": "2024-08"}))
     assert {r["region"]["id"] for r in d["regions"]} == REGION_IDS
     assert 1 <= len(d["highlights"]) <= 3
     for h in d["highlights"]:
@@ -19,13 +19,13 @@ def test_dashboard(client):
     ("maritime", "2024-05", "rainy"),
 ])
 def test_agriculture_season(client, region, date, season):
-    a = client.get(f"{API}/regions/{region}/agriculture", params={"date": date}).json()
+    a = data(client.get(f"{API}/regions/{region}/agriculture", params={"date": date}))
     assert a["season"] == season
 
 
 @pytest.mark.m20
 def test_agriculture_rules(client):
-    a = client.get(f"{API}/regions/savanes/agriculture", params={"date": "2024-08"}).json()
+    a = data(client.get(f"{API}/regions/savanes/agriculture", params={"date": "2024-08"}))
     assert "prévisions officielles" in a["disclaimer"]
     assert a["statements"]
     assert all(s["nature"] != "predicted" for s in a["statements"])

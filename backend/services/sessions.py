@@ -22,7 +22,7 @@ def create_session() -> Session:
 def _session(session_id: str) -> Session:
     s = repo.get(session_id)
     if s is None:
-        raise NotFound("session_not_found", session_id)
+        raise NotFound("session_not_found", f"Session introuvable : {session_id}")
     return s
 
 

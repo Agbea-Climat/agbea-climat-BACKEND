@@ -4,10 +4,12 @@ __pycache__/
 venv/
 .env
 data/raw/
-*.sqlite
 
-.chroma/
 .pytest_cache/
 
-# archives locales
+# fichiers source de la base du projet (locaux, non versionnés)
 *.zip
+agbea-climat-BACKEND/
+CLAUDE.md
+MISSIONS.md
+docs/

@@ -1,16 +1,16 @@
 from fastapi import APIRouter
 
-from backend.schemas import AppMeta
+from backend.schemas import ApiResponse, AppMeta, ok
 from backend.services import catalog
 
 router = APIRouter(tags=["meta"])
 
 
-@router.get("/health")
+@router.get("/health", response_model=ApiResponse[dict[str, str]])
 def health():
-    return {"status": "ok"}
+    return ok({"status": "ok"})
 
 
-@router.get("/meta", response_model=AppMeta)
+@router.get("/meta", response_model=ApiResponse[AppMeta])
 def meta():
-    return catalog.get_meta()
+    return ok(catalog.get_meta())
