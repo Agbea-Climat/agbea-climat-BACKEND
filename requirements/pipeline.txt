@@ -1,0 +1,18 @@
+# Pipeline de données (pipeline/) — traitement géospatial
+numpy>=2.0
+pandas>=2.2
+pyarrow>=17
+xarray>=2024.10
+scipy>=1.13
+rasterio>=1.4
+geopandas>=1.0
+shapely>=2.0
+pyproj>=3.6
+# Accès aux données
+requests>=2.32
+pystac-client>=0.8
+planetary-computer>=1.0
+h5py>=3.11
+pyhdf>=0.11    # HDF4 MODIS (LP DAAC) pour combler les trous de Planetary Computer
+# Config
+pyyaml>=6.0

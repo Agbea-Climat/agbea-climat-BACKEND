@@ -60,13 +60,22 @@ evals/                    # évaluations de l'assistant
 prisma/                   # réservé
 contract/types.ts         # types du front
 data/
-  regions.geojson         # contours ADM1 (geoBoundaries TGO)
-  processed/monthly.parquet   # region_id, indicator, date (YYYY-MM), value
-  processed/static.json       # altitude par région
+  regions.geojson         # 5 régions officielles (geodata.gouv.tg via MAP TOGO) — écrit par pipeline/
+  processed/monthly.parquet   # region_id, indicator, date (YYYY-MM), value (+ valid_frac, low_coverage, dataset_id)
+  processed/static.json       # altitude par région (NASADEM)
+  reference/              # limites administratives (MAP TOGO, HDX)
+  api/                    # livrable complet du pipeline (fiches, tables, couches) — non versionné
   corpus/                 # documents du RAG (md, pdf)
-scripts/export_gee.py     # export Google Earth Engine → monthly.parquet
+pipeline/                 # pipeline de données NASA (P2) — règles propres dans pipeline/CLAUDE.md
+docker/  docker-compose.yml   # images agbea-api et agbea-pipeline
 tests/                    # un fichier par bloc, un marker par mission
 ```
+
+## Données (P2)
+
+`data/regions.geojson` et `data/processed/` sont produits par `pipeline/` (`docker compose run --rm pipeline export-backend`) :
+ne jamais les modifier à la main. Format : `docs/data/contrat-donnees.md`. Une valeur avec `low_coverage = true`
+(moins de 50 % de la région visible, nuages) doit être signalée à l'utilisateur.
 
 ## Règles non négociables
 

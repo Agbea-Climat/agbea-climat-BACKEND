@@ -1,0 +1,29 @@
+.git/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+*.sqlite
+.chroma/
+logs/
+.playwright-mcp/
+*.zip
+CLAUDE.md
+
+# données : montées au lancement, jamais copiées (sauf data/reference, embarqué dans l'image pipeline)
+data/raw/
+data/interim/
+data/api/
+data/processed/
+data/corpus/
+data/regions.geojson
+
+# documentation et notes : inutiles dans les images
+docs/
+notes/
+changelogs/
+
+# ancienne copie imbriquée du dépôt (voir notes/)
+agbea-climat-BACKEND/

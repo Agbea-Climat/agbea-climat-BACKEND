@@ -39,8 +39,17 @@ Deux agents ne travaillent jamais sur le même fichier `backend/services/*.py` e
   - Tant que P2 n'est pas fait, `backend/repositories/store.py` peut renvoyer les mocks actuels.
 - **Test** : `pytest -m "p1"` et tous les tests qui passaient avant passent toujours.
 
-### P2 — Pipeline de données (Google Earth Engine)
-- **Fichiers** : `scripts/export_gee.py`, `data/regions.geojson`,
+### P2 — Pipeline de données
+- **Statut** : fait (14/11/2026) par `pipeline/` (sources NASA directes, sans Google Earth Engine) :
+  `docker compose run --rm pipeline export-backend`. Détails : `pipeline/README.md`, `docs/data/contrat-donnees.md`.
+  Écarts avec le plan initial ci-dessous (à garder en tête pour M06–M16) :
+  - contours : limites **officielles** geodata.gouv.tg (via MAP TOGO) plutôt que geoBoundaries ; `properties`
+    contient déjà `id, name, capital, centroid, bbox, area_km2` ;
+  - NDVI : MODIS **MOD13A1** (500 m) plutôt que MOD13Q1 (250 m) ; altitude : **NASADEM** (SRTM retraité) ;
+  - `monthly.parquet` a 3 colonnes en plus : `valid_frac` (part de la région visible), `low_coverage`
+    (`valid_frac < 0,5`, à signaler à l'utilisateur), `dataset_id` ;
+  - `static.json` : `{"dataset_id": "srtm", "units": "m", "regions": {"<id>": {"elevation": {mean, min, max, p10, median, p90, pct_below_10m}}}}`.
+- **Fichiers (plan initial)** : `scripts/export_gee.py`, `data/regions.geojson`,
   `data/processed/monthly.parquet`, `data/processed/static.json`.
 - **Implémentation** :
   - Contours : geoBoundaries `TGO` niveau `ADM1` (GeoJSON simplifié). Ajouter dans

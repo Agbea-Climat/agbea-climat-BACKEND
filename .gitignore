@@ -1,13 +1,27 @@
+# ── Python ──
 __pycache__/
 *.pyc
 .venv/
 venv/
-.env
-data/raw/
-*.sqlite
-
-.chroma/
 .pytest_cache/
 
-# archives locales
+# ── Secrets ──
+.env
+
+# ── API (sessions, RAG) ──
+*.sqlite
+.chroma/
+
+# ── Données ──
+# Versionnés : data/reference/ (limites), data/regions.geojson, data/processed/ (livrable P2), data/corpus/
+# Régénérables par le pipeline (python -m pipeline all) :
+data/raw/
+data/interim/
+data/api/
+*.tmp.tif
+*.part
+
+# ── Divers ──
+logs/
+.playwright-mcp/
 *.zip
