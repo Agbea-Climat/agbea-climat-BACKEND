@@ -71,7 +71,7 @@ export interface Dataset {
 export interface LegendStop { value: number; color: string; label?: string }
 
 export interface MapLayer {
-  id: string;                 // "ndvi_16day"
+  id: string;                 // "ndvi", "precipitation", "lst_day"
   indicator: IndicatorId;
   dataset_id: string;
   title: string;
@@ -82,6 +82,7 @@ export interface MapLayer {
   opacity: number;            // 0..1
   legend: LegendStop[];
   modes: Mode[];              // couches visibles dans quel mode
+  max_zoom?: number | null;   // zoom maximal servi (au-delà, GIBS répond 400)
 }
 
 // ───────────────────────── Indicateurs ─────────────────────────
@@ -91,6 +92,8 @@ export interface TimePoint {
   value: number | null;
   baseline?: number | null; // moyenne climatologique même mois (2001–2020)
   anomaly_pct?: number | null;
+  valid_frac?: number | null;  // part de la région visible par le satellite (0–1), mois seulement
+  low_coverage?: boolean;      // true si valid_frac < 0,5 : valeur peu représentative, à signaler
 }
 
 export interface TimeSeries {
@@ -117,6 +120,8 @@ export interface IndicatorSnapshot {
   trend: Trend;
   plain_summary: string;  // phrase simple pour le mode public (template, pas LLM)
   dataset_id: string;
+  valid_frac: number | null;  // part de la région visible par le satellite (0–1)
+  low_coverage: boolean;      // true si valid_frac < 0,5 : valeur peu représentative, à signaler
 }
 
 export interface RegionSummary {

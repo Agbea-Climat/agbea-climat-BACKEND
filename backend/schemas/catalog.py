@@ -45,6 +45,7 @@ class MapLayer(BaseModel):
     opacity: float = 0.7
     legend: list[LegendStop]
     modes: list[Mode] = ["public", "scientific"]
+    max_zoom: Optional[int] = None  # zoom maximal servi (au-delà, GIBS répond 400)
 
 
 # ── Indicateurs ──

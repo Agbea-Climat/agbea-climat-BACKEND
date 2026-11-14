@@ -1,10 +1,14 @@
 """Catalogue statique : méta, profils, datasets, indicateurs, couches de carte."""
+import calendar
+from datetime import date, timedelta
+
 from backend.core.constants import APP_VERSION
 from backend.core.exceptions import NotFound
+from backend.repositories import store
 from backend.schemas import (AppMeta, Dataset, Feature, Indicator, LegendStop, MapLayer, Mode,
                              Profile)
 
-from .regions import REGIONS
+from .regions import REGION_IDS
 
 # ─────────── Datasets ───────────
 # Faits alignés sur pipeline/settings/datasets.yaml (produits réellement utilisés par le pipeline P2).
@@ -71,9 +75,17 @@ def dataset_for(indicator: str) -> Dataset:
 
 
 # ─────────── Méta ───────────
+def data_last_updated() -> str:
+    """Dernier jour du dernier mois présent dans monthly.parquet (YYYY-MM-DD)."""
+    last = store.last_date()
+    if last is None:
+        raise store.DataUnavailable("data_unavailable", "monthly.parquet ne contient aucune valeur")
+    y, m = map(int, last.split("-"))
+    return f"{y:04d}-{m:02d}-{calendar.monthrange(y, m)[1]:02d}"
+
+
 def get_meta() -> AppMeta:
-    # TODO M02 (après P2) : data_last_updated = dernier mois de monthly.parquet
-    return AppMeta(version=APP_VERSION, regions_count=len(REGIONS), data_last_updated="2026-10-31", features=[
+    return AppMeta(version=APP_VERSION, regions_count=len(REGION_IDS), data_last_updated=data_last_updated(), features=[
         Feature(id="map", title="Carte interactive du Togo", status="prototype"),
         Feature(id="chat", title="Assistant IA (texte)", status="prototype"),
         Feature(id="voice", title="AGBÉA Voice", status="in_development"),
@@ -115,7 +127,7 @@ INDICATORS: list[Indicator] = [
     Indicator(id="ndvi", label="Verdure de la végétation", units="", dataset_id="modis_ndvi", layer_id="ndvi",
               description_public="Plus la valeur est haute, plus la terre est verte.",
               description_scientific="NDVI MODIS MOD13A1 v061, composites 16 jours à 500 m agrégés au mois.", has_timeseries=True),
-    Indicator(id="lst_day", label="Température du sol", units="°C", dataset_id="modis_lst",
+    Indicator(id="lst_day", label="Température du sol", units="°C", dataset_id="modis_lst", layer_id="lst_day",
               description_public="Chaleur de la surface du sol en journée.",
               description_scientific="LST diurne MODIS MOD11A2 v061, composites 8 jours à 1 km agrégés au mois.", has_timeseries=True),
     Indicator(id="elevation", label="Altitude", units="m", dataset_id="srtm",
@@ -128,19 +140,69 @@ def list_indicators() -> list[Indicator]:
     return INDICATORS
 
 
-# ─────────── Couches de carte ───────────
-# TODO M13 : vérifier les identifiants exacts dans le catalogue GIBS (worldview.earthdata.nasa.gov)
-GIBS = "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/{layer}/default/{date}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.png"
+# ─────────── Couches de carte (M13) ───────────
+# Tuiles NASA GIBS, WMTS EPSG:3857. Identifiants, TileMatrixSet et dates vérifiés le 2026-11-14 sur
+# https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/1.0.0/WMTSCapabilities.xml (tuiles HTTP 200 sur le Togo).
+# Le TileMatrixSet dépend de la couche : au-delà de max_zoom, GIBS répond 400. Une date sans image
+# dans une plage renvoie la période précédente ; une date après la fin de plage renvoie 404.
+# Palettes : https://gibs.earthdata.nasa.gov/colormaps/v1.3/<colormap>.xml
+GIBS = "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/{layer}/default/{date}/{tms}/{z}/{y}/{x}.png"
+
+
+def _gibs(layer: str, tms: str) -> str:
+    return GIBS.replace("{layer}", layer).replace("{tms}", tms)
+
+
+def _periodic(first_year: int, last: str, step_days: int) -> list[str]:
+    """Dates de composites GIBS : chaque année repart du 1er janvier, pas de `step_days` jours."""
+    end = date.fromisoformat(last)
+    out = []
+    for year in range(first_year, end.year + 1):
+        d = date(year, 1, 1)
+        while d.year == year and d <= end:
+            out.append(d.isoformat())
+            d += timedelta(days=step_days)
+    return out
+
+
+def _daily(last: str, days: int) -> list[str]:
+    end = date.fromisoformat(last)
+    return [(end - timedelta(days=i)).isoformat() for i in range(days - 1, -1, -1)]
+
+
+NDVI_LAST, LST_LAST, IMERG_LAST = "2026-10-16", "2026-11-01", "2026-11-13"
+
 LAYERS: list[MapLayer] = [
-    MapLayer(id="ndvi", indicator="ndvi", dataset_id="modis_ndvi", title="Verdure de la végétation",
-             type="wmts", url_template=GIBS.replace("{layer}", "MODIS_Terra_NDVI_16Day"),
-             available_dates=["2026-09-14"], default_date="2026-09-14",
-             legend=[LegendStop(value=0, color="#d8c48f", label="Sol nu"),
-                     LegendStop(value=0.8, color="#1a7f37", label="Très vert")]),
-    MapLayer(id="precipitation", indicator="precipitation", dataset_id="gpm_imerg", title="Pluie",
-             type="wmts", url_template=GIBS.replace("{layer}", "IMERG_Precipitation_Rate"),
-             available_dates=["2026-09-30"], default_date="2026-09-30",
-             legend=[LegendStop(value=0, color="#e0f3ff"), LegendStop(value=300, color="#08306b")]),
+    # MODIS Terra MOD13Q1 (250 m), composite 16 jours ; série de l'API : MOD13A1 (500 m), même indice
+    MapLayer(id="ndvi", indicator="ndvi", dataset_id="modis_ndvi",
+             title="Verdure de la végétation (NDVI, MODIS Terra, 16 jours)",
+             type="wmts", url_template=_gibs("MODIS_Terra_L3_NDVI_16Day", "GoogleMapsCompatible_Level9"),
+             available_dates=_periodic(2016, NDVI_LAST, 16), default_date=NDVI_LAST, max_zoom=9,
+             legend=[LegendStop(value=0.05, color="#e1d9d5", label="Sol nu"),
+                     LegendStop(value=0.2, color="#b09b8a"),
+                     LegendStop(value=0.4, color="#8fb716"),
+                     LegendStop(value=0.6, color="#3e8a01"),
+                     LegendStop(value=0.8, color="#086701", label="Très vert")]),
+    # GPM IMERG, intensité de pluie journalière (mm/h) — la série de l'API est un cumul mensuel (mm)
+    MapLayer(id="precipitation", indicator="precipitation", dataset_id="gpm_imerg",
+             title="Intensité de pluie (IMERG, journalier, mm/h)",
+             type="wmts", url_template=_gibs("IMERG_Precipitation_Rate", "GoogleMapsCompatible_Level6"),
+             available_dates=_daily(IMERG_LAST, 90), default_date=IMERG_LAST, max_zoom=6,
+             legend=[LegendStop(value=0.1, color="#00764e", label="0,1 mm/h"),
+                     LegendStop(value=1, color="#c3e400", label="1 mm/h"),
+                     LegendStop(value=2, color="#ffb006", label="2 mm/h"),
+                     LegendStop(value=5, color="#ff4730", label="5 mm/h"),
+                     LegendStop(value=10, color="#e70000", label="10 mm/h et plus")]),
+    # MODIS Terra MOD11A2, température de surface de jour, composite 8 jours (palette en K, légende en °C)
+    MapLayer(id="lst_day", indicator="lst_day", dataset_id="modis_lst",
+             title="Température du sol en journée (MODIS Terra, 8 jours)",
+             type="wmts", url_template=_gibs("MODIS_Terra_L3_Land_Surface_Temp_8Day_Day", "GoogleMapsCompatible_Level7"),
+             available_dates=_periodic(2024, LST_LAST, 8), default_date=LST_LAST, max_zoom=7,
+             legend=[LegendStop(value=0, color="#57ff34", label="0 °C"),
+                     LegendStop(value=15, color="#b3ff00", label="15 °C"),
+                     LegendStop(value=25, color="#f4ff00", label="25 °C"),
+                     LegendStop(value=35, color="#ffd600", label="35 °C"),
+                     LegendStop(value=45, color="#ffa600", label="45 °C et plus")]),
 ]
 
 

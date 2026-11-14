@@ -14,6 +14,8 @@ class TimePoint(BaseModel):
     value: Optional[float]
     baseline: Optional[float] = None
     anomaly_pct: Optional[float] = None
+    valid_frac: Optional[float] = None   # part de la région visible (0–1), mois seulement
+    low_coverage: bool = False           # valid_frac < 0,5 : valeur peu représentative
 
 
 class TimeSeries(BaseModel):
@@ -38,6 +40,8 @@ class IndicatorSnapshot(BaseModel):
     trend: Trend
     plain_summary: str
     dataset_id: str
+    valid_frac: Optional[float] = None
+    low_coverage: bool = False
 
 
 class RegionSummary(BaseModel):
