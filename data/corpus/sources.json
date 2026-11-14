@@ -1,0 +1,13 @@
+[
+  {"file": "dataset-gpm-imerg.md", "title": "Fiche dataset : pluie NASA GPM IMERG (Final Run V07, mensuel)", "source_url": "https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGM_07/summary", "region_ids": [], "indicators": ["precipitation"]},
+  {"file": "dataset-modis-ndvi.md", "title": "Fiche dataset : végétation MODIS Terra MOD13A1 v061 (NDVI)", "source_url": "https://lpdaac.usgs.gov/products/mod13a1v061/", "region_ids": [], "indicators": ["ndvi"]},
+  {"file": "dataset-modis-lst.md", "title": "Fiche dataset : température de surface MODIS Terra MOD11A2 v061 (LST)", "source_url": "https://lpdaac.usgs.gov/products/mod11a2v061/", "region_ids": [], "indicators": ["lst_day"]},
+  {"file": "dataset-nasadem-altitude.md", "title": "Fiche dataset et explication : altitude NASADEM (SRTM retraité)", "source_url": "https://lpdaac.usgs.gov/products/nasadem_hgtv001/", "region_ids": [], "indicators": ["elevation"]},
+  {"file": "comprendre-pluie-imerg.md", "title": "Comprendre la pluie vue par satellite (GPM IMERG)", "source_url": "https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGM_07/summary", "region_ids": [], "indicators": ["precipitation"]},
+  {"file": "comprendre-ndvi.md", "title": "Comprendre le NDVI, l'indice de verdure de la végétation", "source_url": "https://lpdaac.usgs.gov/products/mod13a1v061/", "region_ids": [], "indicators": ["ndvi"]},
+  {"file": "comprendre-temperature-surface.md", "title": "Comprendre la température de surface (LST)", "source_url": "https://lpdaac.usgs.gov/products/mod11a2v061/", "region_ids": [], "indicators": ["lst_day"]},
+  {"file": "calendrier-agricole-sud.md", "title": "Calendrier agricole du sud du Togo (régions Maritime et Plateaux)", "source_url": "https://help.fews.net/fde/v3/togo-country-book", "region_ids": ["maritime", "plateaux"], "indicators": ["precipitation", "ndvi"]},
+  {"file": "calendrier-agricole-nord.md", "title": "Calendrier agricole du centre et du nord du Togo (régions Centrale, Kara et Savanes)", "source_url": "https://www.fao.org/giews/countrybrief/country.jsp?code=TGO", "region_ids": ["centrale", "kara", "savanes"], "indicators": ["precipitation", "ndvi"]},
+  {"file": "rapport-unicef-paysage-climatique-togo.md", "title": "Résumé : Analyse du paysage climatique pour les enfants au Togo (UNICEF, 2025)", "source_url": "https://www.unicef.org/togo/media/2916/file/ANALYSE%20DU%20PAYSAGE%20CLIMATIQUE%20POUR%20LES%20ENFANTS%20AU%20TOGO.pdf.pdf", "region_ids": [], "indicators": []},
+  {"file": "resume-cdn-togo.md", "title": "Résumé : la Contribution déterminée au niveau national (CDN) révisée du Togo", "source_url": "https://climatepromise.undp.org/fr/what-we-do/where-we-work/togo", "region_ids": [], "indicators": []}
+]
