@@ -8,6 +8,9 @@ venv/
 # ── Secrets ──
 .env
 
+# ── Règles locales des agents IA (le CLAUDE.md racine reste sur chaque poste) ──
+/CLAUDE.md
+
 # ── API (sessions, RAG) ──
 *.sqlite
 .chroma/

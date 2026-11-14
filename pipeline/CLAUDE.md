@@ -1,6 +1,6 @@
 # pipeline/ — règles pour les agents (volet données)
 
-Pipeline Python qui produit `data/` pour l'API. C'est le prérequis **P2** de `MISSIONS.md`. Les règles du `CLAUDE.md` racine s'appliquent aussi.
+Pipeline Python qui produit `data/` pour l'API. C'est le prérequis **P2** de `MISSIONS.md`. Les règles générales du projet (contrat API, format d'erreurs, « aucun chiffre inventé ») sont dans `MISSIONS.md` et `README.md`.
 
 ## Conventions de l'équipe données
 

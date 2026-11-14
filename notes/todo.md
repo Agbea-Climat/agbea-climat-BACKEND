@@ -13,7 +13,7 @@
 ## Intégration avec le backend (14/11)
 
 - [ ] **Faire relire et fusionner** la branche `feat/pipeline-donnees` par l'équipe backend (rien n'est commité).
-- [ ] Dossier **`agbea-climat-BACKEND/` imbriqué** dans le dépôt : ancienne copie du mock (`app/main.py`) ajoutée par le commit `b98bcec`. À supprimer après accord de l'équipe.
+- [x] ~~Dossier `agbea-climat-BACKEND/` imbriqué~~ (ancienne copie du mock) : supprimé le 14/11. Ses PDF étaient identiques à `docs/`.
 - [ ] `backend/services/catalog.py` (missions M10-M12, équipe backend) annonce **MOD13Q1 250 m** et **SRTM GL1**, alors que les données viennent de **MOD13A1 500 m** et de **NASADEM**. IMERG V07 commence en **1998-01**, et non en 2000-06. À corriger dans les fiches `Dataset` (ids inchangés).
 - [ ] Les tests `real_data` sont maintenant **actifs** (monthly.parquet présent). 3 échouent tant que les mocks ne sont pas remplacés : M07 (`test_geojson_real_boundaries`), M14, M16. C'est le comportement prévu par `MISSIONS.md`. Bilan Docker du 14/11 : 40 passed, 8 failed (dont 5 préexistants), 3 skipped.
 - [ ] L'API doit afficher un avertissement quand `low_coverage = true` (cf. D22).
