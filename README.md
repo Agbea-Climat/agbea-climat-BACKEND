@@ -1,1 +1,43 @@
 # AGBÉA CLIMAT — Backend
+
+API FastAPI de la plateforme AGBÉA CLIMAT (NASA Space Apps Challenge 2026).
+Contrat API v0.4 — les routes renvoient pour l'instant des données mock.
+
+## Lancer
+
+```bash
+python -m venv .venv
+source .venv/bin/activate        # Windows : .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env
+uvicorn backend.main:app --reload --port 8000
+```
+
+Documentation interactive : http://localhost:8000/docs
+
+## Structure
+
+- `backend/` — API : `api/` (routes `/api/v1/...`), `services/` (logique métier),
+  `repositories/` (accès données), `schemas/` (Pydantic), `core/` (config, erreurs, DB)
+- `chatbot/` — assistant IA (LangGraph + RAG)
+- `worker/` — ingestion du corpus RAG
+- `contract/types.ts` — types TypeScript pour le front (miroir de `backend/schemas/`)
+- `CLAUDE.md` — règles du projet pour les agents IA
+- `MISSIONS.md` — fiche technique, mission par mission
+- `docs/AGBEA_CLIMAT_missions_*.pdf` — tests humains API + front (FR / EN)
+- `tests/` — tests automatiques ; une mission est finie quand `pytest -m mXX` passe
+
+## Tests
+
+```bash
+pytest                    # tout
+pytest -m m14             # une mission
+pytest -m "not llm"       # sans appel au LLM
+```
+
+Les tests `real_data` sont ignorés tant que `data/processed/monthly.parquet` n'existe pas (P2),
+les tests `llm` tant que `LLM_API_KEY` n'est pas défini.
+
+## Règle
+
+`contract/types.ts` et `backend/schemas/` changent toujours ensemble, dans le même commit.
