@@ -7,35 +7,49 @@ from backend.schemas import (AppMeta, Dataset, Feature, Indicator, LegendStop, M
 from .regions import REGIONS
 
 # ─────────── Datasets ───────────
+# Faits alignés sur pipeline/settings/datasets.yaml (produits réellement utilisés par le pipeline P2).
+# Les ids ne changent pas : ce sont les dataset_id de data/processed/.
 DATASETS: dict[str, Dataset] = {
     "gpm_imerg": Dataset(
-        id="gpm_imerg", name="NASA GPM IMERG (Final)", provider="NASA GES DISC",
-        variable="Precipitation", indicator="precipitation", units="mm",
-        spatial_resolution="0.1° (~10 km)", temporal_resolution="monthly",
-        coverage="60°N–60°S", period_start="2000-06-01",
-        limitations=["Estimation satellite, pas une mesure de pluviomètre"],
-        source_url="https://gpm.nasa.gov/data/imerg"),
+        id="gpm_imerg", name="NASA GPM IMERG Final Run V07 (mensuel, GPM_3IMERGM)", provider="NASA GES DISC",
+        variable="precipitation", indicator="precipitation", units="mm",
+        spatial_resolution="0.1° (~11 km)", temporal_resolution="mensuel",
+        coverage="Global (complet entre 60°N et 60°S)", period_start="1998-01-01",
+        limitations=["Estimation satellite, pas une mesure de pluviomètre",
+                     "Maille de ~11 km : une valeur représente une zone, pas un point précis",
+                     "Final Run publié avec ~3 mois de retard",
+                     "Séries AGBÉA à partir de 2001-01 (normales 2001-2020)"],
+        source_url="https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGM_07/summary",
+        citation="doi:10.5067/GPM/IMERG/3B-MONTH/07"),
     "modis_ndvi": Dataset(
-        id="modis_ndvi", name="MODIS Terra MOD13Q1", provider="NASA LP DAAC",
-        variable="NDVI", indicator="ndvi", units="",
-        spatial_resolution="250 m", temporal_resolution="16 jours",
+        id="modis_ndvi", name="MODIS Terra MOD13A1 v061", provider="NASA LP DAAC",
+        variable="500m_16_days_NDVI", indicator="ndvi", units="",
+        spatial_resolution="500 m", temporal_resolution="composite 16 jours, agrégé au mois",
         coverage="Global", period_start="2000-02-18",
-        limitations=["Nuages possibles en saison des pluies"],
-        source_url="https://lpdaac.usgs.gov/products/mod13q1v061/"),
+        limitations=["Nuages de saison des pluies : trous fréquents, surtout sur la côte (juin-septembre)",
+                     "Le NDVI mesure la verdeur, pas la biomasse ni le type de culture",
+                     "Forte saisonnalité : comparer les mêmes mois d'une année à l'autre"],
+        source_url="https://lpdaac.usgs.gov/products/mod13a1v061/",
+        citation="doi:10.5067/MODIS/MOD13A1.061"),
     "modis_lst": Dataset(
-        id="modis_lst", name="MODIS Terra MOD11A2", provider="NASA LP DAAC",
-        variable="Land Surface Temperature (jour)", indicator="lst_day", units="°C",
-        spatial_resolution="1 km", temporal_resolution="8 jours",
+        id="modis_lst", name="MODIS Terra MOD11A2 v061", provider="NASA LP DAAC",
+        variable="LST_Day_1km", indicator="lst_day", units="°C",
+        spatial_resolution="1 km", temporal_resolution="composite 8 jours, agrégé au mois",
         coverage="Global", period_start="2000-03-05",
-        limitations=["Température de la surface du sol, pas de l'air"],
-        source_url="https://lpdaac.usgs.gov/products/mod11a2v061/"),
+        limitations=["Température de la surface du sol (toits, routes, champs), pas de l'air",
+                     "Mesurée seulement par ciel clair : en saison des pluies, valeurs rares et biaisées vers les jours secs",
+                     "Dérive orbitale de Terra depuis 2022 : tendances récentes de LST de jour à lire avec prudence"],
+        source_url="https://lpdaac.usgs.gov/products/mod11a2v061/",
+        citation="doi:10.5067/MODIS/MOD11A2.061"),
     "srtm": Dataset(
-        id="srtm", name="SRTM GL1", provider="NASA / USGS",
-        variable="Elevation", indicator="elevation", units="m",
-        spatial_resolution="30 m", temporal_resolution="statique (2000)",
+        id="srtm", name="NASADEM (SRTM retraité) v001", provider="NASA JPL / LP DAAC",
+        variable="elevation", indicator="elevation", units="m",
+        spatial_resolution="30 m (1 seconde d'arc)", temporal_resolution="statique (mission SRTM, 2000)",
         coverage="56°S–60°N", period_start="2000-02-11", period_end="2000-02-22",
-        limitations=["Relief mesuré en 2000 : ne montre pas les changements récents"],
-        source_url="https://lpdaac.usgs.gov/products/srtmgl1v003/"),
+        limitations=["Relief mesuré en 2000 : ne montre pas les changements récents",
+                     "Altitude du sommet de la végétation et des bâtiments, pas toujours du sol"],
+        source_url="https://lpdaac.usgs.gov/products/nasadem_hgtv001/",
+        citation="doi:10.5067/MEaSUREs/NASADEM/NASADEM_HGT.001"),
 }
 IND2DS = {d.indicator: d.id for d in DATASETS.values()}
 LABELS = {"precipitation": "Pluie du mois", "ndvi": "Verdure (NDVI)",
@@ -97,16 +111,16 @@ def list_profiles() -> list[Profile]:
 INDICATORS: list[Indicator] = [
     Indicator(id="precipitation", label="Pluie", units="mm", dataset_id="gpm_imerg", layer_id="precipitation",
               description_public="Quantité de pluie tombée, vue par satellite.",
-              description_scientific="Précipitations GPM IMERG Final, cumul mensuel, grille 0.1°.", has_timeseries=True),
+              description_scientific="Précipitations GPM IMERG Final Run V07, cumul mensuel, grille 0.1°.", has_timeseries=True),
     Indicator(id="ndvi", label="Verdure de la végétation", units="", dataset_id="modis_ndvi", layer_id="ndvi",
               description_public="Plus la valeur est haute, plus la terre est verte.",
-              description_scientific="NDVI MODIS MOD13Q1, composite 16 jours, 250 m.", has_timeseries=True),
+              description_scientific="NDVI MODIS MOD13A1 v061, composites 16 jours à 500 m agrégés au mois.", has_timeseries=True),
     Indicator(id="lst_day", label="Température du sol", units="°C", dataset_id="modis_lst",
               description_public="Chaleur de la surface du sol en journée.",
-              description_scientific="LST diurne MODIS MOD11A2, composite 8 jours, 1 km.", has_timeseries=True),
+              description_scientific="LST diurne MODIS MOD11A2 v061, composites 8 jours à 1 km agrégés au mois.", has_timeseries=True),
     Indicator(id="elevation", label="Altitude", units="m", dataset_id="srtm",
               description_public="Hauteur du terrain : zones basses et pentes.",
-              description_scientific="MNT SRTM GL1, 30 m.", has_timeseries=False),
+              description_scientific="MNT NASADEM (SRTM retraité), 30 m.", has_timeseries=False),
 ]
 
 
