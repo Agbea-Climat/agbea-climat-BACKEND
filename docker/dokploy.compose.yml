@@ -1,0 +1,47 @@
+# AGBÉA CLIMAT — déploiement Dokploy, mode « Raw » : coller ce fichier tel quel.
+#
+# Prérequis : l'image de l'API publiée dans un registre (voir docker/api.prod.Dockerfile).
+# Variables : onglet « Environment » du service Dokploy (au minimum POSTGRES_PASSWORD).
+# Domaine   : onglet « Domains » → service `api`, port 8000 (pas de port publié ici, Traefik route).
+#
+# L'API applique les migrations Alembic au démarrage ; les données sont dans l'image.
+
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-agbea}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD à définir dans Dokploy}
+      POSTGRES_DB: ${POSTGRES_DB:-agbea}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    image: ${AGBEA_API_IMAGE:-ghcr.io/agbea-climat/agbea-api:latest}
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    expose:
+      - "8000"
+    environment:
+      DATA_DIR: data
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: ${POSTGRES_USER:-agbea}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD à définir dans Dokploy}
+      POSTGRES_DB: ${POSTGRES_DB:-agbea}
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://agbea-climat.vercel.app}
+      LLM_PROVIDER: ${LLM_PROVIDER:-anthropic}
+      LLM_MODEL: ${LLM_MODEL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-}
+      EMBEDDING_DIM: ${EMBEDDING_DIM:-1024}
+
+volumes:
+  pgdata:
