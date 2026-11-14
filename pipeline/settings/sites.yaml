@@ -1,0 +1,50 @@
+# Sites pilotes. Identifiants et coordonnées repris du front déployé (agbea-climat.vercel.app)
+# pour que le backend puisse faire la jointure sans traduction.
+# La zone d'un site = disque de `radius_km` autour du point, découpé par la frontière du Togo
+# (on retire la mer et les pays voisins).
+
+default_radius_km: 10
+
+sites:
+  - id: lome
+    name: Grand Lomé & Lagune
+    region: Maritime
+    lon: 1.2123
+    lat: 6.1375
+    primary_risk: chaleur
+  - id: aneho
+    name: Aného & Littoral de Kpémé
+    region: Maritime
+    lon: 1.5975
+    lat: 6.2272
+    primary_risk: erosion
+  - id: kpalime
+    name: Kpalimé & Mont Agou
+    region: Plateaux
+    lon: 0.6289
+    lat: 6.9078
+    primary_risk: vegetation
+  - id: sokode
+    name: Sokodé & Corridor Fazao
+    region: Centrale
+    lon: 1.1333
+    lat: 8.9833
+    primary_risk: vegetation
+  - id: kara
+    name: Kara & Massif de Défalé
+    region: Kara
+    lon: 1.1861
+    lat: 9.5511
+    primary_risk: secheresse
+  - id: dapaong
+    name: Dapaong & Confins Sahéliens
+    region: Savanes
+    lon: 0.2081
+    lat: 10.8631
+    primary_risk: secheresse
+  - id: mango-oti
+    name: Mango & Bassin Fluvial de l'Oti
+    region: Savanes
+    lon: 0.4706
+    lat: 10.3592
+    primary_risk: inondation

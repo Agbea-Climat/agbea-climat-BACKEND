@@ -1,1 +1,1 @@
-"""Mémoire des conversations : checkpointer SQLite par thread_id."""
+"""Mémoire des conversations : checkpointer Postgres par thread_id."""

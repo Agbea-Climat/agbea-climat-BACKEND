@@ -1,7 +1,7 @@
 """Graphe de l'assistant : route → fetch_data → retrieve → generate.
 
 TODO M24–M26 : graphe LangGraph (nœuds dans chatbot/nodes/, prompts dans chatbot/prompts/,
-client LLM dans chatbot/llm/, checkpointer SQLite par thread_id dans chatbot/memory/).
+client LLM dans chatbot/llm/, checkpointer Postgres par thread_id dans chatbot/memory/).
 D'ici là : réponses mock, même contrat.
 """
 import asyncio

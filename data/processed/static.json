@@ -1,0 +1,62 @@
+{
+ "generated_at": "2026-11-14T14:11:58+00:00",
+ "dataset_id": "srtm",
+ "units": "m",
+ "regions": {
+  "maritime": {
+   "elevation": {
+    "mean": 64.3,
+    "min": -13.7,
+    "max": 176.0,
+    "p10": 11.9,
+    "median": 63.8,
+    "p90": 117.4,
+    "pct_below_10m": 8.77
+   }
+  },
+  "plateaux": {
+   "elevation": {
+    "mean": 270.1,
+    "min": 57.6,
+    "max": 985.0,
+    "p10": 122.6,
+    "median": 205.0,
+    "p90": 606.0,
+    "pct_below_10m": 0.0
+   }
+  },
+  "centrale": {
+   "elevation": {
+    "mean": 364.7,
+    "min": 98.1,
+    "max": 853.3,
+    "p10": 239.3,
+    "median": 341.2,
+    "p90": 542.6,
+    "pct_below_10m": 0.0
+   }
+  },
+  "kara": {
+   "elevation": {
+    "mean": 273.8,
+    "min": 87.1,
+    "max": 843.9,
+    "p10": 149.1,
+    "median": 239.6,
+    "p90": 436.8,
+    "pct_below_10m": 0.0
+   }
+  },
+  "savanes": {
+   "elevation": {
+    "mean": 191.8,
+    "min": 106.2,
+    "max": 515.1,
+    "p10": 128.0,
+    "median": 169.2,
+    "p90": 286.9,
+    "pct_below_10m": 0.0
+   }
+  }
+ }
+}

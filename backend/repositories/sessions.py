@@ -1,6 +1,6 @@
 """Stockage des sessions.
 
-TODO M03/M04 : tables SQLite `sessions` et `threads` via backend.core.database.
+TODO M03/M04 : tables PostgreSQL `sessions` et `threads` (backend.core.database.models).
 D'ici là : stockage en mémoire (perdu au redémarrage).
 """
 from typing import Optional
