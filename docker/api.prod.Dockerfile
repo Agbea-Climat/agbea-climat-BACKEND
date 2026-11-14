@@ -25,9 +25,10 @@ COPY chatbot ./chatbot
 COPY worker ./worker
 
 # Données lues par l'API (régénérer avec le pipeline puis reconstruire l'image).
-# Ajouter ici data/corpus/ quand le corpus RAG (P3) existera.
 COPY data/regions.geojson ./data/regions.geojson
 COPY data/processed ./data/processed
+# Corpus RAG (P3) : ingéré dans pgvector par POST /api/v1/admin/rag/ingest
+COPY data/corpus ./data/corpus
 
 RUN useradd --create-home --uid 1000 agbea \
     && chown -R agbea:agbea /app
