@@ -9,9 +9,11 @@ venv/
 .env
 
 # ── Fichiers locaux, non versionnés ──
-# Règles des agents IA et fiche des missions (le CLAUDE.md racine reste sur chaque poste ;
-# pipeline/CLAUDE.md, lui, est versionné)
-/CLAUDE.md
+# Agents IA : règles et réglages locaux, gardés sur chaque poste, jamais en ligne
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+# Fiche des missions
 /MISSIONS.md
 # Archive et copie extraite de la base du projet
 *.zip

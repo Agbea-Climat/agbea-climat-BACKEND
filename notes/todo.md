@@ -12,9 +12,12 @@
 
 ## Intégration avec le backend (14/11)
 
-- [ ] **Faire relire et fusionner** la branche `feat/pipeline-donnees` par l'équipe backend (rien n'est commité).
+- [ ] Les `CLAUDE.md` restent dans l'**historique** Git (commits jusqu'à `b20dcab`). Pas de secret dedans. Réécrire l'historique seulement si l'équipe l'exige (force push, tout le monde reclone).
+- [ ] Le dépôt est-il **public** ? Si oui, `data/reference/map_togo/` et `data/regions.geojson` (limites geodata.gouv.tg) sont déjà diffusés : voir la question des CGU ci-dessus.
+
+- [x] ~~Fusionner le pipeline~~ : poussé sur `main` le 14/11 (`b20dcab`, puis nettoyage `977d716`).
 - [x] ~~Dossier `agbea-climat-BACKEND/` imbriqué~~ (ancienne copie du mock) : supprimé le 14/11. Ses PDF étaient identiques à `docs/`.
-- [ ] `backend/services/catalog.py` (missions M10-M12, équipe backend) annonce **MOD13Q1 250 m** et **SRTM GL1**, alors que les données viennent de **MOD13A1 500 m** et de **NASADEM**. IMERG V07 commence en **1998-01**, et non en 2000-06. À corriger dans les fiches `Dataset` (ids inchangés).
+- [x] ~~`backend/services/catalog.py`~~ : fiches corrigées (MOD13A1 500 m, NASADEM, IMERG V07 dès 1998-01) le 14/11.
 - [ ] Les tests `real_data` sont maintenant **actifs** (monthly.parquet présent). 3 échouent tant que les mocks ne sont pas remplacés : M07 (`test_geojson_real_boundaries`), M14, M16. C'est le comportement prévu par `MISSIONS.md`. Bilan Docker du 14/11 : 40 passed, 8 failed (dont 5 préexistants), 3 skipped.
 - [ ] L'API doit afficher un avertissement quand `low_coverage = true` (cf. D22).
 - [ ] Diffusion de `data/api/` (non versionné, ~110 Mo) pour les coéquipiers sans jeton Earthdata : release GitHub ou stockage partagé ?

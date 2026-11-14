@@ -10,7 +10,7 @@ Point de départ du volet « données » (rôles 2 et 3 du guide d'équipe : sci
 | Guide d'équipe FR (rôles, MVP, calendrier, intégrité scientifique) | `../AGBEA_CLIMAT_FR.docx` / `.pdf` | lu |
 | Front déployé | <https://agbea-climat.vercel.app> (bundle Vite/React) | audité (voir plus bas) |
 | Conversation claude.ai d'origine | lien `claude.ai/chat/…` | **inaccessible depuis Claude Code** : à recopier dans `notes/` si elle contient des décisions |
-| Projets locaux réutilisables | `D:\Projects\MAP TOGO`, `D:\Projects\CARTO TOGO\3dMaps` | inventoriés |
+| Projets locaux réutilisables | projets locaux MAP TOGO et CARTO TOGO / 3dMaps (hors dépôt) | inventoriés |
 
 ## Ce que dit le guide d'équipe (l'essentiel pour nous)
 

@@ -12,9 +12,9 @@ export type Lang = "fr" | "en" | "ee"; // ee = éwé (prévu, pas pour la démo)
 
 export type IndicatorId =
   | "precipitation" // GPM IMERG — mm
-  | "ndvi"          // MODIS MOD13Q1 — sans unité (-1..1)
+  | "ndvi"          // MODIS MOD13A1 — sans unité (-1..1)
   | "lst_day"       // MODIS MOD11A2 — °C
-  | "elevation"     // SRTM — m (statique)
+  | "elevation"     // NASADEM (SRTM retraité) — m (statique)
   | "land_cover";   // optionnel J2 (MODIS/Landsat)
 
 export type Granularity = "month" | "year";
@@ -59,7 +59,7 @@ export interface Dataset {
   spatial_resolution: string; // "0.1° (~10 km)"
   temporal_resolution: string;// "monthly"
   coverage: string;           // "60°N–60°S"
-  period_start: string;       // ISO date "2000-06-01"
+  period_start: string;       // ISO date "1998-01-01"
   period_end: string | null;  // null = présent
   limitations: string[];      // ["Estimation satellite, pas un pluviomètre"]
   source_url: string;

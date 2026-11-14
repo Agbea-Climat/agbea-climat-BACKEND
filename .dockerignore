@@ -11,6 +11,8 @@ logs/
 .playwright-mcp/
 *.zip
 CLAUDE.md
+CLAUDE.local.md
+.claude/
 
 # données : montées au lancement, jamais copiées (sauf data/reference, embarqué dans l'image pipeline)
 data/raw/
