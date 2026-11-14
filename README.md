@@ -37,7 +37,7 @@ Documentation interactive : http://localhost:8000/docs
 - `chatbot/` — assistant IA (LangGraph + RAG)
 - `worker/` — ingestion du corpus RAG
 - `contract/types.ts` — types TypeScript pour le front (miroir de `backend/schemas/`)
-- `CLAUDE.md` — règles locales pour les agents IA (non versionné, voir `.gitignore`) ; `pipeline/CLAUDE.md` pour le pipeline
+- `CLAUDE.md`, `pipeline/CLAUDE.md` — règles locales des agents IA, gardées sur chaque poste et **non versionnées** (voir `.gitignore`)
 - `MISSIONS.md` — fiche technique, mission par mission
 - `docs/AGBEA_CLIMAT_missions_*.pdf` — tests humains API + front (FR / EN)
 - `tests/` — tests automatiques ; une mission est finie quand `pytest -m mXX` passe

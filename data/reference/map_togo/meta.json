@@ -1,7 +1,7 @@
 {
  "source": "Contenu provenant de la Plateforme Géodata (geodata.gouv.tg) en date du 2026-10-23",
  "via": "projet MAP TOGO (noms rattachés aux polygones PRISE)",
- "importe_depuis": "D:\\Projects\\MAP TOGO\\web\\data",
+ "importe_depuis": "MAP TOGO/web/data",
  "regions": 5,
  "prefectures": 39
 }

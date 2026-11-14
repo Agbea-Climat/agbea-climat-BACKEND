@@ -60,7 +60,7 @@ def import_map_togo(source_dir: Path) -> None:
         cols = ["unit_id", "code", "nom", "region", "parent_id", "superficie_km2", "geometry"]
         g[[c for c in cols if c in g.columns]].to_file(MAP_TOGO_DIR / f"{name}.geojson", driver="GeoJSON")
     meta = {"source": MAP_TOGO_ATTRIBUTION, "via": "projet MAP TOGO (noms rattachés aux polygones PRISE)",
-            "importe_depuis": str(source_dir), "regions": len(reg), "prefectures": len(pref)}
+            "importe_depuis": f"MAP TOGO/{source_dir.parent.name}/{source_dir.name}", "regions": len(reg), "prefectures": len(pref)}
     (MAP_TOGO_DIR / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"MAP TOGO : {len(reg)} régions, {len(pref)} préfectures + contour du pays → {MAP_TOGO_DIR}")
 
@@ -84,7 +84,7 @@ def _hdx(level: int) -> gpd.GeoDataFrame:
 
 def _map_togo(name: str) -> gpd.GeoDataFrame:
     return _read(MAP_TOGO_DIR / f"{name}.geojson",
-                 'Importer : python -m pipeline boundaries --map-togo-dir "D:\\Projects\\MAP TOGO\\web\\data"')
+                 'Importer : python -m pipeline boundaries --map-togo-dir "<projet MAP TOGO>/web/data"')
 
 
 def _best_overlap(units: gpd.GeoDataFrame, ref: gpd.GeoDataFrame, ref_col: str) -> pd.Series:
