@@ -31,6 +31,7 @@ docker compose --profile notebooks run --rm notebooks python verifier.py
 ```
 
 `verifier.py` exécute les cellules de chaque notebook, puis appelle chaque fonction d'affichage avec un échantillon de toutes les combinaisons des menus. `jupyter nbconvert --execute` ne suffit pas : une erreur levée dans un widget ne le fait pas échouer.
+De plus, nbconvert attend toute la durée de `--ExecutePreprocessor.timeout` sur chaque cellule à widgets (`interactive_output`), sans échouer, alors que le kernel a fini en ~2 s (15 min par notebook avec `timeout=900`). Dans JupyterLab, chaque notebook s'exécute en 4 à 11 s (vérifié le 15/11/2026).
 
 ## Prérequis
 
