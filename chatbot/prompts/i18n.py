@@ -99,6 +99,9 @@ TEXT = {
                "en": "{month} is in the future: AGBÉA CLIMAT only shows past observations and makes no forecast."},
     "calendar_intro": {"fr": "D'après le document « {title} » :", "en": "According to the document \"{title}\" "
                                                                         "(quoted in French):"},
+    "zone_intro": {"fr": "D'après la fiche « {title} » (calculée à partir des mêmes données satellites) :",
+                   "en": "According to the fact sheet \"{title}\" (computed from the same satellite data, quoted "
+                         "in French):"},
     "calendar_none": {"fr": "Je n'ai pas trouvé le calendrier agricole dans le corpus de documents.",
                       "en": "I could not find the agricultural calendar in the document corpus."},
     "calendar_caveat": {"fr": "Les dates exactes changent chaque année avec le démarrage des pluies : confirmez-les "

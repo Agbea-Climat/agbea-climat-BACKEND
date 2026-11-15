@@ -12,18 +12,21 @@ Altitude moyenne 34 m (de -8 à 89 m). 11,9 % du territoire est à moins de 10 m
 
 ## Climat habituel (normales 2001-2020)
 
-- Pluie : environ 1 036 mm par an. Mois les plus pluvieux : juin (188 mm), mai (162 mm), octobre (128 mm). Mois le plus sec : janvier (11,9 mm).
+- Pluie : environ 1036 mm par an. Mois les plus pluvieux : juin (188 mm), mai (162 mm), octobre (128 mm). Mois le plus sec : janvier (11,9 mm).
 - Végétation (NDVI, de -1 à 1) : la plus verte en juin (0,63), la moins verte en février (0,38).
 - Température du sol le jour : la plus chaude en avril (34,1 °C), la plus fraîche en juin (28,5 °C).
 
 ## Tendances observées
 
 Test de Mann-Kendall au seuil de 5 %, pente de Sen. On ne parle de tendance que si le test est significatif.
+
 - Végétation (NDVI) (janvier-mars, saison sèche, 2001-2026) : hausse de 0,038 par décennie (intervalle de confiance à 95 % : 0,015 à 0,058).
 - Température du sol la nuit (sur l'année, 2001-2020) : hausse de 0,43 °C par décennie (intervalle de confiance à 95 % : 0,11 à 0,66 °C).
 - Température du sol la nuit (janvier-mars, saison sèche, 2001-2020) : hausse de 0,73 °C par décennie (intervalle de confiance à 95 % : 0,17 à 1,26 °C).
 - Pas de tendance significative pour : pluie (sur l'année, 2001-2024) ; pluie (janvier-mars, saison sèche, 2001-2025) ; pluie (mai-octobre, saison des pluies, 2001-2024) ; température du sol le jour (sur l'année, 2002-2020) ; température du sol le jour (janvier-mars, saison sèche, 2001-2020) ; température du sol la nuit (mai-octobre, saison des pluies, 2001-2020).
+
 Les tendances de température du sol s'arrêtent en 2020 (dérive d'orbite du satellite Terra).
+
 À l'échelle des préfectures et des sites, des dizaines de séries sont testées : environ une sur vingt peut paraître significative par hasard. Une tendance isolée est à confirmer avec les zones voisines.
 
 ## Dernières observations

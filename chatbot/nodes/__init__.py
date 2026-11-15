@@ -27,7 +27,7 @@ from chatbot import guard
 from chatbot.llm import client as llm
 from chatbot.prompts import i18n, templates
 from chatbot.tools import data as data_tools
-from chatbot.tools import question, retrieve
+from chatbot.tools import question, retrieve, zones
 
 log = logging.getLogger(__name__)
 
@@ -56,6 +56,8 @@ TOPIC_WORDS = {"saison", "saisons", "semis", "semer", "sol", "sols", "eau", "nas
                "anomalie", "champ", "champs", "planter", "region", "regions", "carte", "donnee", "donnees",
                "cultiver", "recoltes", "elevage", "season", "seasons", "soil", "water", "farm", "farming"}
 FOLLOW_UP_FIRST = {"et", "and"}
+# Température de nuit : absente de l'API (lst_day seulement), présente dans les fiches de zone (tendances)
+NIGHT_WORDS = {"nuit", "nuits", "nocturne", "nocturnes", "night", "nights", "nighttime"}
 
 
 class ChatState(TypedDict, total=False):
@@ -78,6 +80,8 @@ class ChatState(TypedDict, total=False):
     docs: list[dict]
     passages: list[dict]
     notes: list[dict]                 # phrases « interpreted » sourcées (passages, limites des données)
+    zone: Optional[dict]              # préfecture ou site cité (chatbot.tools.zones.Zone.as_dict)
+    night: bool                       # question sur la température de nuit
     answer: str
     statements: list[dict]
     history: Annotated[list[dict], operator.add]
@@ -108,12 +112,19 @@ async def route(state: ChatState) -> dict:
     if not region_id:
         # ordre de la phrase, négation « pas à X », mots ambigus seulement en contexte (question.regions_in)
         region_id = next(iter(question.regions_in(msg)), None)
+    zone = zones.find(msg)                       # préfecture ou site pilote (fiche du corpus)
+    if not region_id and zone and zone.region_id:
+        region_id = zone.region_id
+    night = bool(ws & NIGHT_WORDS)
     inds = [i for i, words in INDICATOR_WORDS.items() if ws & set(words)]
+    if night and "lst_day" in inds:
+        # l'API n'a que la température du sol le jour : la nuit se lit dans la fiche de zone (tendances)
+        inds = [i for i in inds if i != "lst_day"] or ["lst_night"]
     explicit = question.intent(msg)
     date_req = question.parse_date(msg)
     prev_region = state.get("region_id")
     follow_up = bool(ws_list) and (ws_list[0] in FOLLOW_UP_FIRST or (date_req is not None and len(ws_list) <= 5))
-    on_topic = bool(region_id or inds or explicit or ws & TOPIC_WORDS
+    on_topic = bool(region_id or zone or inds or explicit or ws & TOPIC_WORDS
                     or any(w.startswith(t) for w in ws for t in TOPIC_STEMS)
                     or (prev_region and follow_up))
     if not on_topic:  # hors sujet : on garde le contexte du fil pour la question suivante
@@ -131,8 +142,11 @@ async def route(state: ChatState) -> dict:
             inds = ["precipitation"]
     if date_req is None and follow_up and intent == state.get("intent"):
         date_req = state.get("date_req")
+    prev_zone = state.get("zone")
+    zone_d = zone.as_dict() if zone else (
+        prev_zone if follow_up and prev_zone and prev_zone.get("region_id") == region_id else None)
     return {"region_id": region_id, "indicators": inds, "intent": intent, "date_req": date_req,
-            "off_topic": False, "facts": [], "sources": [], "snapshots": [], "series": [], "docs": [],
+            "zone": zone_d, "night": night, "off_topic": False, "facts": [], "sources": [], "snapshots": [], "series": [], "docs": [],
             "passages": [], "notes": [], "recency": None}
 
 
@@ -197,14 +211,49 @@ async def retrieve_docs(state: ChatState) -> dict:
         limits = retrieve.search("température du sol dérive Terra tendances 2020 décembre 2022", k=1,
                                  files=[retrieve.LIMITS_FILE])
         chunks += limits
-    chunks += retrieve.search(msg, k=3, indicator=inds[0] if len(inds) == 1 else None, region_id=region_id)
+    # Fiche de la zone citée (préfecture, site), ou de la région pour une tendance / la température de nuit :
+    # cherchée directement par son nom de fichier, puis ses lignes utiles extraites (chatbot.tools.zones)
+    zone = state.get("zone")
+    fiche = zone["file"] if zone else None
+    if not fiche and region_id and (intent == "trend" or state.get("night")):
+        rf = zones.region_fiche(region_id)
+        fiche = rf.file if rf else None
+    zone_raw: list[tuple[retrieve.Chunk, str]] = []
+    if fiche:
+        fc = retrieve.search(msg, k=3, files=[fiche])
+        zone_raw = retrieve.passages(fc, _fiche_query(state, fiche), None, max_n=4)
+        if state.get("night"):   # question sur la nuit : pas les lignes de température de jour
+            zone_raw = [(c, u) for c, u in zone_raw if "le jour" not in u]
+        chunks = fc + chunks
+    general = retrieve.search(msg, k=5, indicator=inds[0] if len(inds) == 1 else None, region_id=region_id,
+                              exclude_fiches=True)
+    chunks += general
+    # Sans région ni zone : les données de l'API ne répondent pas, on cite le document général le plus proche
+    doc_raw: list[tuple[retrieve.Chunk, str]] = []
+    if not region_id and not zone and intent != "calendar" and general:
+        # meilleures lignes des 2 documents les plus proches (recherche lexicale : le 1er n'est pas toujours le bon)
+        kws = retrieve.keywords(msg)
+        # 3 documents les plus proches, lus en entier (jusqu'à 4 morceaux) : on garde celui dont la meilleure
+        # ligne répond le mieux à la question (à égalité : le plus proche dans la recherche)
+        candidates = {f: retrieve.search(msg, k=4, files=[f]) for f in list(dict.fromkeys(c.file for c in general))[:3]}
+
+        def best_line(f: str) -> int:
+            return max((retrieve.unit_score(h, u, kws) for c in candidates[f]
+                        for h, u in retrieve._units(c.content, with_heading=True)), default=0)
+        # à score égal : les documents qui expliquent l'application (glossaire, méthodologie, limites, indicateurs)
+        # passent avant les documents de contexte (rapport UNICEF, calendrier) ; puis le plus proche
+        explains = lambda f: f in retrieve.APP_DOCS or f.startswith(("comprendre_", "fiche_"))  # noqa: E731
+        chosen = max(candidates, key=lambda f: (best_line(f), explains(f)))
+        doc_raw = retrieve.passages(candidates[chosen], msg, None, max_n=3)
+        chunks += [c for c in candidates[chosen] if c not in chunks]
     # Une source par document : l'id du premier morceau retenu de chaque fichier
     file_ids: dict[str, str] = {}
     for c in chunks:
         file_ids.setdefault(c.file, c.source_id)
     docs = [_doc_dict(c, file_ids[c.file]) for c in retrieve.dedupe(chunks)]
-    passages = [{"source_id": file_ids[c.file], "file": c.file, "title": c.title, "text": text}
-                for c, text in passages_raw]
+    passages = [{"source_id": file_ids[c.file], "file": c.file, "title": c.title, "text": text, "kind": kind}
+                for kind, raw in (("calendar", passages_raw), ("zone", zone_raw), ("doc", doc_raw))
+                for c, text in raw]
     notes = [{"text": p["text"], "nature": "interpreted", "source_ids": [p["source_id"]]} for p in passages]
     if intent == "trend" and "lst_day" in (inds or ind_service.TS_INDICATORS) and any(
             f["indicator"] == "lst_day" for f in state.get("facts", [])):
@@ -218,6 +267,22 @@ async def retrieve_docs(state: ChatState) -> dict:
     return {"docs": docs, "passages": passages, "notes": notes}
 
 
+def _fiche_query(state: ChatState, fiche: str) -> str:
+    """Mots-clés pour choisir les lignes de la fiche : la question sans le nom de la zone (présent sur toutes
+    les lignes « Où »), plus le sujet (nuit, tendance) ; à défaut, un aperçu général."""
+    z = zones.by_file(fiche)
+    name_words = set(question.words(z.name)) if z else set()
+    kws = [w for w in question.words(state["message"]) if w not in name_words]
+    if state.get("night"):
+        kws += ["nuit", "temperature"]
+    if state.get("intent") == "trend":
+        kws += ["tendance", "hausse", "baisse"]
+    # mots de niveau présents dans toutes les fiches (« préfecture », « site »…) : pas discriminants
+    level_words = {"prefecture", "prefectures", "site", "sites", "pilote", "pilotes", "region", "regions", "zone", "zones"}
+    useful = [w for w in kws if w not in retrieve._STOP and w not in level_words and len(w) > 2]
+    return " ".join(useful) if useful else "pluie altitude tendance"
+
+
 # ─────────── generate ───────────
 def _template_answer(state: ChatState, with_disclaimer: bool = True) -> str:
     lang = state.get("lang", "fr")
@@ -226,8 +291,11 @@ def _template_answer(state: ChatState, with_disclaimer: bool = True) -> str:
     parts: list[str] = []
     if intent == "forecast":
         parts.append(i18n.t("no_forecast", lang))
+    all_passages = state.get("passages") or []
+    zone_p = [p for p in all_passages if p.get("kind") == "zone"]
+    doc_p = [p for p in all_passages if p.get("kind") == "doc"]
     if intent == "calendar":
-        passages = state.get("passages") or []
+        passages = [p for p in all_passages if p.get("kind", "calendar") == "calendar"]
         if passages:
             parts.append(i18n.t("calendar_intro", lang, title=passages[0]["title"]))
             parts += [f"— {p['text']}" for p in passages]
@@ -240,12 +308,19 @@ def _template_answer(state: ChatState, with_disclaimer: bool = True) -> str:
         parts += [f["text"] for f in facts]
         if state.get("recency"):
             parts.append(state["recency"])
-    elif not region_id and intent != "calendar":
+    if zone_p:
+        parts.append(i18n.t("zone_intro", lang, title=zone_p[0]["title"]))
+        parts += [f"— {p['text']}" for p in zone_p]
+    if doc_p:
+        parts.append(i18n.t("calendar_intro", lang, title=doc_p[0]["title"]))
+        parts += [f"— {p['text']}" for p in doc_p]
+    if not region_id and intent != "calendar" and not zone_p and not doc_p:
         parts.append(i18n.t("need_region", lang))
     parts += [n["text"] for n in state.get("notes", []) if n not in _passage_notes(state)]
     if intent == "trend" and facts:
         parts.append(i18n.t("trend_note", lang))
-    docs = [d for d in state.get("docs", []) if d["file"] != retrieve.CALENDAR_FILE or intent != "calendar"]
+    quoted = {p["file"] for p in all_passages}
+    docs = [d for d in state.get("docs", []) if d["file"] not in quoted]
     if docs:
         parts.append(i18n.t("more", lang, title=docs[0]["title"]))
     if with_disclaimer:

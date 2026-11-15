@@ -5,6 +5,7 @@
 - `passages` : lignes, puces ou rangées de tableau d'un morceau qui répondent à la question
   (citées telles quelles, avec l'en-tête du tableau), pour répondre sans LLM à partir du document.
 """
+import logging
 import re
 import unicodedata
 from dataclasses import dataclass
@@ -16,8 +17,13 @@ from backend.core.database import SessionLocal
 from backend.core.database.models import RagChunk
 from chatbot.llm import embeddings
 
+log = logging.getLogger(__name__)
+
 CALENDAR_FILE = "calendrier_agricole_togo.md"
 LIMITS_FILE = "limites_donnees_agbea.md"
+FICHES_DIR = "fiches/"
+# Documents qui expliquent l'application elle-même (préférés pour une question générale)
+APP_DOCS = ("glossaire_faq.md", "methodologie_agbea.md", LIMITS_FILE)
 # Fiche ou explication de référence par indicateur (cité par /explain)
 INDICATOR_DOCS = {
     "precipitation": ("comprendre_pluie_imerg.md", "fiche_gpm_imerg.md"),
@@ -46,9 +52,18 @@ class Chunk:
 
 
 def search(query: str, k: int = 4, indicator: Optional[str] = None,
-           region_id: Optional[str] = None, files: Optional[list[str]] = None) -> list[Chunk]:
-    """k morceaux les plus proches. Filtres : documents de l'indicateur / la région (ou généraux), fichiers."""
-    vec = embeddings.embed_one(query)
+           region_id: Optional[str] = None, files: Optional[list[str]] = None,
+           exclude_fiches: bool = False) -> list[Chunk]:
+    """k morceaux les plus proches. Filtres : documents de l'indicateur / la région (ou généraux), fichiers.
+
+    exclude_fiches : écarte les fiches de zone (data/corpus/fiches/). Elles répètent toutes « normale »,
+    « pluie », « tendance » et noieraient les documents généraux dans une recherche lexicale ; le chatbot
+    les va chercher directement par leur nom de fichier quand une zone est citée (chatbot.tools.zones)."""
+    try:
+        vec = embeddings.embed_one(query)
+    except Exception:  # embedder mal configuré (ex. EMBEDDING_MODEL inconnu) : réponse sans documents, pas d'erreur 500
+        log.exception("Recherche dans le corpus impossible (EMBEDDING_MODEL=%r)", embeddings.model_name())
+        return []
     dist = RagChunk.embedding.cosine_distance(vec).label("distance")
     q = select(RagChunk.id, RagChunk.file, RagChunk.title, RagChunk.source_url, RagChunk.content, dist)
     if indicator:
@@ -57,6 +72,8 @@ def search(query: str, k: int = 4, indicator: Optional[str] = None,
         q = q.where(or_(RagChunk.region_ids.overlap([region_id]), RagChunk.region_ids == literal([], RagChunk.region_ids.type)))
     if files:
         q = q.where(RagChunk.file.in_(files))
+    if exclude_fiches:
+        q = q.where(~RagChunk.file.like(f"{FICHES_DIR}%"))
     try:
         with SessionLocal() as db:
             rows = db.execute(q.order_by(dist).limit(k)).all()
@@ -103,6 +120,8 @@ def keywords(question: str, region_id: Optional[str] = None) -> dict[str, int]:
         w = SYNONYMS.get(w, w)
         if w not in STRONG and (w in _STOP or len(w) < 3 or w.isdigit()):
             continue
+        if w not in STRONG and len(w) > 4 and w.endswith("s"):
+            w = w[:-1]          # pluriel simple : « tendances » retrouve « tendance », « pluies » « pluie »
         kws[w] = 3 if w in STRONG else 1
     if region_id:
         kws[region_id] = 3
@@ -114,16 +133,20 @@ def _clean(text: str) -> str:
     return " ".join(text.replace("**", "").split())
 
 
-def _units(content: str) -> list[str]:
-    """Découpe un morceau en unités citables : paragraphe, puce, ou rangée de tableau avec son en-tête."""
-    out: list[str] = []
+def _units(content: str, with_heading: bool = False) -> list:
+    """Découpe un morceau en unités citables : paragraphe, puce, ou rangée de tableau avec son en-tête.
+
+    with_heading=True : renvoie (titre de section, unité). Le titre sert au classement (« ## 8. Tendances »
+    rend pertinentes ses puces « Test de Mann-Kendall… »), jamais au texte cité."""
+    out: list = []
+    heading = ""
     header: Optional[list[str]] = None
     current: list[str] = []
     in_table = False
 
     def flush():
         if current:
-            out.append(_clean(" ".join(current)))
+            out.append((heading, _clean(" ".join(current))))
             current.clear()
 
     lines = [ln.strip() for ln in content.split("\n")]
@@ -135,6 +158,8 @@ def _units(content: str) -> list[str]:
         if not line or line.startswith("#"):
             flush()
             in_table, header = False, None
+            if line.startswith("#"):
+                heading = _clean(line.lstrip("#"))
             continue
         if line.startswith("|"):
             flush()
@@ -149,7 +174,7 @@ def _units(content: str) -> list[str]:
                     continue
                 header = None
             if header and len(header) == len(cells):
-                out.append(_clean(" ; ".join(f"{h} : {c}" for h, c in zip(header, cells))))
+                out.append((heading, _clean(" ; ".join(f"{h} : {c}" for h, c in zip(header, cells)))))
             # rangée sans son en-tête (morceau coupé dans le tableau) : sens perdu, non citée
             continue
         in_table, header = False, None
@@ -158,12 +183,23 @@ def _units(content: str) -> list[str]:
             line = re.sub(r"^([-*]|\d+\.)\s+", "", line)
         current.append(line)
     flush()
-    return [u for u in out if len(u) > 20]
+    out = [(h, u) for h, u in out if len(u) > 20]
+    return out if with_heading else [u for _, u in out]
 
 
 def _score(unit: str, kws: dict[str, int]) -> int:
     ws = set(_norm_words(unit))
-    return sum(weight for k, weight in kws.items() if any(w == k or (len(k) >= 4 and w.startswith(k)) for w in ws))
+    # même mot, mot qui commence par le mot-clé, ou même racine de 6 lettres (« calculées » / « calcul » non,
+    # « calculées » / « calculée » oui ; « précipitations » / « précipité »… tolérable pour un classement)
+    return sum(weight for k, weight in kws.items()
+               if any(w == k or (len(k) >= 4 and w.startswith(k)) or (len(k) >= 6 and len(w) >= 6 and w[:6] == k[:6])
+                      for w in ws))
+
+
+def unit_score(heading: str, unit: str, kws: dict[str, int]) -> int:
+    """Score d'une unité : ses mots, plus ceux de son titre de section comptés double (une puce sous
+    « 8. Tendances » parle du sujet ; une phrase qui cite le mot en passant, moins)."""
+    return _score(unit, kws) + 2 * _score(heading, kws)
 
 
 def passages(chunks: list[Chunk], question: str, region_id: Optional[str] = None,
@@ -172,11 +208,11 @@ def passages(chunks: list[Chunk], question: str, region_id: Optional[str] = None
     kws = keywords(question, region_id)
     scored, seen = [], set()
     for ci, c in enumerate(chunks):
-        for ui, u in enumerate(_units(c.content)):
-            if u in seen:
+        for ui, (h, u) in enumerate(_units(c.content, with_heading=True)):
+            if u in seen or u.startswith("Source :"):   # ligne de provenance : déjà dans la source citée
                 continue
             seen.add(u)
-            s = _score(u, kws)
+            s = unit_score(h, u, kws)
             if s > 0:
                 scored.append((s, ci, ui, c, u))
     best = sorted(scored, key=lambda x: (-x[0], x[1], x[2]))[:max_n]

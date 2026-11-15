@@ -201,7 +201,7 @@ def test_publication_cutoff_lst():
 def test_corpus_fiche_format():
     """Étape corpus (D31) : nombres au format français, tendance seulement si significative, pas de « -0,0 »."""
     from pipeline import corpus
-    assert corpus.fr(-0.04, 1) == "0,0" and corpus.fr(1234.5, 1) == "1\u202f234,5"
+    assert corpus.fr(-0.04, 1) == "0,0" and corpus.fr(1234.5, 1) == "1234,5"
     s = {"unit": {"id": "X", "level": "prefecture", "name": "Test", "parent_id": "TG-A", "area_km2": 100.0,
                   "centroid": [1.2, 6.2]},
          "elevation_m": {"mean": 20.0, "min": 1.0, "max": 50.0, "pct_below_10m": 12.0},

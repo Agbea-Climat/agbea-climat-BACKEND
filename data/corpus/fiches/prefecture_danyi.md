@@ -12,19 +12,22 @@ Altitude moyenne 711 m (de 233 à 981 m). 0,0 % du territoire est à moins de 10
 
 ## Climat habituel (normales 2001-2020)
 
-- Pluie : environ 1 304 mm par an. Mois les plus pluvieux : septembre (201 mm), juillet (181 mm), juin (180 mm). Mois le plus sec : janvier (11,8 mm).
+- Pluie : environ 1304 mm par an. Mois les plus pluvieux : septembre (201 mm), juillet (181 mm), juin (180 mm). Mois le plus sec : janvier (11,8 mm).
 - Végétation (NDVI, de -1 à 1) : la plus verte en juillet (0,80), la moins verte en février (0,54).
 - Température du sol le jour : la plus chaude en février (29,1 °C), la plus fraîche en juin (25,0 °C).
 
 ## Tendances observées
 
 Test de Mann-Kendall au seuil de 5 %, pente de Sen. On ne parle de tendance que si le test est significatif.
+
 - Végétation (NDVI) (sur l'année, 2001-2025) : hausse de 0,020 par décennie (intervalle de confiance à 95 % : 0,005 à 0,026).
 - Température du sol la nuit (sur l'année, 2001-2020) : hausse de 0,38 °C par décennie (intervalle de confiance à 95 % : 0,27 à 0,55 °C).
 - Température du sol la nuit (janvier-mars, saison sèche, 2001-2020) : hausse de 0,56 °C par décennie (intervalle de confiance à 95 % : 0,19 à 0,96 °C).
 - Température du sol la nuit (mai-octobre, saison des pluies, 2001-2020) : hausse de 0,30 °C par décennie (intervalle de confiance à 95 % : 0,06 à 0,49 °C).
 - Pas de tendance significative pour : pluie (sur l'année, 2001-2024) ; pluie (janvier-mars, saison sèche, 2001-2025) ; pluie (mai-octobre, saison des pluies, 2001-2024) ; végétation (NDVI) (janvier-mars, saison sèche, 2001-2026) ; température du sol le jour (sur l'année, 2001-2020) ; température du sol le jour (janvier-mars, saison sèche, 2001-2020).
+
 Les tendances de température du sol s'arrêtent en 2020 (dérive d'orbite du satellite Terra).
+
 À l'échelle des préfectures et des sites, des dizaines de séries sont testées : environ une sur vingt peut paraître significative par hasard. Une tendance isolée est à confirmer avec les zones voisines.
 
 ## Dernières observations

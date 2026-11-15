@@ -48,11 +48,12 @@ DEC_PENTE = {"rainfall": 1, "ndvi": 3, "lst_day": 2, "lst_night": 2}
 # ----------------------------------------------------------------------------- formatage
 
 def fr(x: float, nd: int = 1) -> str:
-    """Nombre au format français (virgule décimale, espace fine pour les milliers)."""
-    s = f"{x:,.{nd}f}"
-    if float(s.replace(",", "")) == 0:
+    """Nombre au format français (virgule décimale), sans séparateur de milliers : même règle que
+    chatbot/prompts/i18n.py, pour que le garde-fou des chiffres du chatbot lise chaque nombre en entier."""
+    s = f"{x:.{nd}f}"
+    if float(s) == 0:
         s = s.lstrip("-")                                   # pas de « -0,0 »
-    return s.replace(",", " ").replace(".", ",")
+    return s.replace(".", ",")
 
 
 def mois_annee(ym: str) -> str:
@@ -131,11 +132,13 @@ def _tendances(trends: dict, level: str) -> list[str]:
                 non.append(label)
     out = ["Test de Mann-Kendall au seuil de 5 %, pente de Sen. On ne parle de tendance que si le test est "
            "significatif."]
-    out += sig or ["- Aucune tendance significative."]
+    out += [""] + (sig or ["- Aucune tendance significative."])
     if non:
         out.append("- Pas de tendance significative pour : " + " ; ".join(non) + ".")
-    out.append("Les tendances de température du sol s'arrêtent en 2020 (dérive d'orbite du satellite Terra).")
+    # lignes vides : chaque remarque est une unité citable à part (chatbot/tools/retrieve._units)
+    out += ["", "Les tendances de température du sol s'arrêtent en 2020 (dérive d'orbite du satellite Terra)."]
     if level in ("prefecture", "site"):
+        out += [""]
         out.append("À l'échelle des préfectures et des sites, des dizaines de séries sont testées : environ une sur "
                    "vingt peut paraître significative par hasard. Une tendance isolée est à confirmer avec les zones voisines.")
     return out

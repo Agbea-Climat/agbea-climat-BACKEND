@@ -4,7 +4,7 @@ Source : AGBÉA CLIMAT, fiche générée le 2026-11-15 par le pipeline de donné
 
 ## Où
 
-Préfecture Tandjoaré, région Savanes. Superficie : 1 006 km². Centre : longitude 0,127, latitude 10,647.
+Préfecture Tandjoaré, région Savanes. Superficie : 1006 km². Centre : longitude 0,127, latitude 10,647.
 
 ## Relief (NASADEM)
 
@@ -12,19 +12,22 @@ Altitude moyenne 268 m (de 123 à 515 m). 0,0 % du territoire est à moins de 10
 
 ## Climat habituel (normales 2001-2020)
 
-- Pluie : environ 1 066 mm par an. Mois les plus pluvieux : août (247 mm), septembre (205 mm), juillet (203 mm). Mois le plus sec : décembre (0,2 mm).
+- Pluie : environ 1066 mm par an. Mois les plus pluvieux : août (247 mm), septembre (205 mm), juillet (203 mm). Mois le plus sec : décembre (0,2 mm).
 - Végétation (NDVI, de -1 à 1) : la plus verte en septembre (0,66), la moins verte en février (0,25).
 - Température du sol le jour : la plus chaude en mars (40,3 °C), la plus fraîche en septembre (29,5 °C).
 
 ## Tendances observées
 
 Test de Mann-Kendall au seuil de 5 %, pente de Sen. On ne parle de tendance que si le test est significatif.
+
 - Végétation (NDVI) (janvier-mars, saison sèche, 2001-2026) : hausse de 0,006 par décennie (intervalle de confiance à 95 % : 0,000 à 0,010).
 - Température du sol la nuit (sur l'année, 2001-2020) : hausse de 0,50 °C par décennie (intervalle de confiance à 95 % : 0,36 à 0,74 °C).
 - Température du sol la nuit (janvier-mars, saison sèche, 2001-2020) : hausse de 0,57 °C par décennie (intervalle de confiance à 95 % : 0,10 à 1,10 °C).
 - Température du sol la nuit (mai-octobre, saison des pluies, 2001-2020) : hausse de 0,61 °C par décennie (intervalle de confiance à 95 % : 0,39 à 0,76 °C).
 - Pas de tendance significative pour : pluie (sur l'année, 2001-2024) ; pluie (janvier-mars, saison sèche, 2001-2025) ; pluie (mai-octobre, saison des pluies, 2001-2024) ; végétation (NDVI) (sur l'année, 2001-2025) ; végétation (NDVI) (mai-octobre, saison des pluies, 2001-2026) ; température du sol le jour (sur l'année, 2001-2020) ; température du sol le jour (janvier-mars, saison sèche, 2001-2020) ; température du sol le jour (mai-octobre, saison des pluies, 2001-2020).
+
 Les tendances de température du sol s'arrêtent en 2020 (dérive d'orbite du satellite Terra).
+
 À l'échelle des préfectures et des sites, des dizaines de séries sont testées : environ une sur vingt peut paraître significative par hasard. Une tendance isolée est à confirmer avec les zones voisines.
 
 ## Dernières observations

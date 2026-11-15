@@ -66,18 +66,36 @@ Une entrée par document :
   - une valeur peut être en faible couverture (« peu fiable », nuages).
 - **Tendances des préfectures et des sites** : des dizaines de séries sont testées, et environ une sur vingt peut paraître significative par hasard. Les fiches le disent ; le chatbot doit le rappeler s'il cite une tendance locale isolée.
 
-## 5. Constats du test du 15/11/2026 (mode gabarits, sans clé LLM)
+## 5. Défauts constatés le 15/11/2026 et corrigés le même jour
 
-L'ingestion donne 64 documents et 122 morceaux, sans doublon. La recherche retrouve le glossaire, les limites, la méthodologie et la fiche du site de Lomé sur des questions adaptées. Trois défauts restent du côté du chatbot :
+Trois défauts du chatbot ont été trouvés en test (mode gabarits, sans clé LLM), puis corrigés et couverts par
+`tests/test_chatbot_corpus.py` :
 
-1. **Sans LLM, les gabarits n'utilisent pas le contenu des documents**, seulement leur titre (« Pour en savoir plus : … »). Les questions générales (« Qu'est-ce qu'une normale ? », « Comment sont calculées les tendances ? ») reçoivent « Précisez une région ». Piste : sans région, et quand un document général est trouvé (`region_ids: []`), citer son passage le plus pertinent, comme c'est déjà fait pour le calendrier agricole.
-2. **La recherche lexicale (`hash-v1`) noie les documents généraux sous les fiches de zone.** Les 52 fiches répètent « normale », « pluie », « tendance ». Pistes :
-   - sans région ni zone dans la question, exclure les fichiers `fiches/` de la recherche ;
-   - avec une région, une préfecture ou un site détecté, aller chercher **directement** la fiche par son nom de fichier (`fiches/prefecture_<nom>.md`, `fiches/site_<nom>.md`) plutôt que par similarité ;
-   - à terme, un vrai modèle d'embeddings (`EMBEDDING_MODEL`) remplacerait le hachage de mots.
-3. **Les préfectures, les sites et la température de nuit ne sont pas reconnus dans les questions.**
-   - « Tendance de la température la nuit à Kpalimé » répond par la température de jour de la région Plateaux, et la fiche du site de Kpalimé n'est pas citée.
-   - Piste : reconnaître les noms des 39 préfectures et des 7 sites (liste : `data/api/summaries/index.json`, ou les titres de `sources.json`), puis répondre depuis leur fiche.
+1. **Les gabarits n'utilisaient que le titre des documents.** Les questions générales (« Qu'est-ce qu'une
+   normale ? ») recevaient « Précisez une région ». Désormais, sans région ni zone, le chatbot cite les lignes
+   les plus pertinentes du meilleur document général.
+   - Le choix se fait parmi les 3 plus proches, lus en entier.
+   - À score égal, les documents qui expliquent l'application (glossaire, méthodologie, limites, indicateurs)
+     passent avant les documents de contexte.
+   - Le titre de section compte double dans le score : les puces de « 8. Tendances » répondent à « comment sont
+     calculées les tendances ».
+2. **Les fiches de zone noyaient les documents généraux.** La recherche générale les écarte maintenant
+   (`retrieve.search(..., exclude_fiches=True)`). Une fiche n'est lue que si sa zone est citée, ou si la question
+   porte sur une tendance ou la nuit dans une région : le chatbot la va chercher par son nom de fichier.
+3. **Préfectures, sites et température de nuit n'étaient pas reconnus.**
+   - `chatbot/tools/zones.py` reconnaît les 39 préfectures et les 7 sites. La liste est lue dans `sources.json`.
+     Les noms courts ou courants (Lacs, Vo, Mô, Golfe, Mango…) ne comptent qu'avec un contexte (« préfecture
+     des Lacs ») ou une majuscule ; une zone niée est ignorée.
+   - Une question « la nuit » répond depuis la fiche (tendances de nuit), sans les lignes de jour : l'API n'a
+     que la température de jour.
+   - La zone est gardée d'un tour à l'autre (« Parle-moi de Kpalimé » puis « Et la température la nuit ? »).
+
+Restent à faire :
+- tant qu'on n'utilise pas un vrai modèle d'embeddings (`EMBEDDING_MODEL`), la recherche reste lexicale ;
+- **en production, `EMBEDDING_MODEL` doit rester vide** : une autre valeur faisait tomber le chat (erreur 500
+  constatée le 15/11) ; c'est maintenant un repli sans documents, et un message clair à l'ingestion.
+- Les chiffres des fiches sont rendus en phrases `interpreted` citant la fiche. La règle 5 reste à élargir
+  explicitement (voir §4).
 
 ## 6. Pour aller plus loin (sources externes possibles)
 

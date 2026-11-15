@@ -26,7 +26,8 @@
 - [x] ~~**LST de jour récente faussée**~~ (réglé par D30 : publiée jusqu'en 2022-12 ; VIIRS à étudier) (tests du 15/11, `notes/2026-11-15_tests-api.md`, D1) : écart Terra − Aqua −0,75 °C en 2023, −1,15 en 2024, −1,56 en 2025 ; les anomalies `lst_day` récentes de l'API (jusqu'à −3,7 °C) sont des artefacts de dérive d'orbite. Décider : couper `lst_day` du livrable P2 après 2022, publier les valeurs sans anomalie après 2022 (drapeau, contrat à changer), ou passer à VIIRS (orbite maintenue, depuis 2012).
 - [x] ~~Rapport de tests de l'API~~ : points corrigés le 15/11 (à relire par l'équipe backend avant fusion).
 
-- [ ] Équipe IA : exploiter les fiches de zone (`docs/chatbot-corpus.md` §5) et trancher l'usage des chiffres du corpus (règle 5).
+- [x] ~~Exploiter les fiches de zone dans le chatbot~~ (15/11, `docs/chatbot-corpus.md` §5).
+- [ ] Équipe : trancher l'usage des chiffres du corpus (règle 5) ; vider `EMBEDDING_MODEL` sur Dokploy.
 - [ ] Corpus : ajouter des résumés sourcés (CDN 2021, PNACC, 4e Communication nationale, WACA).
 
 ## Prochaines étapes

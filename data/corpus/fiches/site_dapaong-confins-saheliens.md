@@ -12,13 +12,14 @@ Altitude moyenne 292 m (de 226 à 378 m). 0,0 % du territoire est à moins de 10
 
 ## Climat habituel (normales 2001-2020)
 
-- Pluie : environ 1 034 mm par an. Mois les plus pluvieux : août (248 mm), juillet (200 mm), septembre (200 mm). Mois le plus sec : décembre (0,2 mm).
+- Pluie : environ 1034 mm par an. Mois les plus pluvieux : août (248 mm), juillet (200 mm), septembre (200 mm). Mois le plus sec : décembre (0,2 mm).
 - Végétation (NDVI, de -1 à 1) : la plus verte en septembre (0,60), la moins verte en mars (0,22).
 - Température du sol le jour : la plus chaude en mars (40,0 °C), la plus fraîche en septembre (30,1 °C).
 
 ## Tendances observées
 
 Test de Mann-Kendall au seuil de 5 %, pente de Sen. On ne parle de tendance que si le test est significatif.
+
 - Végétation (NDVI) (sur l'année, 2001-2025) : hausse de 0,009 par décennie (intervalle de confiance à 95 % : 0,001 à 0,018).
 - Végétation (NDVI) (janvier-mars, saison sèche, 2001-2026) : hausse de 0,013 par décennie (intervalle de confiance à 95 % : 0,010 à 0,016).
 - Végétation (NDVI) (mai-octobre, saison des pluies, 2001-2026) : hausse de 0,014 par décennie (intervalle de confiance à 95 % : 0,003 à 0,028).
@@ -26,7 +27,9 @@ Test de Mann-Kendall au seuil de 5 %, pente de Sen. On ne parle de tendance que 
 - Température du sol la nuit (janvier-mars, saison sèche, 2001-2020) : hausse de 0,57 °C par décennie (intervalle de confiance à 95 % : 0,03 à 1,19 °C).
 - Température du sol la nuit (mai-octobre, saison des pluies, 2001-2020) : hausse de 0,60 °C par décennie (intervalle de confiance à 95 % : 0,45 à 0,86 °C).
 - Pas de tendance significative pour : pluie (sur l'année, 2001-2024) ; pluie (janvier-mars, saison sèche, 2001-2025) ; pluie (mai-octobre, saison des pluies, 2001-2024) ; température du sol le jour (sur l'année, 2001-2020) ; température du sol le jour (janvier-mars, saison sèche, 2001-2020) ; température du sol le jour (mai-octobre, saison des pluies, 2001-2020).
+
 Les tendances de température du sol s'arrêtent en 2020 (dérive d'orbite du satellite Terra).
+
 À l'échelle des préfectures et des sites, des dizaines de séries sont testées : environ une sur vingt peut paraître significative par hasard. Une tendance isolée est à confirmer avec les zones voisines.
 
 ## Dernières observations

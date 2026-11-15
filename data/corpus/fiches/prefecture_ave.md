@@ -4,7 +4,7 @@ Source : AGBÉA CLIMAT, fiche générée le 2026-11-15 par le pipeline de donné
 
 ## Où
 
-Préfecture Avé, région Maritime. Superficie : 1 020 km². Centre : longitude 0,925, latitude 6,472.
+Préfecture Avé, région Maritime. Superficie : 1020 km². Centre : longitude 0,925, latitude 6,472.
 
 ## Relief (NASADEM)
 
@@ -12,13 +12,14 @@ Altitude moyenne 88 m (de 11 à 149 m). 0,0 % du territoire est à moins de 10 m
 
 ## Climat habituel (normales 2001-2020)
 
-- Pluie : environ 1 066 mm par an. Mois les plus pluvieux : juin (171 mm), mai (153 mm), octobre (135 mm). Mois le plus sec : janvier (14,8 mm).
+- Pluie : environ 1066 mm par an. Mois les plus pluvieux : juin (171 mm), mai (153 mm), octobre (135 mm). Mois le plus sec : janvier (14,8 mm).
 - Végétation (NDVI, de -1 à 1) : la plus verte en juin (0,75), la moins verte en février (0,41).
 - Température du sol le jour : la plus chaude en février (33,5 °C), la plus fraîche en juin (27,9 °C).
 
 ## Tendances observées
 
 Test de Mann-Kendall au seuil de 5 %, pente de Sen. On ne parle de tendance que si le test est significatif.
+
 - Végétation (NDVI) (janvier-mars, saison sèche, 2001-2026) : hausse de 0,038 par décennie (intervalle de confiance à 95 % : 0,012 à 0,063).
 - Température du sol le jour (sur l'année, 2002-2020) : hausse de 0,59 °C par décennie (intervalle de confiance à 95 % : 0,02 à 0,98 °C).
 - Température du sol le jour (janvier-mars, saison sèche, 2001-2020) : hausse de 0,67 °C par décennie (intervalle de confiance à 95 % : 0,08 à 1,40 °C).
@@ -26,7 +27,9 @@ Test de Mann-Kendall au seuil de 5 %, pente de Sen. On ne parle de tendance que 
 - Température du sol la nuit (janvier-mars, saison sèche, 2001-2020) : hausse de 1,13 °C par décennie (intervalle de confiance à 95 % : 0,68 à 1,79 °C).
 - Température du sol la nuit (mai-octobre, saison des pluies, 2001-2020) : hausse de 0,61 °C par décennie (intervalle de confiance à 95 % : 0,32 à 0,92 °C).
 - Pas de tendance significative pour : pluie (sur l'année, 2001-2024) ; pluie (janvier-mars, saison sèche, 2001-2025) ; pluie (mai-octobre, saison des pluies, 2001-2024).
+
 Les tendances de température du sol s'arrêtent en 2020 (dérive d'orbite du satellite Terra).
+
 À l'échelle des préfectures et des sites, des dizaines de séries sont testées : environ une sur vingt peut paraître significative par hasard. Une tendance isolée est à confirmer avec les zones voisines.
 
 ## Dernières observations

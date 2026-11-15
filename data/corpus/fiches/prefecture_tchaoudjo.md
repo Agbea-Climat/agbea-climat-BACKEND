@@ -4,7 +4,7 @@ Source : AGBÉA CLIMAT, fiche générée le 2026-11-15 par le pipeline de donné
 
 ## Où
 
-Préfecture Tchaoudjo, région Centrale. Superficie : 2 537 km². Centre : longitude 1,176, latitude 9,011.
+Préfecture Tchaoudjo, région Centrale. Superficie : 2537 km². Centre : longitude 1,176, latitude 9,011.
 
 ## Relief (NASADEM)
 
@@ -12,19 +12,22 @@ Altitude moyenne 397 m (de 219 à 811 m). 0,0 % du territoire est à moins de 10
 
 ## Climat habituel (normales 2001-2020)
 
-- Pluie : environ 1 265 mm par an. Mois les plus pluvieux : septembre (239 mm), août (228 mm), juillet (217 mm). Mois le plus sec : décembre (2,7 mm).
+- Pluie : environ 1265 mm par an. Mois les plus pluvieux : septembre (239 mm), août (228 mm), juillet (217 mm). Mois le plus sec : décembre (2,7 mm).
 - Végétation (NDVI, de -1 à 1) : la plus verte en septembre (0,74), la moins verte en janvier (0,38).
 - Température du sol le jour : la plus chaude en février (34,4 °C), la plus fraîche en juin (26,8 °C).
 
 ## Tendances observées
 
 Test de Mann-Kendall au seuil de 5 %, pente de Sen. On ne parle de tendance que si le test est significatif.
+
 - Température du sol le jour (mai-octobre, saison des pluies, 2001-2020) : hausse de 0,41 °C par décennie (intervalle de confiance à 95 % : 0,10 à 0,68 °C).
 - Température du sol la nuit (sur l'année, 2001-2020) : hausse de 0,61 °C par décennie (intervalle de confiance à 95 % : 0,41 à 0,81 °C).
 - Température du sol la nuit (janvier-mars, saison sèche, 2001-2020) : hausse de 0,49 °C par décennie (intervalle de confiance à 95 % : 0,13 à 0,93 °C).
 - Température du sol la nuit (mai-octobre, saison des pluies, 2001-2020) : hausse de 0,75 °C par décennie (intervalle de confiance à 95 % : 0,47 à 1,05 °C).
 - Pas de tendance significative pour : pluie (sur l'année, 2001-2024) ; pluie (janvier-mars, saison sèche, 2001-2025) ; pluie (mai-octobre, saison des pluies, 2001-2024) ; végétation (NDVI) (sur l'année, 2001-2025) ; végétation (NDVI) (janvier-mars, saison sèche, 2001-2026) ; végétation (NDVI) (mai-octobre, saison des pluies, 2002-2026) ; température du sol le jour (sur l'année, 2001-2020) ; température du sol le jour (janvier-mars, saison sèche, 2001-2020).
+
 Les tendances de température du sol s'arrêtent en 2020 (dérive d'orbite du satellite Terra).
+
 À l'échelle des préfectures et des sites, des dizaines de séries sont testées : environ une sur vingt peut paraître significative par hasard. Une tendance isolée est à confirmer avec les zones voisines.
 
 ## Dernières observations

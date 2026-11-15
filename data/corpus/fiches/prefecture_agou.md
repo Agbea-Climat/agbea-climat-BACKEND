@@ -12,19 +12,22 @@ Altitude moyenne 150 m (de 64 à 985 m). 0,0 % du territoire est à moins de 10 
 
 ## Climat habituel (normales 2001-2020)
 
-- Pluie : environ 1 156 mm par an. Mois les plus pluvieux : juin (171 mm), septembre (160 mm), mai (150 mm). Mois le plus sec : janvier (14,7 mm).
+- Pluie : environ 1156 mm par an. Mois les plus pluvieux : juin (171 mm), septembre (160 mm), mai (150 mm). Mois le plus sec : janvier (14,7 mm).
 - Végétation (NDVI, de -1 à 1) : la plus verte en juillet (0,76), la moins verte en février (0,44).
 - Température du sol le jour : la plus chaude en février (33,0 °C), la plus fraîche en juillet (27,6 °C).
 
 ## Tendances observées
 
 Test de Mann-Kendall au seuil de 5 %, pente de Sen. On ne parle de tendance que si le test est significatif.
+
 - Végétation (NDVI) (sur l'année, 2001-2025) : hausse de 0,014 par décennie (intervalle de confiance à 95 % : 0,003 à 0,023).
 - Température du sol la nuit (sur l'année, 2001-2020) : hausse de 0,62 °C par décennie (intervalle de confiance à 95 % : 0,49 à 0,78 °C).
 - Température du sol la nuit (janvier-mars, saison sèche, 2001-2020) : hausse de 0,85 °C par décennie (intervalle de confiance à 95 % : 0,40 à 1,34 °C).
 - Température du sol la nuit (mai-octobre, saison des pluies, 2001-2020) : hausse de 0,64 °C par décennie (intervalle de confiance à 95 % : 0,33 à 0,90 °C).
 - Pas de tendance significative pour : pluie (sur l'année, 2001-2024) ; pluie (janvier-mars, saison sèche, 2001-2025) ; pluie (mai-octobre, saison des pluies, 2001-2024) ; végétation (NDVI) (janvier-mars, saison sèche, 2001-2026) ; végétation (NDVI) (mai-octobre, saison des pluies, 2003-2026) ; température du sol le jour (sur l'année, 2001-2020) ; température du sol le jour (janvier-mars, saison sèche, 2001-2020) ; température du sol le jour (mai-octobre, saison des pluies, 2002-2019).
+
 Les tendances de température du sol s'arrêtent en 2020 (dérive d'orbite du satellite Terra).
+
 À l'échelle des préfectures et des sites, des dizaines de séries sont testées : environ une sur vingt peut paraître significative par hasard. Une tendance isolée est à confirmer avec les zones voisines.
 
 ## Dernières observations

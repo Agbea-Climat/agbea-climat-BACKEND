@@ -4,7 +4,7 @@ Source : AGBÉA CLIMAT, fiche générée le 2026-11-15 par le pipeline de donné
 
 ## Où
 
-Togo, ensemble du pays (5 régions, 39 préfectures). Superficie : 56 681 km². Centre : longitude 0,978, latitude 8,529.
+Togo, ensemble du pays (5 régions, 39 préfectures). Superficie : 56681 km². Centre : longitude 0,978, latitude 8,529.
 
 ## Relief (NASADEM)
 
@@ -12,18 +12,20 @@ Altitude moyenne 258 m (de -14 à 985 m). 1,0 % du territoire est à moins de 10
 
 ## Climat habituel (normales 2001-2020)
 
-- Pluie : environ 1 204 mm par an. Mois les plus pluvieux : septembre (209 mm), juillet (189 mm), août (181 mm). Mois le plus sec : décembre (7,0 mm).
+- Pluie : environ 1204 mm par an. Mois les plus pluvieux : septembre (209 mm), juillet (189 mm), août (181 mm). Mois le plus sec : décembre (7,0 mm).
 - Végétation (NDVI, de -1 à 1) : la plus verte en septembre (0,71), la moins verte en février (0,36).
 - Température du sol le jour : la plus chaude en mars (35,7 °C), la plus fraîche en juillet (28,3 °C).
 
 ## Tendances observées
 
 Test de Mann-Kendall au seuil de 5 %, pente de Sen. On ne parle de tendance que si le test est significatif.
+
 - Température du sol le jour (mai-octobre, saison des pluies, 2001-2020) : hausse de 0,42 °C par décennie (intervalle de confiance à 95 % : 0,02 à 0,66 °C).
 - Température du sol la nuit (sur l'année, 2001-2020) : hausse de 0,60 °C par décennie (intervalle de confiance à 95 % : 0,44 à 0,75 °C).
 - Température du sol la nuit (janvier-mars, saison sèche, 2001-2020) : hausse de 0,61 °C par décennie (intervalle de confiance à 95 % : 0,22 à 1,06 °C).
 - Température du sol la nuit (mai-octobre, saison des pluies, 2001-2020) : hausse de 0,66 °C par décennie (intervalle de confiance à 95 % : 0,46 à 0,87 °C).
 - Pas de tendance significative pour : pluie (sur l'année, 2001-2024) ; pluie (janvier-mars, saison sèche, 2001-2025) ; pluie (mai-octobre, saison des pluies, 2001-2024) ; végétation (NDVI) (sur l'année, 2001-2025) ; végétation (NDVI) (janvier-mars, saison sèche, 2001-2026) ; végétation (NDVI) (mai-octobre, saison des pluies, 2001-2026) ; température du sol le jour (sur l'année, 2001-2020) ; température du sol le jour (janvier-mars, saison sèche, 2001-2020).
+
 Les tendances de température du sol s'arrêtent en 2020 (dérive d'orbite du satellite Terra).
 
 ## Dernières observations

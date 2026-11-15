@@ -4,7 +4,7 @@ Source : AGBÉA CLIMAT, fiche générée le 2026-11-15 par le pipeline de donné
 
 ## Où
 
-Préfecture Haho, région Plateaux. Superficie : 2 938 km². Centre : longitude 1,232, latitude 7,022.
+Préfecture Haho, région Plateaux. Superficie : 2938 km². Centre : longitude 1,232, latitude 7,022.
 
 ## Relief (NASADEM)
 
@@ -12,19 +12,22 @@ Altitude moyenne 143 m (de 58 à 593 m). 0,0 % du territoire est à moins de 10 
 
 ## Climat habituel (normales 2001-2020)
 
-- Pluie : environ 1 172 mm par an. Mois les plus pluvieux : juin (178 mm), septembre (166 mm), juillet (151 mm). Mois le plus sec : janvier (12,6 mm).
+- Pluie : environ 1172 mm par an. Mois les plus pluvieux : juin (178 mm), septembre (166 mm), juillet (151 mm). Mois le plus sec : janvier (12,6 mm).
 - Végétation (NDVI, de -1 à 1) : la plus verte en octobre (0,72), la moins verte en février (0,37).
 - Température du sol le jour : la plus chaude en février (34,9 °C), la plus fraîche en juillet (28,7 °C).
 
 ## Tendances observées
 
 Test de Mann-Kendall au seuil de 5 %, pente de Sen. On ne parle de tendance que si le test est significatif.
+
 - Température du sol le jour (janvier-mars, saison sèche, 2001-2020) : hausse de 0,98 °C par décennie (intervalle de confiance à 95 % : 0,01 à 1,82 °C).
 - Température du sol la nuit (sur l'année, 2001-2020) : hausse de 0,59 °C par décennie (intervalle de confiance à 95 % : 0,37 à 0,79 °C).
 - Température du sol la nuit (janvier-mars, saison sèche, 2001-2020) : hausse de 0,79 °C par décennie (intervalle de confiance à 95 % : 0,24 à 1,30 °C).
 - Température du sol la nuit (mai-octobre, saison des pluies, 2001-2020) : hausse de 0,60 °C par décennie (intervalle de confiance à 95 % : 0,28 à 0,81 °C).
 - Pas de tendance significative pour : pluie (sur l'année, 2001-2024) ; pluie (janvier-mars, saison sèche, 2001-2025) ; pluie (mai-octobre, saison des pluies, 2001-2024) ; végétation (NDVI) (sur l'année, 2001-2025) ; végétation (NDVI) (janvier-mars, saison sèche, 2001-2026) ; végétation (NDVI) (mai-octobre, saison des pluies, 2002-2026) ; température du sol le jour (sur l'année, 2001-2020).
+
 Les tendances de température du sol s'arrêtent en 2020 (dérive d'orbite du satellite Terra).
+
 À l'échelle des préfectures et des sites, des dizaines de séries sont testées : environ une sur vingt peut paraître significative par hasard. Une tendance isolée est à confirmer avec les zones voisines.
 
 ## Dernières observations

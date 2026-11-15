@@ -88,7 +88,11 @@ def ingest() -> dict:
             parts = chunk(_read(path))
             if not parts:
                 continue
-            vectors = embeddings.embed(parts)
+            try:
+                vectors = embeddings.embed(parts)
+            except NotImplementedError as err:  # réglage du serveur, pas un bug : message explicite (503)
+                raise DataUnavailable("data_unavailable", f"Ingestion impossible : {err}. Laisser EMBEDDING_MODEL vide "
+                                      "(embedder local hash-v1) dans l'environnement du serveur.") from err
             rows = [{"id": chunk_id(e["file"], i), "file": e["file"], "chunk_index": i, "title": e["title"],
                      "source_url": e["source_url"], "content": text, "region_ids": e.get("region_ids") or [],
                      "indicators": e.get("indicators") or [], "embedding": vec}
