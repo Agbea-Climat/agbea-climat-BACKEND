@@ -30,3 +30,7 @@ data/api/
 logs/
 .playwright-mcp/
 *.zip
+
+# ── Dossier temporaire (kits à partager hors Git, essais) ──
+/temp/
+.ipynb_checkpoints/

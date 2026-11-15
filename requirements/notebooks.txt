@@ -1,0 +1,11 @@
+# Notebooks d'exploration (tests/notebooks/) — lecture seule de data/
+# Données : mêmes versions que requirements/pipeline.lock
+numpy==2.5.4
+pandas==3.1.1
+pyarrow==26.0.1
+rasterio==1.5.2
+# Jupyter et affichage
+jupyterlab==4.3.4
+ipywidgets==8.1.5
+plotly==5.24.1
+nbconvert==7.16.4
