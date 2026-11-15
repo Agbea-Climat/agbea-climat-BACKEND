@@ -66,6 +66,7 @@ def series(region_id: str, indicator: str) -> dict[str, Obs]:
     return _index().get((region_id, indicator), {})
 
 
+@lru_cache(maxsize=None)
 def last_date(indicator: Optional[str] = None, region_id: Optional[str] = None) -> Optional[str]:
     """Dernier mois avec une valeur non nulle (pour un indicateur / une région si précisés)."""
     df = monthly()
@@ -77,12 +78,20 @@ def last_date(indicator: Optional[str] = None, region_id: Optional[str] = None) 
     return None if df.empty else str(df.date.max())
 
 
+@lru_cache(maxsize=None)
 def first_date(indicator: Optional[str] = None) -> Optional[str]:
     df = monthly()
     df = df[df.value.notna()]
     if indicator:
         df = df[df.indicator == indicator]
     return None if df.empty else str(df.date.min())
+
+
+def last_dates() -> dict[str, str]:
+    """Dernier mois avec une valeur, par indicateur : {indicator: "YYYY-MM"} (les séries s'arrêtent
+    à des mois différents : retard de publication d'IMERG Final, LST arrêtée en 2022-12)."""
+    df = monthly()
+    return {str(k): str(v) for k, v in df[df.value.notna()].groupby("indicator").date.max().items()}
 
 
 @lru_cache

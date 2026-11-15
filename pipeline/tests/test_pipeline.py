@@ -188,3 +188,11 @@ def test_lpdaac_hdf4_georeferencing(tmp_path, monkeypatch):
     assert arr[r_lome, c_lome] == pytest.approx(0.5)
     assert np.isnan(arr[r_dap, c_dap])          # au nord de 10° N : tuile v07
     assert np.isnan(arr[r_lome, int((-0.2 - g.west) / g.res)])  # à l'ouest de 0° : tuile h17
+
+
+def test_publication_cutoff_lst():
+    """D30 : LST publiée jusqu'en 2022-12 (dérive d'orbite) ; pluie et NDVI sans coupure."""
+    assert analysis.publication_cutoff("lst_day") == "2022-12"
+    assert analysis.publication_cutoff("lst_night") == "2022-12"
+    assert analysis.publication_cutoff("rainfall") is None
+    assert analysis.publication_cutoff("ndvi") is None

@@ -9,7 +9,7 @@ from .catalog import Dataset, Indicator, LegendStop, MapLayer, Profile
 from .common import (FeatureStatus, Granularity, IndicatorId, Lang, Mode, ProfileId, Source,
                      Statement, StatementNature, Trend)
 from .envelope import ApiErrorResponse, ApiResponse, ErrorDetail, ok
-from .geo import Region
+from .geo import Region, RegionFeature, RegionFeatureCollection, RegionGeometry
 from .meta import AppMeta, Feature
 from .observations import (BeforeAfter, Comparison, IndicatorSnapshot, LayerAtDate, PeriodStats,
                            RegionSummary, TimePoint, TimeSeries)
@@ -23,6 +23,6 @@ __all__ = [
     "EvStatus", "EvToken", "ExplainRequest", "ExplainResponse", "Feature", "FeatureStatus",
     "Granularity", "Indicator", "IndicatorId", "IndicatorSnapshot", "Lang", "LayerAtDate",
     "LegendStop", "MapLayer", "Mode", "PeriodStats", "Preferences", "Profile", "ProfileId",
-    "Region", "RegionSummary", "Session", "Source", "Statement", "StatementNature",
+    "Region", "RegionFeature", "RegionFeatureCollection", "RegionGeometry", "RegionSummary", "Session", "Source", "Statement", "StatementNature",
     "ThreadSummary", "TimePoint", "TimeSeries", "Trend",
 ]

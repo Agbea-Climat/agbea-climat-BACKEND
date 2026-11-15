@@ -21,7 +21,7 @@ from rasterio import features
 from rasterio.transform import from_origin
 
 from . import config
-from .analysis import CUBES, TABLES
+from .analysis import CUBES, TABLES, publication_cutoff
 from .boundaries import load_units
 from .grid import get_grid, read_tif, write_tif
 from .zonal import build_weights, zonal_mean
@@ -132,12 +132,18 @@ def build_layers() -> None:
             continue
         g = get_grid(gname)
         how = config.datasets()["indicators"][ind]["annual_agg"]
+        cutoff = publication_cutoff(ind)
+        if cutoff:  # D30 : mois non publiés exclus des couches
+            files = [f for f in files if f.stem[:7] <= cutoff]
         need = comp["min_months_annual_sum"] if how == "sum" else comp["min_months_annual_mean"]
         by_year: dict[int, list] = {}
         for f in files:
             y, m = map(int, re.match(r"(\d{4})-(\d{2})", f.stem).groups())
             by_year.setdefault(y, []).append(f)
         out_dir = API / "layers" / ind
+        # couches annuelles et anomalies régénérées : on retire les anciennes (années dépubliées)
+        for old in list(out_dir.glob("[0-9][0-9][0-9][0-9].tif")) + list(out_dir.glob("anomaly_*.tif")):
+            old.unlink()
         annual = {}
         for y, fl in sorted(by_year.items()):
             if y >= today.year or len(fl) < 12:

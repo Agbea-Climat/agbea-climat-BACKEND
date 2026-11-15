@@ -20,6 +20,16 @@ class ApiResponse(BaseModel, Generic[T]):
     response: T
 
 
+class ValidationIssue(BaseModel):
+    """Élément de `details` d'une erreur 422 `validation_error` (construit par
+    backend/core/exceptions/handlers.py). `msg` en français pour les types courants ;
+    `input` : valeur reçue tronquée à 100 caractères, absente pour un objet ou une liste."""
+    type: str
+    loc: list[str | int]
+    msg: str
+    input: Optional[str | float | bool] = None
+
+
 class ErrorDetail(BaseModel):
     code: str
     details: Optional[Any] = None
@@ -29,6 +39,18 @@ class ApiErrorResponse(BaseModel):
     status: Literal["error"] = "error"
     message: str
     response: ErrorDetail
+
+
+class ValidationErrorDetail(BaseModel):
+    code: Literal["validation_error"] = "validation_error"
+    details: list[ValidationIssue]
+
+
+class ApiValidationErrorResponse(BaseModel):
+    """Erreur 422 : même enveloppe qu'ApiErrorResponse, `details` typé (documentation OpenAPI)."""
+    status: Literal["error"] = "error"
+    message: str
+    response: ValidationErrorDetail
 
 
 def ok(data: Any, message: str = "OK") -> dict:

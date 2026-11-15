@@ -47,6 +47,14 @@ seasons:
   mjjaso: [5, 6, 7, 8, 9, 10] # saison des pluies (bimodale au sud, unimodale au nord)
 
 # Seuil de significativité du test de Mann-Kendall
+# Dernier mois publié, par indicateur (D30). LST : la dérive d'orbite de Terra fausse les valeurs mensuelles
+# elles-mêmes à partir de 2023 (écart Terra − Aqua, 5 régions : −0,33 °C en 2022, −0,75 en 2023, −1,15 en 2024,
+# −1,56 en 2025). Les mois suivants restent dans les cubes (contrôle Terra / Aqua) mais ne sont plus publiés.
+publication:
+  last_month:
+    lst_day: "2022-12"
+    lst_night: "2022-12"
+
 trend:
   alpha: 0.05
   # Dernière année des tendances, par indicateur. LST : dérive d'orbite de Terra après 2020 ; le contrôle

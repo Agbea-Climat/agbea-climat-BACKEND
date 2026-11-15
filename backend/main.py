@@ -24,10 +24,29 @@ async def lifespan(_: FastAPI):
     await memory.close_saver()
 
 
+class StripTrailingSlash:
+    """`/api/v1/regions/` sert la même ressource que `/api/v1/regions`, sans redirection.
+
+    La redirection 307 de Starlette (redirect_slashes) renvoyait une URL absolue en http:// derrière
+    le proxy HTTPS (contenu mixte bloqué par le navigateur)."""
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        path = scope.get("path", "")
+        if scope["type"] in ("http", "websocket") and len(path) > 1 and path.endswith("/"):
+            scope = dict(scope, path=path.rstrip("/") or "/")
+            if scope.get("raw_path"):
+                scope["raw_path"] = scope["raw_path"].rstrip(b"/") or b"/"
+        await self.app(scope, receive, send)
+
+
 def create_app() -> FastAPI:
-    app = FastAPI(title="AGBÉA CLIMAT API", version=APP_VERSION, lifespan=lifespan)
+    app = FastAPI(title="AGBÉA CLIMAT API", version=APP_VERSION, lifespan=lifespan, redirect_slashes=False)
     app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins_list,
                        allow_methods=["*"], allow_headers=["*"])
+    app.add_middleware(StripTrailingSlash)
     register_exception_handlers(app)
     app.include_router(api_router)
     return app

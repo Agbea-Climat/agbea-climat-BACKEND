@@ -27,4 +27,5 @@ de l'air donnée par le bulletin météo.
 - Le satellite ne mesure qu'à travers un ciel clair. En saison des pluies, les mesures sont rares
   et faites surtout les jours sans nuage, ce qui tire la moyenne vers les jours secs et ensoleillés.
 - Depuis 2020, le satellite Terra dérive sur son orbite et passe plus tôt le matin, ce qui peut faire baisser
-  artificiellement la température mesurée de jour. AGBÉA CLIMAT ne calcule donc pas de tendance au-delà de 2020.
+  artificiellement la température mesurée de jour. AGBÉA CLIMAT ne publie donc pas de température du sol
+  après décembre 2022, et ne calcule pas de tendance au-delà de 2020.

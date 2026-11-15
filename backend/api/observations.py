@@ -40,6 +40,10 @@ def export_timeseries(region_id: str, indicator: IndicatorId, start: Optional[st
 
 
 @router.get("/layers/{layer_id}/before-after", response_model=ApiResponse[BeforeAfter])
-def before_after(layer_id: str, before: str = "2016-09-13", after: str = "2024-09-13",
+def before_after(layer_id: str,
+                 before: Optional[str] = Query(None, description="YYYY-MM-DD, date servie par la couche ; absent = "
+                                                                 "même jour, le plus d'années possible avant `after`"),
+                 after: Optional[str] = Query(None, description="YYYY-MM-DD, date servie par la couche ; absent = "
+                                                                "dernière date de la couche"),
                  region_id: Optional[str] = None):
     return ok(indicators.before_after(layer_id, before, after, region_id))

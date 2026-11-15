@@ -1,10 +1,11 @@
 # Limites des données AGBÉA CLIMAT
 
-Sources : normales climatiques OMM 1991-2020 des stations de Lomé (65387) et d'Aného (65445), archive NOAA/NCEI
+Sources : méthodologie du pipeline AGBÉA CLIMAT — https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/docs/data/methodologie.md ;
+normales climatiques OMM 1991-2020 des stations de Lomé (65387) et d'Aného (65445), archive NOAA/NCEI
 (accession 0253808) —
 https://www.nodc.noaa.gov/archive/arc0216/0253808/3.3/data/0-data/Region-1-WMO-Normals-9120/Togo/CSV/LOME_65387.csv et
 https://www.nodc.noaa.gov/archive/arc0216/0253808/3.3/data/0-data/Region-1-WMO-Normals-9120/Togo/CSV/ANEHO_65445.csv ;
-NASA, mission Terra (terra.nasa.gov) ; méthodologie du pipeline de données AGBÉA CLIMAT (`docs/data/methodologie.md`).
+NASA, mission Terra (terra.nasa.gov).
 
 ## Données observées, pas des prévisions
 
@@ -40,12 +41,14 @@ peu pluvieux ; la forme de l'année (mois secs et mois pluvieux) est juste. Cons
 
 Le satellite Terra, qui porte le capteur MODIS utilisé ici, ne corrige plus l'heure de passage de son orbite
 depuis sa dernière manœuvre d'inclinaison, le 27 février 2020, et passe de plus en plus tôt le matin.
-Cela fausse les tendances de température calculées après 2020. AGBÉA CLIMAT arrête donc les tendances
-de température en 2020. Sur 2003-2020, la hausse de la température de surface la nuit a été vérifiée
+Cela fausse les tendances de température après 2020, puis les valeurs elles-mêmes : à partir de 2023, l'écart avec
+le satellite Aqua dépasse 0,7 °C (et 1,5 °C en 2025). AGBÉA CLIMAT arrête donc les tendances de température en 2020
+et ne publie plus de température du sol après décembre 2022. Sur 2003-2020, la hausse de la température de surface la nuit a été vérifiée
 avec un second satellite (Aqua).
 
 ## Mois récents
 
 - Le mois en cours n'est jamais affiché : il n'est pas terminé.
+- La température du sol s'arrête en décembre 2022 (dérive du satellite Terra, voir plus haut).
 - La pluie IMERG Final arrive en temps normal 3 à 4 mois après le mois observé ; actuellement, la série de pluie
-  s'arrête en septembre 2025, alors que la végétation et la température vont plus loin.
+  s'arrête en septembre 2025, alors que la végétation va jusqu'en octobre 2026.

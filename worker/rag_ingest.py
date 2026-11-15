@@ -53,11 +53,23 @@ def _read(path: Path) -> str:
 
 
 def chunk(text: str, size: int = CHUNK_WORDS, overlap: int = OVERLAP_WORDS) -> list[str]:
-    words = text.split()
+    """Fenêtres de `size` mots (chevauchement `overlap`). Les fins de ligne sont gardées (tableaux,
+    puces, titres) pour que l'assistant puisse citer une ligne précise du document."""
+    words: list[str] = []
+    ends: list[str] = []   # séparateur après chaque mot : " " ou "\n" (fin de ligne / paragraphe)
+    for line in text.split("\n"):
+        ws = line.split()
+        if not ws:
+            if ends:
+                ends[-1] = "\n\n"
+            continue
+        words += ws
+        ends += [" "] * (len(ws) - 1) + ["\n"]
     if not words:
         return []
     step = size - overlap
-    return [" ".join(words[i:i + size]) for i in range(0, max(len(words) - overlap, 1), step)]
+    return ["".join(w + e for w, e in zip(words[i:i + size], ends[i:i + size])).strip()
+            for i in range(0, max(len(words) - overlap, 1), step)]
 
 
 def chunk_id(file: str, index: int) -> str:

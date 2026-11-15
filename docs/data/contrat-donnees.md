@@ -162,7 +162,7 @@ Règles de complétude (`pipeline/settings/settings.yaml`) : pluie = tous les mo
 | `significant` | `p_value < 0.05` |
 | `direction` | `hausse` / `baisse` / `pas de tendance significative` |
 
-**LST** (`lst_day`, `lst_night`) : les tendances s'arrêtent à **2020** (`last_year = 2020`), à cause de la dérive d'orbite de Terra (D27). Les séries mensuelles et annuelles, elles, vont jusqu'au dernier mois disponible.
+**LST** (`lst_day`, `lst_night`) : les tendances s'arrêtent à **2020** (`last_year = 2020`, D27) et les **valeurs mensuelles s'arrêtent à 2022-12** (`publication.last_month`, D30) dans `data/api` comme dans `data/processed` : après, la dérive d'orbite de Terra fausse les mesures elles-mêmes (écart Terra − Aqua de −0,75 °C en 2023 à −1,56 °C en 2025).
 
 **Règle d'affichage** : ne parler de « tendance » que si `significant = true`. Sinon, dire « pas de tendance nette sur la période ». C'est l'exigence n° 7 du guide d'équipe.
 

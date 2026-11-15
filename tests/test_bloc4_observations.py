@@ -31,7 +31,8 @@ def test_summary_shape(client):
 @pytest.mark.m14
 @pytest.mark.real_data
 def test_summary_deterministic_and_consistent(client):
-    p = {"date": "2024-08"}
+    # 2022-08 : dernier été où les 3 indicateurs existent (LST publiée jusqu'en 2022-12, décision données D30)
+    p = {"date": "2022-08"}
     a = data(client.get(f"{API}/regions/kara/summary", params=p))
     b = data(client.get(f"{API}/regions/kara/summary", params=p))
     assert a == b, "le résumé doit être déterministe (plus de données aléatoires)"

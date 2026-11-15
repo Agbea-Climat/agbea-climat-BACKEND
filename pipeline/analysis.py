@@ -62,16 +62,24 @@ def month_incomplete(year: int, month: int, n_composites: int | None, period_day
     return None
 
 
+def publication_cutoff(ind: str) -> str | None:
+    """Dernier mois publié (YYYY-MM) pour l'indicateur, ou None (D30, settings.yaml → publication.last_month)."""
+    return (config.settings().get("publication") or {}).get("last_month", {}).get(ind)
+
+
 def _composite_days() -> dict[str, int]:
     from .sources import modis
     return {ind: 2 * p.half_period_days for p in modis.PRODUCTS.values() for ind, _, _ in p.outputs}
 
 
-def monthly_from_cubes(indicators: list[str] | None = None, cubes: dict[str, str] = CUBES) -> pd.DataFrame:
+def monthly_from_cubes(indicators: list[str] | None = None, cubes: dict[str, str] = CUBES,
+                       publication: bool = True) -> pd.DataFrame:
+    """publication=False : garde aussi les mois après publication.last_month (contrôles Terra / Aqua)."""
     import rasterio
     frames = []
     periods = _composite_days()
     for ind in indicators or cubes:
+        cutoff = publication_cutoff(ind) if publication else None
         d = config.INTERIM / "cubes" / ind
         files = sorted(d.glob("[0-9][0-9][0-9][0-9]-[0-9][0-9].tif"))
         if not files:
@@ -79,6 +87,8 @@ def monthly_from_cubes(indicators: list[str] | None = None, cubes: dict[str, str
         w = build_weights(get_grid(cubes[ind]))
         for f in files:
             y, m = map(int, re.match(r"(\d{4})-(\d{2})", f.stem).groups())
+            if cutoff and f"{y:04d}-{m:02d}" > cutoff:
+                continue
             with rasterio.open(f) as src:
                 n = src.tags().get("n_composites")
             why = month_incomplete(y, m, int(n) if n else None, periods.get(ind))
@@ -88,7 +98,7 @@ def monthly_from_cubes(indicators: list[str] | None = None, cubes: dict[str, str
             df = zonal_mean(read_tif(f, 1), w)
             df["indicator"], df["year"], df["month"] = ind, y, m
             frames.append(df)
-        print(f"  {ind} : {len(files)} mois agrégés")
+        print(f"  {ind} : {len(files)} mois agrégés" + (f" (publiés jusqu'à {cutoff}, D30)" if cutoff else ""))
     if not frames:
         return pd.DataFrame(columns=["unit_id", "indicator", "year", "month", "value", "valid_frac"])
     return pd.concat(frames, ignore_index=True)

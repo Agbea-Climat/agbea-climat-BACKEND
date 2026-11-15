@@ -14,8 +14,13 @@ class TimePoint(BaseModel):
     value: Optional[float]
     baseline: Optional[float] = None
     anomaly_pct: Optional[float] = None
-    valid_frac: Optional[float] = None   # part de la région visible (0–1), mois seulement
-    low_coverage: bool = False           # valid_frac < 0,5 : valeur peu représentative
+    # Part de la région visible (0–1). En granularité `year` : part du mois agrégé le moins couvert.
+    valid_frac: Optional[float] = None
+    # valid_frac < 0,5 : valeur peu représentative. En `year` : au moins un mois agrégé l'est.
+    low_coverage: bool = False
+    # Granularité `year` : nombre de mois avec valeur dans l'année (12 = année entière ; moins = année
+    # partielle, valeur seulement pour NDVI / température à partir de 10 mois). null en granularité `month`.
+    months_count: Optional[int] = None
 
 
 class TimeSeries(BaseModel):
@@ -37,6 +42,7 @@ class IndicatorSnapshot(BaseModel):
     date: str
     baseline: Optional[float]
     anomaly_pct: Optional[float]
+    # Lue sur l'écart affiché : anomalie % à 0,1 (pluie, NDVI) ; température : valeur − normale affichée
     trend: Trend
     plain_summary: str
     dataset_id: str
@@ -80,3 +86,5 @@ class BeforeAfter(BaseModel):
     before: LayerAtDate
     after: LayerAtDate
     comparison: Optional[Comparison] = None
+    # Raison de l'absence de `comparison` quand region_id est fourni (année incomplète, hors données)
+    comparison_note: Optional[str] = None

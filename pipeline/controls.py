@@ -86,7 +86,7 @@ def _gap_trend(monthly: pd.DataFrame) -> pd.DataFrame:
 
 def lst_terra_aqua() -> pd.DataFrame:
     inds = [*PAIRS, *PAIRS.values()]
-    raw = monthly_from_cubes(inds, cubes={i: "lst" for i in inds})
+    raw = monthly_from_cubes(inds, cubes={i: "lst" for i in inds}, publication=False)
     missing = sorted(set(inds) - set(raw.indicator))
     if missing:
         raise SystemExit(f"Cubes manquants : {missing}. Lancer d'abord : python -m pipeline lst / lst-aqua")

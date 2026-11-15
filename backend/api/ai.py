@@ -21,6 +21,7 @@ async def explain(req: ExplainRequest):
 # Flux SSE : pas d'enveloppe (une ligne `data: <événement>` par message)
 @router.post("/chat/stream")
 async def chat_stream(req: ChatRequest, x_session_id: Optional[str] = Header(None)):
+    graph.check_request(req)  # avant d'ouvrir le flux : 404 region_not_found / outside_togo
     thread_id = graph.thread_id_for(req)
     sessions.record_thread(x_session_id, thread_id, req.message)
     return StreamingResponse(sse.stream(graph.chat_events(req, thread_id)), media_type="text/event-stream",
@@ -29,6 +30,7 @@ async def chat_stream(req: ChatRequest, x_session_id: Optional[str] = Header(Non
 
 @router.post("/chat", response_model=ApiResponse[ChatResponse])
 async def chat(req: ChatRequest, x_session_id: Optional[str] = Header(None)):
+    graph.check_request(req)
     thread_id = graph.thread_id_for(req)
     sessions.record_thread(x_session_id, thread_id, req.message)
     return ok(await graph.chat(req, thread_id))

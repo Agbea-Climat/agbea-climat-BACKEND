@@ -67,12 +67,12 @@ datasets:
     variable: LST_Day_1km et LST_Night_1km (échelle 0,02 K), filtrés par QC
     native_resolution: 1 km
     temporal_resolution: composite 8 jours → agrégé en mois
-    coverage: 2000-02 → présent
+    coverage: 2000-02 → 2022-12 publié (D30 ; les cubes vont plus loin pour le contrôle Terra / Aqua)
     license: Données NASA, libres et ouvertes (citer la source)
     limits:
       - Température de la surface du sol (toits, routes, champs), pas de l'air.
       - Mesurée seulement par ciel clair : en saison des pluies, les valeurs sont rares et biaisées vers les jours secs.
-      - Dérive d'orbite de Terra après la dernière manœuvre (27/02/2020) : passage plus matinal. Les tendances LST s'arrêtent donc à 2020 (D27). Sur 2003-2020, MODIS Aqua confirme la hausse nocturne (control-lst).
+      - "Dérive d'orbite de Terra après la dernière manœuvre (27/02/2020) : passage plus matinal. Les tendances LST s'arrêtent donc à 2020 (D27) et les valeurs mensuelles ne sont publiées que jusqu'en 2022-12 (D30 : écart Terra − Aqua de −0,75 °C en 2023 à −1,56 °C en 2025). Sur 2003-2020, MODIS Aqua confirme la hausse nocturne (control-lst)."
 
   modis_lst_aqua:
     title: MODIS Aqua Land Surface Temperature 8 jours, 1 km, v061 (contrôle)

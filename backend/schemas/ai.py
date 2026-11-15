@@ -5,6 +5,8 @@ from typing import Annotated, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
 
+from backend.core.constants import DISCLAIMER
+
 from .common import IndicatorId, Lang, Mode, ProfileId, Source, Statement
 from .observations import IndicatorSnapshot, TimeSeries
 
@@ -32,15 +34,18 @@ class ChatRequest(BaseModel):
     mode: Mode = "public"
     lang: Lang = "fr"
     region_id: Optional[str] = None
-    location: Optional[tuple[float, float]] = None
+    # [lon, lat] bornés comme /locate : hors bornes, nan ou inf → 422 validation_error
+    location: Optional[tuple[Annotated[float, Field(ge=-180, le=180, allow_inf_nan=False)],
+                             Annotated[float, Field(ge=-90, le=90, allow_inf_nan=False)]]] = None
 
 
 class ChatResponse(BaseModel):
     thread_id: str
-    answer: str
+    answer: str                        # se termine toujours par l'avertissement (traduit si lang=en)
     statements: list[Statement] = []
     sources: list[Source] = []
-    data: Optional[dict] = None
+    data: Optional[dict] = None        # {"snapshots"?: IndicatorSnapshot[], "series"?: TimeSeries[]}
+    disclaimer: str = DISCLAIMER       # toujours le texte exact (règle 7)
 
 
 # Événements SSE (data: <json>)
@@ -60,9 +65,12 @@ class EvToken(BaseModel):
 
 
 class EvData(BaseModel):
+    """Un événement par série (`series`) ; les valeurs du mois dans un seul événement (`snapshots`,
+    et `snapshot` quand il n'y en a qu'une, pour compatibilité)."""
     type: Literal["data"] = "data"
     series: Optional[TimeSeries] = None
     snapshot: Optional[IndicatorSnapshot] = None
+    snapshots: Optional[list[IndicatorSnapshot]] = None
 
 
 class EvSources(BaseModel):
@@ -73,6 +81,7 @@ class EvSources(BaseModel):
 class EvDone(BaseModel):
     type: Literal["done"] = "done"
     statements: Optional[list[Statement]] = None
+    disclaimer: str = DISCLAIMER       # toujours le texte exact (règle 7)
 
 
 class EvError(BaseModel):

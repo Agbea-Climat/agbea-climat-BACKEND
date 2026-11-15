@@ -38,6 +38,9 @@ class MapLayer(BaseModel):
     indicator: IndicatorId
     dataset_id: str
     title: str
+    # Provenance exacte des tuiles (produit, résolution, unité), quand elle diffère du dataset_id
+    # (le dataset_id reste celui des séries de l'indicateur)
+    description: Optional[str] = None
     type: Literal["wmts", "xyz", "geojson"]
     url_template: str
     available_dates: list[str]

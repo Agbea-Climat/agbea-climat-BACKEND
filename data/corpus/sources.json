@@ -90,7 +90,7 @@
   {
     "file": "limites_donnees_agbea.md",
     "title": "Limites des donn\u00e9es AGB\u00c9A CLIMAT (couverture nuageuse, biais c\u00f4tier de la pluie, d\u00e9rive de Terra)",
-    "source_url": "https://www.nodc.noaa.gov/archive/arc0216/0253808/3.3/data/0-data/Region-1-WMO-Normals-9120/Togo/CSV/LOME_65387.csv",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/docs/data/methodologie.md",
     "region_ids": [
       "maritime",
       "plateaux",
