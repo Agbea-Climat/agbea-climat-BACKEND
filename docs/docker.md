@@ -53,3 +53,34 @@ Sur le réseau du 14/11/2026, le DNS local (10.15.108.134) ne résolvait pas `fi
    ```
 
 Les builds utilisent un cache pip BuildKit : un build interrompu reprend sans retélécharger ce qui a déjà été reçu.
+
+## Production : Dokploy (mode « Raw »)
+
+`docker/dokploy.compose.yml` se colle tel quel dans un service *Compose* Dokploy (fournisseur *Raw*). Il ne contient
+**aucune variable** : `db` et `api` lisent le fichier `.env` que Dokploy écrit à partir de l'onglet *Environment*.
+
+1. Construire et pousser l'image (données P2 et corpus RAG inclus) :
+   ```bash
+   docker build -f docker/api.prod.Dockerfile -t ghcr.io/agbea-climat/agbea-api:latest .
+   docker push ghcr.io/agbea-climat/agbea-api:latest
+   ```
+   Package GHCR privé : ajouter le registre dans Dokploy (*Settings → Registry*).
+2. Onglet *Environment* (toutes obligatoires sauf mention) :
+   ```
+   POSTGRES_USER=agbea
+   POSTGRES_PASSWORD=<mot de passe fort>
+   POSTGRES_DB=agbea
+   POSTGRES_HOST=db
+   POSTGRES_PORT=5432
+   DATA_DIR=data
+   CORS_ORIGINS=https://agbea-climat.vercel.app
+   LLM_PROVIDER=openrouter
+   LLM_API_KEY=sk-or-...              # une seule clé OpenRouter : assistant et voix
+   LLM_MODEL=                         # facultatif, vide = anthropic/claude-opus-5.5
+   VOICE_MODEL=                       # facultatif, modèle OpenRouter acceptant l'audio
+   VOICE_LANGUAGES=fr,en
+   ```
+   `POSTGRES_HOST=db` et `POSTGRES_PORT=5432` : l'API joint la base par le réseau interne du compose.
+3. Onglet *Domains* : service `api`, port `8000`. Puis *Deploy*.
+4. Après le premier déploiement (et après chaque nouvelle image avec un corpus modifié) :
+   `curl -X POST https://<domaine>/api/v1/admin/rag/ingest`.

@@ -1,19 +1,17 @@
 # AGBÉA CLIMAT — déploiement Dokploy, mode « Raw » : coller ce fichier tel quel.
 #
-# Prérequis : l'image de l'API publiée dans un registre (voir docker/api.prod.Dockerfile).
-# Variables : onglet « Environment » du service Dokploy (au minimum POSTGRES_PASSWORD).
-# Domaine   : onglet « Domains » → service `api`, port 8000 (pas de port publié ici, Traefik route).
-#
-# L'API applique les migrations Alembic au démarrage ; les données sont dans l'image.
+# Aucune variable ici : toutes viennent de l'onglet « Environment » du service Dokploy, que Dokploy
+# écrit dans le fichier .env à côté de ce compose (lu par env_file). Liste : docs/docker.md.
+# Image : construite avec docker/api.prod.Dockerfile et poussée sur GHCR (données et corpus inclus).
+# Domaine : onglet « Domains » → service `api`, port 8000 (aucun port publié, Traefik route).
+# L'API applique les migrations Alembic à son démarrage.
 
 services:
   db:
     image: pgvector/pgvector:pg17
     restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-agbea}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD à définir dans Dokploy}
-      POSTGRES_DB: ${POSTGRES_DB:-agbea}
+    env_file:
+      - .env
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -23,30 +21,14 @@ services:
       retries: 10
 
   api:
-    image: ${AGBEA_API_IMAGE:-ghcr.io/agbea-climat/agbea-api:latest}
+    image: ghcr.io/agbea-climat/agbea-api:latest
     restart: unless-stopped
+    env_file:
+      - .env
     depends_on:
       db: { condition: service_healthy }
     expose:
       - "8000"
-    environment:
-      DATA_DIR: data
-      POSTGRES_HOST: db
-      POSTGRES_PORT: "5432"
-      POSTGRES_USER: ${POSTGRES_USER:-agbea}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD à définir dans Dokploy}
-      POSTGRES_DB: ${POSTGRES_DB:-agbea}
-      CORS_ORIGINS: ${CORS_ORIGINS:-https://agbea-climat.vercel.app}
-      LLM_PROVIDER: ${LLM_PROVIDER:-openrouter}
-      LLM_MODEL: ${LLM_MODEL:-}
-      LLM_API_KEY: ${LLM_API_KEY:-}
-      LLM_BASE_URL: ${LLM_BASE_URL:-}
-      OPENROUTER_APP_URL: ${OPENROUTER_APP_URL:-}
-      OPENROUTER_APP_NAME: ${OPENROUTER_APP_NAME:-}
-      VOICE_MODEL: ${VOICE_MODEL:-}
-      VOICE_LANGUAGES: ${VOICE_LANGUAGES:-fr,en}
-      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-}
-      EMBEDDING_DIM: ${EMBEDDING_DIM:-1024}
 
 volumes:
   pgdata:
