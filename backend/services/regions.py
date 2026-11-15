@@ -1,45 +1,77 @@
-"""Régions du Togo : liste, détail, GeoJSON, localisation d'un point.
+"""Régions du Togo : liste, détail, GeoJSON, localisation d'un point (M06–M09).
 
-TODO M06/M07/M09 (après P2) : contours réels depuis data/regions.geojson (shapely),
-centroid/bbox/area_km2 calculés, point dans polygone. D'ici là : rectangles mock.
+Source : data/regions.geojson (livrable P2 : limites officielles, `properties` déjà calculées
+par le pipeline — centroid, bbox, area_km2 en UTM 31N). Coordonnées en [lon, lat].
 """
+from functools import lru_cache
+
+from shapely.geometry import Point, shape
+from shapely.prepared import prep
+
 from backend.core.exceptions import NotFound
+from backend.repositories import store
 from backend.schemas import Region
 
-# Ordre : du sud au nord
-REGIONS: dict[str, Region] = {
-    r.id: r for r in [
-        Region(id="maritime", name="Maritime", capital="Lomé", centroid=(1.35, 6.35), bbox=(0.9, 6.1, 1.8, 6.7)),
-        Region(id="plateaux", name="Plateaux", capital="Atakpamé", centroid=(1.0, 7.4), bbox=(0.5, 6.6, 1.7, 8.3)),
-        Region(id="centrale", name="Centrale", capital="Sokodé", centroid=(1.1, 8.7), bbox=(0.4, 8.2, 1.7, 9.3)),
-        Region(id="kara", name="Kara", capital="Kara", centroid=(1.0, 9.7), bbox=(0.3, 9.2, 1.6, 10.2)),
-        Region(id="savanes", name="Savanes", capital="Dapaong", centroid=(0.4, 10.6), bbox=(-0.2, 10.1, 1.0, 11.2)),
-    ]
-}
+# Ordre de l'API : du sud au nord
+REGION_IDS = ("maritime", "plateaux", "centrale", "kara", "savanes")
+SOUTH = ("maritime", "plateaux")
+NORTH = ("centrale", "kara", "savanes")
+# Tolérance de /locate pour un point juste sur la frontière simplifiée (~1 km)
+LOCATE_TOLERANCE_DEG = 0.01
+
+
+@lru_cache
+def _features() -> dict[str, dict]:
+    feats = {f["properties"]["id"]: f for f in store.regions_geojson()["features"]}
+    missing = set(REGION_IDS) - set(feats)
+    if missing:
+        raise store.DataUnavailable("data_unavailable", f"Régions absentes de regions.geojson : {sorted(missing)}")
+    return feats
+
+
+@lru_cache
+def _regions() -> dict[str, Region]:
+    fields = Region.model_fields
+    return {rid: Region(**{k: v for k, v in _features()[rid]["properties"].items() if k in fields})
+            for rid in REGION_IDS}
+
+
+@lru_cache
+def _geometries():
+    return {rid: shape(_features()[rid]["geometry"]) for rid in REGION_IDS}
+
+
+@lru_cache
+def _prepared():
+    return {rid: prep(g) for rid, g in _geometries().items()}
 
 
 def list_regions() -> list[Region]:
-    return list(REGIONS.values())
+    return list(_regions().values())
 
 
 def get_region(region_id: str) -> Region:
-    if region_id not in REGIONS:
-        raise NotFound("region_not_found", region_id)
-    return REGIONS[region_id]
+    region = _regions().get(region_id)
+    if region is None:
+        raise NotFound("region_not_found", f"Région introuvable : {region_id}")
+    return region
 
 
 def regions_geojson() -> dict:
-    feats = []
-    for r in REGIONS.values():
-        x0, y0, x1, y1 = r.bbox
-        feats.append({"type": "Feature", "properties": r.model_dump(),
-                      "geometry": {"type": "Polygon", "coordinates": [[[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]]]}})
-    return {"type": "FeatureCollection", "features": feats}
+    """FeatureCollection : `properties` = l'objet Region, géométries réelles."""
+    regions = _regions()
+    return {"type": "FeatureCollection", "features": [
+        {"type": "Feature", "properties": regions[rid].model_dump(), "geometry": _features()[rid]["geometry"]}
+        for rid in REGION_IDS]}
 
 
 def locate(lon: float, lat: float) -> Region:
-    for r in REGIONS.values():
-        x0, y0, x1, y1 = r.bbox
-        if x0 <= lon <= x1 and y0 <= lat <= y1:
-            return r
+    pt = Point(lon, lat)
+    for rid, geom in _prepared().items():
+        if geom.contains(pt):
+            return _regions()[rid]
+    # Point sur la frontière simplifiée (côte, limites) : région la plus proche si très proche
+    rid, dist = min(((rid, g.distance(pt)) for rid, g in _geometries().items()), key=lambda x: x[1])
+    if dist <= LOCATE_TOLERANCE_DEG:
+        return _regions()[rid]
     raise NotFound("outside_togo", "Point hors du Togo")

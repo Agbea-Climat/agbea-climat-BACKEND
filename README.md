@@ -21,6 +21,8 @@ python -m venv .venv
 source .venv/bin/activate        # Windows : .venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env
+docker compose up -d db          # PostgreSQL 17 + pgvector sur le port 5433
+alembic upgrade head
 uvicorn backend.main:app --reload --port 8000
 ```
 
@@ -33,7 +35,7 @@ Documentation interactive : http://localhost:8000/docs
 - `docker/`, `docker-compose.yml` — images `agbea-api` et `agbea-pipeline`, services de test
 - `requirements/` — `api.txt`, `pipeline.txt`, `pipeline.lock` (`requirements.txt` = les deux)
 - `backend/` — API : `api/` (routes `/api/v1/...`), `services/` (logique métier),
-  `repositories/` (accès données), `schemas/` (Pydantic), `core/` (config, erreurs, DB)
+  `repositories/` (accès données), `schemas/` (Pydantic), `core/` (config, erreurs, base PostgreSQL + migrations Alembic)
 - `chatbot/` — assistant IA (LangGraph + RAG)
 - `worker/` — ingestion du corpus RAG
 - `contract/types.ts` — types TypeScript pour le front (miroir de `backend/schemas/`)
@@ -59,6 +61,12 @@ Avec Docker : `docker compose --profile test run --rm api-tests` et `... run --r
 Le fichier `data/processed/monthly.parquet` (P2) est fourni par le pipeline : les tests `real_data`
 sont donc actifs et passent au vert au fur et à mesure des missions M07, M09, M14–M16 ;
 les tests `llm` tant que `LLM_API_KEY` n'est pas défini.
+
+## Format des réponses
+
+Toute réponse JSON : `{"status": "success" | "error", "message": "...", "response": ...}`
+(voir `backend/schemas/envelope.py`). En cas d'erreur, `response.code` donne le code (`region_not_found`, ...).
+Exceptions : flux SSE `/chat/stream` et fichiers `/timeseries/export`.
 
 ## Règle
 

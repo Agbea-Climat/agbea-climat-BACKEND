@@ -1,12 +1,105 @@
-"""Données d'observation.
+"""Données d'observation : livrable P2 du pipeline (data/), chargé une seule fois en mémoire.
 
-TODO P2 : charger data/processed/monthly.parquet (region_id, indicator, date, value) et
-data/processed/static.json en mémoire au démarrage. D'ici là : valeurs mock (aléatoires).
+- data/processed/monthly.parquet : region_id, indicator, date (YYYY-MM), value, valid_frac,
+  low_coverage, dataset_id (voir docs/data/contrat-donnees.md)
+- data/processed/static.json     : altitude par région
+- data/regions.geojson           : contours des 5 régions
+
+Chargement paresseux (au premier appel) : /health ne dépend pas des fichiers. Si un fichier
+manque, les routes qui en ont besoin répondent 503 `data_unavailable`.
 """
-import random
+import json
+from dataclasses import dataclass
+from functools import lru_cache
+from pathlib import Path
+from typing import Optional
+
+import pandas as pd
+
+from backend.core.config import settings
+from backend.core.exceptions import ApiError
 
 
-def mock_value(indicator: str, month: int) -> float:
-    rainy = 1 if 4 <= month <= 10 else 0
-    return {"precipitation": 20 + rainy * 140, "ndvi": 0.35 + rainy * 0.3,
-            "lst_day": 38 - rainy * 6, "elevation": 300}[indicator] * random.uniform(0.8, 1.2)
+@dataclass(frozen=True)
+class Obs:
+    value: Optional[float]
+    valid_frac: Optional[float]
+    low_coverage: bool
+
+
+class DataUnavailable(ApiError):
+    status_code = 503
+
+
+def _path(*parts: str) -> Path:
+    return Path(settings.data_dir, *parts)
+
+
+def _require(p: Path) -> Path:
+    if not p.exists():
+        raise DataUnavailable("data_unavailable", f"Fichier de données absent : {p} (lancer le pipeline P2)")
+    return p
+
+
+@lru_cache
+def monthly() -> pd.DataFrame:
+    df = pd.read_parquet(_require(_path("processed", "monthly.parquet")))
+    return df.sort_values(["region_id", "indicator", "date"]).reset_index(drop=True)
+
+
+@lru_cache
+def _index() -> dict[tuple[str, str], dict[str, Obs]]:
+    """{(region_id, indicator): {date: Obs}}"""
+    out: dict[tuple[str, str], dict[str, Obs]] = {}
+    for r in monthly().itertuples(index=False):
+        v = None if pd.isna(r.value) else float(r.value)
+        vf = None if pd.isna(r.valid_frac) else float(r.valid_frac)
+        out.setdefault((r.region_id, r.indicator), {})[r.date] = Obs(v, vf, bool(r.low_coverage))
+    return out
+
+
+def observation(region_id: str, indicator: str, date: str) -> Optional[Obs]:
+    return _index().get((region_id, indicator), {}).get(date)
+
+
+def series(region_id: str, indicator: str) -> dict[str, Obs]:
+    return _index().get((region_id, indicator), {})
+
+
+def last_date(indicator: Optional[str] = None, region_id: Optional[str] = None) -> Optional[str]:
+    """Dernier mois avec une valeur non nulle (pour un indicateur / une région si précisés)."""
+    df = monthly()
+    df = df[df.value.notna()]
+    if indicator:
+        df = df[df.indicator == indicator]
+    if region_id:
+        df = df[df.region_id == region_id]
+    return None if df.empty else str(df.date.max())
+
+
+def first_date(indicator: Optional[str] = None) -> Optional[str]:
+    df = monthly()
+    df = df[df.value.notna()]
+    if indicator:
+        df = df[df.indicator == indicator]
+    return None if df.empty else str(df.date.min())
+
+
+@lru_cache
+def static() -> dict:
+    return json.loads(_require(_path("processed", "static.json")).read_text(encoding="utf-8"))
+
+
+@lru_cache
+def regions_geojson() -> dict:
+    return json.loads(_require(_path("regions.geojson")).read_text(encoding="utf-8"))
+
+
+def warm_up() -> None:
+    """Précharge les fichiers (appelé au démarrage ; ignoré si les données manquent)."""
+    try:
+        _index()
+        static()
+        regions_geojson()
+    except DataUnavailable:
+        pass

@@ -13,21 +13,20 @@ COPY requirements/api.txt requirements/api.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --timeout 120 --retries 10 -r requirements/api.txt
 
-COPY pytest.ini ./
+COPY pytest.ini alembic.ini ./
 COPY backend ./backend
 COPY chatbot ./chatbot
 COPY worker ./worker
 COPY contract ./contract
 COPY tests ./tests
 
-# /app/var : SQLite (sessions) et Chroma (RAG), persistés dans un volume nommé
+# Sessions et RAG : PostgreSQL + pgvector (service db de docker-compose.yml, ou DATABASE_URL)
 RUN useradd --create-home --uid 1000 agbea \
-    && mkdir -p /app/var /app/data \
-    && chown -R agbea:agbea /app/var /app/data
+    && mkdir -p /app/data \
+    && chown -R agbea:agbea /app/data
 USER agbea
-ENV DB_PATH=/app/var/agbea.sqlite \
-    CHROMA_DIR=/app/var/.chroma \
-    DATA_DIR=data
+ENV DATA_DIR=data
 
 EXPOSE 8000
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Applique les migrations puis lance l'API
+CMD ["sh", "-c", "alembic upgrade head && exec uvicorn backend.main:app --host 0.0.0.0 --port 8000"]

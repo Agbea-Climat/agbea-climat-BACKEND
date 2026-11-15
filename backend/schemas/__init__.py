@@ -8,6 +8,7 @@ from .ai import (ChatEvent, ChatRequest, ChatResponse, EvData, EvDone, EvError, 
 from .catalog import Dataset, Indicator, LegendStop, MapLayer, Profile
 from .common import (FeatureStatus, Granularity, IndicatorId, Lang, Mode, ProfileId, Source,
                      Statement, StatementNature, Trend)
+from .envelope import ApiErrorResponse, ApiResponse, ErrorDetail, ok
 from .geo import Region
 from .meta import AppMeta, Feature
 from .observations import (BeforeAfter, Comparison, IndicatorSnapshot, LayerAtDate, PeriodStats,
@@ -16,6 +17,7 @@ from .sessions import Preferences, Session, ThreadSummary
 from .views import AgriInsight, Dashboard
 
 __all__ = [
+    "ApiErrorResponse", "ApiResponse", "ErrorDetail", "ok",
     "AgriInsight", "AppMeta", "BeforeAfter", "ChatEvent", "ChatRequest", "ChatResponse",
     "Comparison", "Dashboard", "Dataset", "EvData", "EvDone", "EvError", "EvMeta", "EvSources",
     "EvStatus", "EvToken", "ExplainRequest", "ExplainResponse", "Feature", "FeatureStatus",

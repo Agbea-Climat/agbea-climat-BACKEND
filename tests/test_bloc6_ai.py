@@ -1,6 +1,6 @@
 import pytest
 
-from conftest import API, DATA, NATURES, sse_events
+from conftest import API, DATA, NATURES, data, sse_events
 
 
 # ── Prérequis ──
@@ -30,15 +30,15 @@ def test_p3_corpus():
 # ── M22 / M23 ──
 @pytest.mark.m22
 def test_ingest_idempotent(client):
-    a = client.post(f"{API}/admin/rag/ingest").json()
-    b = client.post(f"{API}/admin/rag/ingest").json()
+    a = data(client.post(f"{API}/admin/rag/ingest"))
+    b = data(client.post(f"{API}/admin/rag/ingest"))
     assert a["documents"] >= 5 and a["chunks"] > 0
     assert a == b, "relancer l'ingestion ne doit pas créer de doublons"
 
 
 @pytest.mark.m23
 def test_documents(client):
-    docs = client.get(f"{API}/admin/rag/documents").json()["documents"]
+    docs = data(client.get(f"{API}/admin/rag/documents"))["documents"]
     assert len(docs) >= 5
     for d in docs:
         assert d["title"] and d["source_url"] and d["chunks"] > 0
@@ -50,7 +50,7 @@ def _explain(client, profile):
         "region_id": "savanes", "indicator": "precipitation", "date": "2024-08",
         "mode": "public", "lang": "fr", "profile": profile})
     assert r.status_code == 200
-    return r.json()
+    return data(r)
 
 
 @pytest.mark.m24
@@ -96,7 +96,7 @@ def test_stream_off_topic(client):
 # ── M26 ──
 @pytest.mark.m26
 def test_chat_thread_kept(client):
-    a = client.post(f"{API}/chat", json={"message": "Bonjour"}).json()
+    a = data(client.post(f"{API}/chat", json={"message": "Bonjour"}))
     assert a["thread_id"] and a["answer"]
-    b = client.post(f"{API}/chat", json={"message": "Et à Kara ?", "thread_id": a["thread_id"]}).json()
+    b = data(client.post(f"{API}/chat", json={"message": "Et à Kara ?", "thread_id": a["thread_id"]}))
     assert b["thread_id"] == a["thread_id"]

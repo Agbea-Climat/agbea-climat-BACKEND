@@ -1,0 +1,169 @@
+# CI/CD de l'API AGBÉA CLIMAT
+#
+#   test   : pytest (hors LLM) + alembic check contre PostgreSQL 17 + pgvector     — PR et push
+#   image  : construit docker/api.prod.Dockerfile ; publie sur GHCR après les tests — push main / tag v*
+#            (sur PR : construction seule, pour vérifier le Dockerfile)
+#   deploy : redéploie le compose Dokploy, attend /health, réingère le corpus RAG   — push main
+#
+# Réglages GitHub (Settings → Secrets and variables → Actions), environnement « production » :
+#   secrets   DOKPLOY_URL (ex. https://dokploy.exemple.com), DOKPLOY_API_KEY, DOKPLOY_COMPOSE_ID
+#   variable  API_URL (ex. https://api.agbea-climat.exemple.com) — sans /api/v1
+# Sans DOKPLOY_API_KEY, l'étape de déploiement est sautée (l'image est quand même publiée).
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  IMAGE: ghcr.io/agbea-climat/agbea-api
+
+jobs:
+  test:
+    name: Tests API
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      db:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_USER: agbea
+          POSTGRES_PASSWORD: agbea-ci
+          POSTGRES_DB: agbea
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U agbea -d agbea"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: agbea
+      POSTGRES_PASSWORD: agbea-ci
+      POSTGRES_DB: agbea
+      DATA_DIR: data
+      LLM_API_KEY: ""          # tests IA en mode gabarits ; les tests `llm` sont ignorés
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"     # même version que l'image (python:3.12-slim)
+          cache: pip
+          cache-dependency-path: requirements/api.txt
+
+      - name: Dépendances
+        run: pip install -r requirements/api.txt
+
+      - name: Migrations
+        run: |
+          alembic upgrade head
+          alembic check
+
+      - name: Tests
+        run: python -m pytest -m "not llm"
+
+  image:
+    name: Image Docker
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Connexion à GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tags de l'image
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=sha-
+            type=semver,pattern={{version}}
+
+      - name: Construction (et publication hors PR)
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/api.prod.Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Déploiement Dokploy
+    needs: image
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: ${{ vars.API_URL }}
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    env:
+      DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
+      DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+      DOKPLOY_COMPOSE_ID: ${{ secrets.DOKPLOY_COMPOSE_ID }}
+      API_URL: ${{ vars.API_URL }}
+    steps:
+      - name: Vérifier la configuration
+        id: cfg
+        run: |
+          if [ -z "$DOKPLOY_API_KEY" ] || [ -z "$DOKPLOY_URL" ] || [ -z "$DOKPLOY_COMPOSE_ID" ]; then
+            echo "::warning::Secrets Dokploy absents : déploiement sauté (image publiée sur GHCR)."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Redéployer le compose
+        if: steps.cfg.outputs.ready == 'true'
+        run: |
+          curl --fail-with-body -sS -X POST "${DOKPLOY_URL%/}/api/compose.deploy" \
+            -H "accept: application/json" -H "Content-Type: application/json" \
+            -H "x-api-key: ${DOKPLOY_API_KEY}" \
+            -d "{\"composeId\": \"${DOKPLOY_COMPOSE_ID}\"}"
+
+      - name: Attendre l'API (/health)
+        if: steps.cfg.outputs.ready == 'true' && env.API_URL != ''
+        run: |
+          for i in $(seq 1 36); do
+            if curl -fsS "${API_URL%/}/api/v1/health" | grep -q '"status":"ok"'; then
+              echo "API en ligne"; exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::L'API ne répond pas après 3 minutes"; exit 1
+
+      - name: Réingérer le corpus RAG
+        if: steps.cfg.outputs.ready == 'true' && env.API_URL != ''
+        run: curl --fail-with-body -sS -X POST "${API_URL%/}/api/v1/admin/rag/ingest"

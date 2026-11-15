@@ -1,1 +1,1 @@
-"""Client LLM choisi selon Settings.LLM_PROVIDER / LLM_MODEL / LLM_API_KEY."""
+"""Client LLM (client.py) et vectorisation des textes (embeddings.py)."""

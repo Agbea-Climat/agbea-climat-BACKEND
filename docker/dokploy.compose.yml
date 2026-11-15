@@ -1,0 +1,35 @@
+# AGBÉA CLIMAT — déploiement Dokploy, mode « Raw » : coller ce fichier tel quel.
+#
+# Aucune variable ici : toutes viennent de l'onglet « Environment » du service Dokploy, que Dokploy
+# écrit dans le fichier .env à côté de ce compose (lu par env_file). Liste : docs/docker.md.
+# Image : construite avec docker/api.prod.Dockerfile et poussée sur GHCR (données et corpus inclus).
+# Domaine : onglet « Domains » → service `api`, port 8000 (aucun port publié, Traefik route).
+# L'API applique les migrations Alembic à son démarrage.
+
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    image: ghcr.io/agbea-climat/agbea-api:latest
+    pull_policy: always        # chaque redéploiement récupère la dernière image publiée par la CI
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      db: { condition: service_healthy }
+    expose:
+      - "8000"
+
+volumes:
+  pgdata:

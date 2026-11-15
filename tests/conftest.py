@@ -39,13 +39,23 @@ def client():
 def session_id(client):
     r = client.post(f"{API}/sessions")
     assert r.status_code == 201
-    return r.json()["session_id"]
+    return data(r)["session_id"]
+
+
+def data(r):
+    """Vérifie l'enveloppe de succès et renvoie son contenu `response`."""
+    body = r.json()
+    assert set(body) == {"status", "message", "response"}, f"enveloppe attendue {{status, message, response}}, reçu {body}"
+    assert body["status"] == "success", body
+    return body["response"]
 
 
 def err_code(r):
+    """Vérifie l'enveloppe d'erreur et renvoie le code (`response.code`)."""
     body = r.json()
-    assert "error" in body, f"format d'erreur attendu {{'error': ...}}, reçu {body}"
-    return body["error"]["code"]
+    assert set(body) == {"status", "message", "response"}, f"enveloppe attendue {{status, message, response}}, reçu {body}"
+    assert body["status"] == "error" and body["message"], body
+    return body["response"]["code"]
 
 
 def is_uuid(s):

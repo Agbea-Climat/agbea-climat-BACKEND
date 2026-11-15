@@ -1,7 +1,8 @@
 # AGBÉA CLIMAT — API + pipeline de données
 #
 #   docker compose build                                   # images agbea-api et agbea-pipeline
-#   docker compose up -d                                   # API seule → http://localhost:8000/docs
+#   docker compose up -d                                   # API + base → http://localhost:8000/docs
+#   docker compose up -d db                                # base PostgreSQL + pgvector seule (dev local, port 5433)
 #
 #   docker compose run --rm pipeline all                   # tout le pipeline de données (≈ 1 h la 1re fois)
 #   docker compose run --rm pipeline export-backend        # régénère le livrable P2 (data/regions.geojson, data/processed/)
@@ -12,6 +13,8 @@
 #   docker compose --profile serve up -d data-server       # data/api en HTTP (CORS) → http://localhost:8088
 #
 # Les données vivent sur l'hôte (./data) : le pipeline les écrit, l'API les lit.
+# Sessions et corpus RAG : PostgreSQL + pgvector (service db, volume pgdata).
+# L'API applique les migrations Alembic à son démarrage.
 
 name: agbea-climat
 
@@ -20,7 +23,30 @@ x-env: &env
     - path: .env
       required: false
 
+# Dans le réseau Docker, l'API joint la base sur db:5432 (prioritaire sur POSTGRES_HOST/PORT du .env)
+x-db-env: &db-env
+  POSTGRES_HOST: db
+  POSTGRES_PORT: "5432"
+
 services:
+  # ───────────────────────────── Base ─────────────────────────────
+  db:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-agbea}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agbea}
+      POSTGRES_DB: ${POSTGRES_DB:-agbea}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
   # ───────────────────────────── API ─────────────────────────────
   api:
     <<: *env
@@ -29,12 +55,12 @@ services:
     ports:
       - "${AGBEA_API_PORT:-8000}:8000"
     environment:
+      <<: *db-env
       DATA_DIR: data
-      DB_PATH: /app/var/agbea.sqlite
-      CHROMA_DIR: /app/var/.chroma
     volumes:
       - ./data:/app/data
-      - api-var:/app/var
+    depends_on:
+      db: { condition: service_healthy }
     restart: unless-stopped
 
   api-tests:
@@ -42,12 +68,13 @@ services:
     image: agbea-api:0.1.0
     profiles: ["test"]
     environment:
+      <<: *db-env
       DATA_DIR: data
-      DB_PATH: /tmp/agbea-test.sqlite
-      CHROMA_DIR: /tmp/.chroma
     volumes:
       - ./data:/app/data:ro
       - ./tests:/app/tests:ro
+    depends_on:
+      db: { condition: service_healthy }
     entrypoint: ["python", "-m", "pytest", "-p", "no:cacheprovider"]
     command: []
 
@@ -94,4 +121,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  api-var:
+  pgdata:

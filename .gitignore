@@ -8,14 +8,18 @@ venv/
 # ── Secrets ──
 .env
 
-# ── Agents IA : règles et réglages locaux, gardés sur chaque poste, jamais en ligne ──
+# ── Fichiers locaux, non versionnés ──
+# Agents IA : règles et réglages locaux, gardés sur chaque poste, jamais en ligne
 CLAUDE.md
 CLAUDE.local.md
 .claude/
-
-# ── API (sessions, RAG) ──
-*.sqlite
-.chroma/
+# Fiche des missions
+/MISSIONS.md
+# Archive et copie extraite de la base du projet
+*.zip
+agbea-climat-BACKEND/
+# Collection Insomnia (envoyée directement au testeur)
+/docs/insomnia_*.json
 
 # ── Données ──
 # Versionnés : data/reference/ (limites), data/regions.geojson, data/processed/ (livrable P2), data/corpus/
@@ -29,7 +33,6 @@ data/api/
 # ── Divers ──
 logs/
 .playwright-mcp/
-*.zip
 
 # ── Dossier temporaire (kits à partager hors Git, essais) ──
 /temp/

@@ -1,16 +1,16 @@
 import pytest
 
-from conftest import API, err_code
+from conftest import API, data, err_code
 
 
 @pytest.mark.m10
 def test_indicators(client):
-    inds = {i["id"]: i for i in client.get(f"{API}/indicators").json()}
+    inds = {i["id"]: i for i in data(client.get(f"{API}/indicators"))}
     assert set(inds) == {"precipitation", "ndvi", "lst_day", "elevation"}
     assert inds["elevation"]["has_timeseries"] is False
     assert all(inds[k]["has_timeseries"] for k in ("precipitation", "ndvi", "lst_day"))
-    datasets = {d["id"] for d in client.get(f"{API}/datasets").json()}
-    layers = {l["id"] for m in ("public", "scientific") for l in client.get(f"{API}/layers", params={"mode": m}).json()}
+    datasets = {d["id"] for d in data(client.get(f"{API}/datasets"))}
+    layers = {l["id"] for m in ("public", "scientific") for l in data(client.get(f"{API}/layers", params={"mode": m}))}
     for i in inds.values():
         assert i["dataset_id"] in datasets
         assert i["description_public"] and i["description_scientific"]
@@ -20,7 +20,7 @@ def test_indicators(client):
 
 @pytest.mark.m11
 def test_datasets_complete(client):
-    ds = client.get(f"{API}/datasets").json()
+    ds = data(client.get(f"{API}/datasets"))
     assert len(ds) == 4
     for d in ds:
         for k in ("name", "provider", "variable", "spatial_resolution", "temporal_resolution",
@@ -32,16 +32,16 @@ def test_datasets_complete(client):
 
 @pytest.mark.m12
 def test_dataset_detail(client):
-    assert client.get(f"{API}/datasets/gpm_imerg").json()["indicator"] == "precipitation"
+    assert data(client.get(f"{API}/datasets/gpm_imerg"))["indicator"] == "precipitation"
     r = client.get(f"{API}/datasets/inconnu")
     assert r.status_code == 404 and err_code(r) == "dataset_not_found"
 
 
 @pytest.mark.m13
 def test_layers(client):
-    layers = client.get(f"{API}/layers", params={"mode": "public"}).json()
+    layers = data(client.get(f"{API}/layers", params={"mode": "public"}))
     assert layers
-    datasets = {d["id"] for d in client.get(f"{API}/datasets").json()}
+    datasets = {d["id"] for d in data(client.get(f"{API}/datasets"))}
     for l in layers:
         u = l["url_template"]
         assert u.startswith("https://")

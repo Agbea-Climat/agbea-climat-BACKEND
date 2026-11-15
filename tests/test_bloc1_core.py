@@ -1,20 +1,20 @@
 import pytest
 
-from conftest import API, ISO_DATE, err_code, is_uuid
+from conftest import API, ISO_DATE, data, err_code, is_uuid
 
 
 @pytest.mark.m01
 def test_health(client):
     r = client.get(f"{API}/health")
     assert r.status_code == 200
-    assert r.json() == {"status": "ok"}
+    assert data(r) == {"status": "ok"}
 
 
 @pytest.mark.m02
 def test_meta_features(client):
     r = client.get(f"{API}/meta")
     assert r.status_code == 200
-    body = r.json()
+    body = data(r)
     status = {f["id"]: f["status"] for f in body["features"]}
     assert status["voice"] == "in_development"
     assert status["ewe"] == "planned"
@@ -26,9 +26,9 @@ def test_meta_features(client):
 def test_profiles(client):
     r = client.get(f"{API}/profiles")
     assert r.status_code == 200
-    profiles = {p["id"]: p for p in r.json()}
+    profiles = {p["id"]: p for p in data(r)}
     assert set(profiles) == {"farmer", "community", "researcher", "decision_maker"}
-    indicators = {i["id"] for i in client.get(f"{API}/indicators").json()}
+    indicators = {i["id"] for i in data(client.get(f"{API}/indicators"))}
     for p in profiles.values():
         assert p["title"] and p["benefit"] and p["icon"] and p["ai_tone"]
         assert p["featured_indicators"] and set(p["featured_indicators"]) <= indicators
@@ -42,9 +42,9 @@ def test_create_session(client):
     a = client.post(f"{API}/sessions")
     b = client.post(f"{API}/sessions")
     assert a.status_code == b.status_code == 201
-    ida, idb = a.json()["session_id"], b.json()["session_id"]
+    ida, idb = data(a)["session_id"], data(b)["session_id"]
     assert is_uuid(ida) and is_uuid(idb) and ida != idb
-    assert a.json()["threads"] == []
+    assert data(a)["threads"] == []
 
 
 @pytest.mark.m04
@@ -58,7 +58,7 @@ def test_get_session_unknown(client):
 def test_get_session_roundtrip(client, session_id):
     r = client.get(f"{API}/sessions/{session_id}")
     assert r.status_code == 200
-    assert r.json()["session_id"] == session_id
+    assert data(r)["session_id"] == session_id
 
 
 @pytest.mark.m04
@@ -68,7 +68,7 @@ def test_session_threads_sorted(client, session_id):
     h = {"X-Session-Id": session_id}
     client.post(f"{API}/chat", json={"message": "Pluie dans les Savanes ?"}, headers=h)
     client.post(f"{API}/chat", json={"message": "Végétation à Kara ?"}, headers=h)
-    threads = client.get(f"{API}/sessions/{session_id}").json()["threads"]
+    threads = data(client.get(f"{API}/sessions/{session_id}"))["threads"]
     assert len(threads) == 2
     assert threads[0]["updated_at"] >= threads[1]["updated_at"]
 
@@ -80,7 +80,7 @@ def test_preferences_roundtrip(client, session_id):
     assert r.status_code == 200
     r = client.patch(f"{API}/sessions/{session_id}/preferences", json={"mode": "scientific"})
     assert r.status_code == 200
-    prefs = client.get(f"{API}/sessions/{session_id}").json()["preferences"]
+    prefs = data(client.get(f"{API}/sessions/{session_id}"))["preferences"]
     assert prefs["profile"] == "farmer"
     assert prefs["region_id"] == "savanes"
     assert prefs["mode"] == "scientific"

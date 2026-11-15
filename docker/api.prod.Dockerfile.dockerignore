@@ -1,0 +1,30 @@
+# Exclusions du build de docker/api.prod.Dockerfile (remplace .dockerignore pour ce Dockerfile).
+# Différence avec .dockerignore : data/processed/ et data/regions.geojson sont INCLUS (embarqués).
+.git/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+MISSIONS.md
+*.zip
+agbea-climat-BACKEND/
+logs/
+.playwright-mcp/
+
+# données régénérables ou inutiles à l'API
+data/raw/
+data/interim/
+data/api/
+data/reference/
+
+# documentation, notes, front de test, pipeline : inutiles dans l'image API
+docs/
+notes/
+changelogs/
+tests/
+pipeline/
