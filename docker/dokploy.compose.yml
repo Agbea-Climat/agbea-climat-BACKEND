@@ -3,46 +3,23 @@
 # Variables : onglet « Environment » du compose Dokploy, que Dokploy écrit dans le fichier .env à côté
 # de ce compose (lu par env_file). Liste : docs/docker.md.
 # Image : construite avec docker/api.prod.Dockerfile et poussée sur GHCR par la CI (données et corpus inclus).
-# Base : service `db` ci-dessous (pgvector/pgvector:pg17), volume `pgdata`. Pas de base Dokploy séparée.
+# Base : service PostgreSQL Dokploy créé à part, image pgvector/pgvector:pg17, démarré.
+#   DATABASE_URL = son « Internal Connection URL » (hôte interne, joignable par dokploy-network).
 # Domaine : onglet « Domains » → service `api`, port 8000 (aucun port publié, Traefik route).
 # L'API applique les migrations Alembic à son démarrage.
 
 services:
-  db:
-    image: pgvector/pgvector:pg17
-    restart: unless-stopped
-    env_file:
-      - .env
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-
   api:
     image: ghcr.io/kessa99/agbea-api:latest
     pull_policy: always        # chaque redéploiement récupère la dernière image publiée par la CI
     restart: unless-stopped
     env_file:
       - .env
-    # Prioritaire sur le .env : l'API joint toujours la base `db` du compose.
-    environment:
-      DATABASE_URL: ""
-      POSTGRES_HOST: db
-      POSTGRES_PORT: "5432"
-    depends_on:
-      db: { condition: service_healthy }
     expose:
       - "8000"
-    # default : joint `db` ; dokploy-network : Traefik (domaine)
+    # dokploy-network : Traefik (domaine) et la base PostgreSQL Dokploy
     networks:
-      - default
       - dokploy-network
-
-volumes:
-  pgdata:
 
 networks:
   dokploy-network:
