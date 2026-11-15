@@ -24,9 +24,13 @@ class Settings(BaseSettings):
     db_pool_size: int = 5
     db_echo: bool = False
 
-    llm_provider: Literal["anthropic", "openai"] = "anthropic"
-    llm_model: str = ""
+    llm_provider: Literal["anthropic", "openrouter"] = "openrouter"
+    llm_model: str = ""          # vide = modèle par défaut du fournisseur (chatbot/llm/client.py)
     llm_api_key: str = ""
+    llm_base_url: str = ""       # vide = URL par défaut du fournisseur (OpenRouter : https://openrouter.ai/api/v1)
+    # En-têtes facultatifs d'OpenRouter (classement de l'application sur openrouter.ai) ; vides = non envoyés
+    openrouter_app_url: str = ""
+    openrouter_app_name: str = ""
     embedding_model: str = ""
     embedding_dim: int = 1024
 
