@@ -32,11 +32,9 @@ class Settings(BaseSettings):
     openrouter_app_url: str = ""
     openrouter_app_name: str = ""
 
-    # Notes vocales (AGBÉA Voice, M21 — encore en développement : POST /voice/transcribe répond 501)
-    voice_provider: Literal["openrouter"] = "openrouter"
-    voice_model: str = ""        # modèle acceptant l'audio en entrée ; vide = voix désactivée
-    voice_api_key: str = ""      # vide = LLM_API_KEY
-    voice_base_url: str = ""     # vide = LLM_BASE_URL, puis https://openrouter.ai/api/v1
+    # Notes vocales (AGBÉA Voice, M21 — encore en développement : POST /voice/transcribe répond 501).
+    # Même compte OpenRouter que l'assistant : LLM_API_KEY et LLM_BASE_URL servent aussi à la voix.
+    voice_model: str = ""        # id OpenRouter d'un modèle acceptant l'audio ; vide = voix désactivée
     voice_language: str = "fr"   # langue attendue des notes vocales
     embedding_model: str = ""
     embedding_dim: int = 1024
