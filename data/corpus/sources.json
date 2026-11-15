@@ -1,0 +1,107 @@
+[
+  {
+    "file": "fiche_gpm_imerg.md",
+    "title": "Fiche jeu de donn\u00e9es : pluie GPM IMERG Final Run V07",
+    "source_url": "https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGM_07/summary",
+    "indicators": [
+      "precipitation"
+    ]
+  },
+  {
+    "file": "fiche_modis_ndvi.md",
+    "title": "Fiche jeu de donn\u00e9es : v\u00e9g\u00e9tation MODIS Terra MOD13A1 (NDVI)",
+    "source_url": "https://lpdaac.usgs.gov/products/mod13a1v061/",
+    "indicators": [
+      "ndvi"
+    ]
+  },
+  {
+    "file": "fiche_modis_lst.md",
+    "title": "Fiche jeu de donn\u00e9es : temp\u00e9rature du sol MODIS Terra MOD11A2 (LST)",
+    "source_url": "https://lpdaac.usgs.gov/products/mod11a2v061/",
+    "indicators": [
+      "lst_day"
+    ]
+  },
+  {
+    "file": "fiche_nasadem.md",
+    "title": "Fiche jeu de donn\u00e9es : altitude NASADEM (SRTM retrait\u00e9)",
+    "source_url": "https://lpdaac.usgs.gov/products/nasadem_hgtv001/",
+    "indicators": [
+      "elevation"
+    ]
+  },
+  {
+    "file": "comprendre_pluie_imerg.md",
+    "title": "Comprendre la pluie vue par satellite (IMERG)",
+    "source_url": "https://gpm.nasa.gov/data/imerg",
+    "indicators": [
+      "precipitation"
+    ]
+  },
+  {
+    "file": "comprendre_ndvi.md",
+    "title": "Comprendre le NDVI (verdure de la v\u00e9g\u00e9tation)",
+    "source_url": "https://science.nasa.gov/earth/earth-observatory/measuring-vegetation-ndvi-evi",
+    "indicators": [
+      "ndvi"
+    ]
+  },
+  {
+    "file": "comprendre_temperature_sol.md",
+    "title": "Comprendre la temp\u00e9rature du sol (LST)",
+    "source_url": "https://science.nasa.gov/earth/earth-observatory/global-maps/land-surface-temperature",
+    "indicators": [
+      "lst_day"
+    ]
+  },
+  {
+    "file": "calendrier_agricole_togo.md",
+    "title": "Saisons des pluies et calendrier agricole par r\u00e9gion du Togo (FAO GIEWS 2026, UNICEF 2025)",
+    "source_url": "https://www.fao.org/giews/countrybrief/country.jsp?code=TGO",
+    "region_ids": [
+      "maritime",
+      "plateaux",
+      "centrale",
+      "kara",
+      "savanes"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi"
+    ]
+  },
+  {
+    "file": "climat_togo_tendances.md",
+    "title": "Le climat du Togo : tendances observ\u00e9es et risques (UNICEF / MERF, 2025)",
+    "source_url": "https://www.unicef.org/togo/media/2916/file/ANALYSE%20DU%20PAYSAGE%20CLIMATIQUE%20POUR%20LES%20ENFANTS%20AU%20TOGO.pdf.pdf",
+    "region_ids": [
+      "maritime",
+      "plateaux",
+      "centrale",
+      "kara",
+      "savanes"
+    ],
+    "indicators": [
+      "precipitation",
+      "lst_day"
+    ]
+  },
+  {
+    "file": "limites_donnees_agbea.md",
+    "title": "Limites des donn\u00e9es AGB\u00c9A CLIMAT (couverture nuageuse, biais c\u00f4tier de la pluie, d\u00e9rive de Terra)",
+    "source_url": "https://www.nodc.noaa.gov/archive/arc0216/0253808/3.3/data/0-data/Region-1-WMO-Normals-9120/Togo/CSV/LOME_65387.csv",
+    "region_ids": [
+      "maritime",
+      "plateaux",
+      "centrale",
+      "kara",
+      "savanes"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day"
+    ]
+  }
+]

@@ -1,0 +1,7 @@
+# Environnement de développement complet : API + IA + pipeline de données + tests.
+#   pip install -r requirements.txt
+# Les images Docker installent chaque partie séparément :
+#   docker/api.Dockerfile      → requirements/api.txt
+#   docker/pipeline.Dockerfile → requirements/pipeline.lock (versions exactes testées)
+-r requirements/api.txt
+-r requirements/pipeline.txt

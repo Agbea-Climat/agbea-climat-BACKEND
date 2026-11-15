@@ -1,0 +1,124 @@
+# AGBÉA CLIMAT — API + pipeline de données
+#
+#   docker compose build                                   # images agbea-api et agbea-pipeline
+#   docker compose up -d                                   # API + base → http://localhost:8000/docs
+#   docker compose up -d db                                # base PostgreSQL + pgvector seule (dev local, port 5433)
+#
+#   docker compose run --rm pipeline all                   # tout le pipeline de données (≈ 1 h la 1re fois)
+#   docker compose run --rm pipeline export-backend        # régénère le livrable P2 (data/regions.geojson, data/processed/)
+#
+#   docker compose --profile test run --rm api-tests       # tests de l'API   (pytest)
+#   docker compose --profile test run --rm pipeline-tests  # tests du pipeline (pytest pipeline/tests)
+#   docker compose --profile notebooks up -d notebooks     # notebooks d'exploration → http://localhost:8888
+#   docker compose --profile serve up -d data-server       # data/api en HTTP (CORS) → http://localhost:8088
+#
+# Les données vivent sur l'hôte (./data) : le pipeline les écrit, l'API les lit.
+# Sessions et corpus RAG : PostgreSQL + pgvector (service db, volume pgdata).
+# L'API applique les migrations Alembic à son démarrage.
+
+name: agbea-climat
+
+x-env: &env
+  env_file:
+    - path: .env
+      required: false
+
+# Dans le réseau Docker, l'API joint la base sur db:5432 (prioritaire sur POSTGRES_HOST/PORT du .env)
+x-db-env: &db-env
+  POSTGRES_HOST: db
+  POSTGRES_PORT: "5432"
+
+services:
+  # ───────────────────────────── Base ─────────────────────────────
+  db:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-agbea}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agbea}
+      POSTGRES_DB: ${POSTGRES_DB:-agbea}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  # ───────────────────────────── API ─────────────────────────────
+  api:
+    <<: *env
+    build: { context: ., dockerfile: docker/api.Dockerfile }
+    image: agbea-api:0.1.0
+    ports:
+      - "${AGBEA_API_PORT:-8000}:8000"
+    environment:
+      <<: *db-env
+      DATA_DIR: data
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      db: { condition: service_healthy }
+    restart: unless-stopped
+
+  api-tests:
+    <<: *env
+    image: agbea-api:0.1.0
+    profiles: ["test"]
+    environment:
+      <<: *db-env
+      DATA_DIR: data
+    volumes:
+      - ./data:/app/data:ro
+      - ./tests:/app/tests:ro
+    depends_on:
+      db: { condition: service_healthy }
+    entrypoint: ["python", "-m", "pytest", "-p", "no:cacheprovider"]
+    command: []
+
+  # ───────────────────────────── Données ─────────────────────────────
+  pipeline:
+    <<: *env
+    build: { context: ., dockerfile: docker/pipeline.Dockerfile }
+    image: agbea-pipeline:0.2.0
+    profiles: ["pipeline"]
+    environment:
+      AGBEA_MAX_WORKERS: ${AGBEA_MAX_WORKERS:-8}
+    volumes:
+      - ./data:/app/data
+      - ./pipeline/settings:/app/pipeline/settings:ro
+    command: ["all"]
+
+  pipeline-tests:
+    image: agbea-pipeline:0.2.0
+    profiles: ["test"]
+    entrypoint: ["python", "-m", "pytest", "-p", "no:cacheprovider", "pipeline/tests"]
+    command: []
+
+  # Notebooks d'exploration de toutes les données traitées (tests/notebooks), lecture seule de data/
+  notebooks:
+    build: { context: ., dockerfile: docker/notebooks.Dockerfile }
+    image: agbea-notebooks:0.1.0
+    profiles: ["notebooks"]
+    ports:
+      - "127.0.0.1:${AGBEA_NOTEBOOKS_PORT:-8888}:8888"   # local seulement : JupyterLab sans jeton
+    volumes:
+      - ./tests/notebooks:/app/tests/notebooks
+      - ./data:/app/data:ro
+    restart: unless-stopped
+
+  # data/api servi en HTTP statique (CORS ouvert)
+  data-server:
+    image: nginx:1.27-alpine
+    profiles: ["serve"]
+    ports:
+      - "${AGBEA_DATA_PORT:-8088}:80"
+    volumes:
+      - ./data/api:/usr/share/nginx/html:ro
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped
+
+volumes:
+  pgdata:

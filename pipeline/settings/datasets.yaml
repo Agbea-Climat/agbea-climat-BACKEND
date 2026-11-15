@@ -1,0 +1,231 @@
+# Catalogue de provenance : source unique de vérité pour les métadonnées affichées par l'application
+# (slide 10 du pitch : SOURCE · DATES · RÉSOLUTION · UNITÉS · LIMITES).
+# Exporté tel quel dans data/api/catalog.json.
+
+datasets:
+  imerg_monthly:
+    title: NASA GPM IMERG Final Run, mensuel, V07
+    short_name: GPM_3IMERGM
+    version: "07"
+    provider: NASA GES DISC
+    doi: 10.5067/GPM/IMERG/3B-MONTH/07
+    url: https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGM_07/summary
+    access: OPeNDAP GES DISC (compte NASA Earthdata requis)
+    variable: precipitation
+    native_resolution: 0.1° (~11 km)
+    temporal_resolution: mois
+    coverage: 1998-01 → 3 à 4 mois avant aujourd'hui en temps normal (latence du Final Run ; 2025-09 le 15/11/2026)
+    license: Données NASA, libres et ouvertes (citer la source)
+    limits:
+      - Estimation satellitaire, pas une mesure de pluviomètre.
+      - Une maille de 11 km lisse les orages locaux ; ne dit rien de la hauteur d'eau dans une rue.
+      - Le Final Run est calé sur les pluviomètres GPCC ; ce calage est moins fiable là où le réseau de stations est clairsemé.
+
+  imerg_daily_late:
+    title: NASA GPM IMERG Late Run, journalier, V07
+    short_name: GPM_3IMERGDL
+    version: "07"
+    provider: NASA GES DISC
+    doi: 10.5067/GPM/IMERGDL/DAY/07
+    url: https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGDL_07/summary
+    access: OPeNDAP GES DISC (compte NASA Earthdata requis)
+    variable: precipitation
+    native_resolution: 0.1° (~11 km)
+    temporal_resolution: jour
+    coverage: ~2 jours avant aujourd'hui
+    license: Données NASA, libres et ouvertes (citer la source)
+    limits:
+      - Produit quasi temps réel, sans calage pluviomètre ; moins fiable que le Final Run.
+      - Sert uniquement aux « 30 derniers jours » ; jamais mélangé aux séries de tendance.
+
+  modis_ndvi:
+    title: MODIS Terra Vegetation Indices 16 jours, 500 m, v061
+    short_name: MOD13A1
+    version: "061"
+    provider: NASA LP DAAC (copie Microsoft Planetary Computer)
+    doi: 10.5067/MODIS/MOD13A1.061
+    url: https://lpdaac.usgs.gov/products/mod13a1v061/
+    access: STAC Planetary Computer (sans compte)
+    variable: 500m_16_days_NDVI (échelle 0,0001), masque pixel_reliability ∈ {0, 1}
+    native_resolution: 500 m
+    temporal_resolution: composite 16 jours → agrégé en mois
+    coverage: 2000-02 → présent
+    license: Données NASA, libres et ouvertes (citer la source)
+    limits:
+      - Les nuages de saison des pluies laissent des trous, surtout sur la côte (juin-septembre).
+      - Le NDVI mesure la « verdeur », pas la biomasse ni le type de culture.
+      - Forte saisonnalité ; comparer des mêmes mois d'une année à l'autre.
+
+  modis_lst:
+    title: MODIS Terra Land Surface Temperature 8 jours, 1 km, v061
+    short_name: MOD11A2
+    version: "061"
+    provider: NASA LP DAAC (copie Microsoft Planetary Computer)
+    doi: 10.5067/MODIS/MOD11A2.061
+    url: https://lpdaac.usgs.gov/products/mod11a2v061/
+    access: STAC Planetary Computer (sans compte)
+    variable: LST_Day_1km et LST_Night_1km (échelle 0,02 K), filtrés par QC
+    native_resolution: 1 km
+    temporal_resolution: composite 8 jours → agrégé en mois
+    coverage: 2000-02 → présent
+    license: Données NASA, libres et ouvertes (citer la source)
+    limits:
+      - Température de la surface du sol (toits, routes, champs), pas de l'air.
+      - Mesurée seulement par ciel clair : en saison des pluies, les valeurs sont rares et biaisées vers les jours secs.
+      - Dérive d'orbite de Terra après la dernière manœuvre (27/02/2020) : passage plus matinal. Les tendances LST s'arrêtent donc à 2020 (D27). Sur 2003-2020, MODIS Aqua confirme la hausse nocturne (control-lst).
+
+  modis_lst_aqua:
+    title: MODIS Aqua Land Surface Temperature 8 jours, 1 km, v061 (contrôle)
+    short_name: MYD11A2
+    version: "061"
+    provider: NASA LP DAAC (copie Microsoft Planetary Computer)
+    doi: 10.5067/MODIS/MYD11A2.061
+    url: https://lpdaac.usgs.gov/products/myd11a2v061/
+    access: STAC Planetary Computer (sans compte)
+    variable: LST_Day_1km et LST_Night_1km (échelle 0,02 K), filtrés par QC
+    native_resolution: 1 km
+    temporal_resolution: composite 8 jours → agrégé en mois
+    coverage: 2002-07 → présent
+    license: Données NASA, libres et ouvertes (citer la source)
+    limits:
+      - Sert seulement à contrôler les tendances LST de Terra (autre heure de passage, autre orbite) ; jamais publié comme indicateur.
+      - Heures de passage différentes de Terra (~13 h 30 et ~1 h 30) : les niveaux ne se comparent pas, seules les tendances.
+
+  merra2_power:
+    title: NASA POWER (réanalyse MERRA-2), mensuel
+    short_name: POWER monthly / MERRA-2
+    version: v2
+    provider: NASA Langley Research Center (POWER) / NASA GMAO
+    doi: null
+    url: https://power.larc.nasa.gov/
+    access: API REST POWER (sans compte)
+    variable: T2M (température de l'air à 2 m, °C), PRECTOTCORR (pluie, mm/jour)
+    native_resolution: 0,5° × 0,625° (~55 km)
+    temporal_resolution: mois
+    coverage: 1981 → présent
+    license: Données NASA, libres et ouvertes (citer la source)
+    limits:
+      - Réanalyse (modèle + observations), pas une observation directe.
+      - Maille de ~55 km : une valeur représente toute une zone, pas une ville.
+      - La pluie MERRA-2 sert de contrôle croisé ; la référence pluie reste IMERG.
+
+  nasadem:
+    title: NASADEM Merged DEM, 1 arcsec, v001
+    short_name: NASADEM_HGT
+    version: "001"
+    provider: NASA LP DAAC (copie Microsoft Planetary Computer)
+    doi: 10.5067/MEaSUREs/NASADEM/NASADEM_HGT.001
+    url: https://lpdaac.usgs.gov/products/nasadem_hgtv001/
+    access: STAC Planetary Computer (sans compte)
+    variable: elevation (m)
+    native_resolution: 30 m (ré-échantillonné à ~90 m pour les statistiques)
+    temporal_resolution: statique (mission SRTM, février 2000)
+    coverage: 2000
+    license: Données NASA, libres et ouvertes (citer la source)
+    limits:
+      - Altitude du sommet de la végétation et des bâtiments, pas toujours du sol.
+      - Précision verticale de quelques mètres ; ne suffit pas pour une étude fine de submersion.
+
+  map_togo_limites:
+    title: Limites administratives officielles du Togo (PRISE) — pays, régions, préfectures
+    short_name: geodata.gouv.tg via MAP TOGO
+    version: "2026-10-23"
+    provider: Plateforme Géodata du Togo (geodata.gouv.tg) ; noms rattachés par le projet MAP TOGO
+    doi: null
+    url: https://geodata.gouv.tg
+    access: Fichiers GeoJSON versionnés dans data/reference/map_togo
+    variable: 5 régions, 39 préfectures, contour du pays (union des régions)
+    native_resolution: vecteur
+    temporal_resolution: statique
+    coverage: 2021/2022 (découpage PRISE)
+    license: Plateforme Géodata (geodata.gouv.tg) — citer « Contenu provenant de la Plateforme Géodata en date du 2026-10-23 »
+    limits:
+      - Polygones livrés sans noms par geodata.gouv.tg ; noms rattachés par le projet MAP TOGO (couche communes IDM+, vote des chefferies).
+
+  hdx_codab:
+    title: Limites administratives du Togo (COD-AB)
+    short_name: tgo_admin_em
+    version: v02 (2021-01-07)
+    provider: OCHA / HDX
+    doi: null
+    url: https://data.humdata.org/dataset/cod-ab-tgo
+    access: Fichiers GeoJSON (copie locale)
+    variable: cantons (adm3) ; régions et préfectures seulement si boundaries.admin_source = hdx
+    native_resolution: vecteur
+    temporal_resolution: statique
+    coverage: 2021
+    license: CC BY-IGO 3.0
+    limits:
+      - Les cantons HDX ne s'emboîtent pas exactement dans les préfectures officielles ; chaque canton est rattaché à la préfecture qui le recouvre le plus.
+
+# Indicateurs exposés au backend. `dataset` renvoie à la section ci-dessus.
+# `nature` suit la règle du pitch : observed (mesuré) / derived (calculé à partir d'une mesure).
+indicators:
+  rainfall:
+    label: Pluie
+    dataset: imerg_monthly
+    unit: mm
+    monthly_agg: sum         # cumul mensuel
+    annual_agg: sum
+    nature: observed
+  rainfall_30d:
+    label: Pluie des 30 derniers jours
+    dataset: imerg_daily_late
+    unit: mm
+    nature: observed
+  ndvi:
+    label: Indice de végétation (NDVI)
+    dataset: modis_ndvi
+    unit: sans unité (-1 à 1)
+    monthly_agg: mean
+    annual_agg: mean
+    nature: observed
+  lst_day:
+    label: Température de surface, jour
+    dataset: modis_lst
+    unit: °C
+    monthly_agg: mean
+    annual_agg: mean
+    nature: observed
+  lst_night:
+    label: Température de surface, nuit
+    dataset: modis_lst
+    unit: °C
+    monthly_agg: mean
+    annual_agg: mean
+    nature: observed
+  lst_day_aqua:
+    label: Température de surface, jour (Aqua, contrôle)
+    dataset: modis_lst_aqua
+    unit: °C
+    monthly_agg: mean
+    annual_agg: mean
+    nature: observed
+    control: true
+  lst_night_aqua:
+    label: Température de surface, nuit (Aqua, contrôle)
+    dataset: modis_lst_aqua
+    unit: °C
+    monthly_agg: mean
+    annual_agg: mean
+    nature: observed
+    control: true
+  air_temp:
+    label: Température de l'air à 2 m
+    dataset: merra2_power
+    unit: °C
+    monthly_agg: mean
+    annual_agg: mean
+    nature: derived
+  rainfall_merra2:
+    label: Pluie (réanalyse, contrôle croisé)
+    dataset: merra2_power
+    unit: mm
+    monthly_agg: sum
+    annual_agg: sum
+    nature: derived
+  elevation:
+    label: Altitude
+    dataset: nasadem
+    unit: m
+    nature: observed

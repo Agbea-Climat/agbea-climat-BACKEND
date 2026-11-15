@@ -1,0 +1,62 @@
+# Paramètres globaux du pipeline de données AGBÉA CLIMAT
+# Toute valeur ici est documentée dans docs/methodologie.md
+
+# Emprise de travail (EPSG:4326). Alignée sur la grille IMERG 0,1° (bords multiples de 0,1°)
+# pour que la grille pluie native tombe pile, et couvre le Togo (-0.144..1.808 E, 6.112..11.138 N) avec marge.
+bbox:
+  west: -0.3
+  south: 6.0
+  east: 2.0
+  north: 11.3
+
+# Limites administratives utilisées pour pays / régions / préfectures :
+#   map_togo : limites officielles PRISE (geodata.gouv.tg), noms rattachés par le projet MAP TOGO → data/reference/map_togo
+#   hdx      : COD-AB OCHA 2021 → data/reference/hdx
+# Les cantons viennent toujours de HDX (rattachés à la préfecture qui les recouvre le plus).
+boundaries:
+  admin_source: map_togo
+
+# Grilles cibles (degrés). Les produits MODIS sinusoïdaux sont reprojetés sur ces grilles.
+grids:
+  imerg: 0.1      # natif
+  ndvi: 0.005     # ~550 m (MOD13A1 natif 500 m)
+  lst: 0.01       # ~1,1 km (MOD11A2 natif 1 km)
+  dem: 0.000833333333333  # 3 arcsec ~ 90 m (NASADEM natif 1 arcsec, ré-échantillonné par moyenne)
+
+# Période d'analyse
+period:
+  start_year: 2001        # première année complète commune à MODIS Terra et IMERG
+  end_year: null          # null = dernière année complète disponible pour chaque source
+
+# Référence climatologique pour les anomalies (années incluses)
+baseline:
+  start_year: 2001
+  end_year: 2020
+
+# Règles de complétude
+completeness:
+  min_valid_fraction_month: 0.5   # part minimale de la zone couverte par des pixels valides pour garder un mois
+  min_months_annual_mean: 10      # NDVI / LST : nb minimal de mois valides pour une moyenne annuelle
+  min_months_annual_sum: 12       # Pluie : cumul annuel seulement si 12 mois présents
+  min_years_trend: 10             # nb minimal d'années pour un test de tendance
+
+# Saisons (mois intra-année uniquement). Utilisées pour les agrégats et les tendances saisonnières.
+seasons:
+  annual: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+  jfm: [1, 2, 3]              # cœur de saison sèche sur tout le pays : ciel clair, utile pour LST
+  mjjaso: [5, 6, 7, 8, 9, 10] # saison des pluies (bimodale au sud, unimodale au nord)
+
+# Seuil de significativité du test de Mann-Kendall
+trend:
+  alpha: 0.05
+  # Dernière année des tendances, par indicateur. LST : dérive d'orbite de Terra après 2020 ; le contrôle
+  # Terra / Aqua (control-lst) montre un écart Terra − Aqua qui dérive sur 2003-2025, pas sur 2003-2020 (D27).
+  last_year:
+    lst_day: 2020
+    lst_night: 2020
+
+# Téléchargements
+network:
+  max_workers: 8
+  timeout_s: 120
+  retries: 4
