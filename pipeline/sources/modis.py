@@ -1,4 +1,4 @@
-"""MODIS Terra v061 (NDVI MOD13A1, LST MOD11A2) via le STAC de Microsoft Planetary Computer.
+"""MODIS Terra v061 (NDVI MOD13A1, LST MOD11A2) et Aqua (LST MYD11A2, contrôle seulement) via le STAC de Microsoft Planetary Computer.
 
 Pour chaque composite : lecture de la seule fenêtre « Togo » de chaque tuile sinusoïdale
 (h17/h18 × v07/v08), masque qualité, reprojection sur la grille commune EPSG:4326, puis
@@ -45,7 +45,7 @@ GDAL_ENV = dict(
 class Product:
     key: str                 # nom interne
     collection: str
-    id_prefix: str           # MOD = Terra uniquement (série homogène depuis 2000)
+    id_prefix: str           # MOD = Terra (séries publiées) ; MYD = Aqua (contrôle croisé seulement)
     half_period_days: int    # milieu du composite = début + half_period
     grid: str
     outputs: tuple           # ((indicateur, asset valeur, asset qualité), ...)
@@ -55,7 +55,11 @@ NDVI = Product("ndvi", "modis-13A1-061", "MOD13A1", 8, "ndvi",
                (("ndvi", "500m_16_days_NDVI", "500m_16_days_pixel_reliability"),))
 LST = Product("lst", "modis-11A2-061", "MOD11A2", 4, "lst",
               (("lst_day", "LST_Day_1km", "QC_Day"), ("lst_night", "LST_Night_1km", "QC_Night")))
-PRODUCTS = {"ndvi": NDVI, "lst": LST}
+# Aqua (passage ~13 h 30 / ~1 h 30 au lieu de ~10 h 30 / ~22 h 30) : sert à vérifier les tendances LST de
+# Terra (dérive d'orbite). Jamais publié comme indicateur. Voir pipeline/controls.py.
+LST_AQUA = Product("lst_aqua", "modis-11A2-061", "MYD11A2", 4, "lst",
+                   (("lst_day_aqua", "LST_Day_1km", "QC_Day"), ("lst_night_aqua", "LST_Night_1km", "QC_Night")))
+PRODUCTS = {"ndvi": NDVI, "lst": LST, "lst_aqua": LST_AQUA}
 
 
 def _cube_dir(indicator: str):
@@ -81,7 +85,8 @@ def _mask_lst(val: np.ndarray, qc: np.ndarray) -> np.ndarray:
     return out
 
 
-MASKS = {"ndvi": _mask_ndvi, "lst_day": _mask_lst, "lst_night": _mask_lst}
+MASKS = {"ndvi": _mask_ndvi, "lst_day": _mask_lst, "lst_night": _mask_lst,
+         "lst_day_aqua": _mask_lst, "lst_night_aqua": _mask_lst}
 
 
 # ----------------------------------------------------------------------------- lecture

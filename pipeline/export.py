@@ -256,7 +256,7 @@ def build_summaries(monthly, season, trends, elev, r30) -> None:
             recent[ind] = _records(g.tail(24), ["date", "value", "clim_mean", "anomaly", "valid_frac"])
         e = elev[elev.unit_id == uid].drop(columns="unit_id").to_dict("records") if len(elev) else []
         doc = {
-            "unit": {"id": uid, "level": u.level, "name": u.name, "parent_id": u.parent_id,
+            "unit": {"id": uid, "level": u.level, "name": u.name, "parent_id": _clean(u.parent_id),
                      "area_km2": u.area_km2, "centroid": [u.centroid_lon, u.centroid_lat]},
             "elevation_m": e[0] if e else None,
             "latest": latest,
@@ -265,7 +265,7 @@ def build_summaries(monthly, season, trends, elev, r30) -> None:
             "recent_monthly": recent,
         }
         _write_json(out_dir / f"{uid}.json", doc)
-        index.append({"id": uid, "level": u.level, "name": u.name, "parent_id": u.parent_id})
+        index.append({"id": uid, "level": u.level, "name": u.name, "parent_id": _clean(u.parent_id)})
     _write_json(out_dir / "index.json", index)
     print(f"  {len(index)} fiches → {out_dir}")
 

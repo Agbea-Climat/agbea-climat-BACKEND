@@ -17,7 +17,7 @@ Zones : pays, 5 régions et 39 préfectures (limites officielles geodata.gouv.tg
 | Fichier | Pour qui | Versionné |
 |---|---|---|
 | `data/regions.geojson`, `data/processed/monthly.parquet`, `data/processed/static.json` | **API** (P2, format de `MISSIONS.md`) | oui |
-| `data/api/` : fiches par unité, tables complètes, couches GeoTIFF, catalogue, contrôles | front de test, futures missions, scientifique | non (régénérable) |
+| `data/api/` : fiches par unité, tables complètes, couches GeoTIFF, catalogue, contrôles | notebooks d'exploration, futures missions, scientifique | non (régénérable) |
 
 Format détaillé : [docs/data/contrat-donnees.md](../docs/data/contrat-donnees.md).
 

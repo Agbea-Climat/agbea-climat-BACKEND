@@ -132,6 +132,38 @@ def test_annual_rainfall_requires_12_months(monkeypatch):
     assert ann[2010] == 1200 and np.isnan(ann[2011])
 
 
+def _season_rows(ind, years):
+    return pd.DataFrame({"unit_id": "u", "indicator": ind, "season": "annual", "year": years,
+                         "value": 20 + 0.05 * (years - years[0])})
+
+
+def test_lst_trends_stop_at_last_year():
+    """D27 : tendances LST coupées à trend.last_year (dérive de Terra) ; la pluie n'est pas coupée ;
+    les contrôles (apply_last_year=False) gardent toute la série."""
+    years = np.arange(2001, 2026)
+    df = pd.concat([_season_rows("lst_night", years), _season_rows("rainfall", years)], ignore_index=True)
+    t = analysis.trends(df).set_index("indicator")
+    assert t.loc["lst_night", "last_year"] == 2020
+    assert t.loc["rainfall", "last_year"] == 2025
+    full = analysis.trends(df, apply_last_year=False).set_index("indicator")
+    assert full.loc["lst_night", "last_year"] == 2025
+
+
+def test_expected_composites_per_month():
+    assert analysis.expected_composites(8, 2026, 10) == 4     # LST 8 jours
+    assert analysis.expected_composites(16, 2026, 10) == 2    # NDVI 16 jours
+    assert sum(analysis.expected_composites(8, 2025, m) for m in range(1, 13)) == 46
+
+
+def test_incomplete_months_are_dropped():
+    today = dt.date(2026, 11, 14)
+    assert analysis.month_incomplete(2026, 11, 1, 8, today) == "mois en cours"
+    assert analysis.month_incomplete(2026, 10, 3, 8, today) == "3/4 composites"
+    assert analysis.month_incomplete(2026, 10, 4, 8, today) is None
+    assert analysis.month_incomplete(2026, 10, None, None, today) is None   # IMERG : pas de composites
+    assert analysis.month_incomplete(2026, 8, 3, 8, today) is None          # lacune ancienne : gardée
+
+
 # ----------------------------------------------------------------------------- MODIS HDF4 (LP DAAC)
 
 def test_lpdaac_hdf4_georeferencing(tmp_path, monkeypatch):

@@ -4,7 +4,7 @@ Ce document décrit chaque transformation entre la donnée NASA brute et les chi
 
 ## 1. Zones d'analyse
 
-- **Pays, régions, préfectures** : limites officielles PRISE de geodata.gouv.tg (2026-10-23), avec les noms rattachés par le projet MAP TOGO (`data/reference/map_togo/`) : 5 régions, 39 préfectures, contour du pays = union des régions. La réutilisation publique est à confirmer (CGU). En repli : COD-AB HDX via `boundaries.admin_source: hdx`.
+- **Pays, régions, préfectures** : limites officielles PRISE de geodata.gouv.tg (2026-10-23), avec les noms rattachés par le projet MAP TOGO (`data/reference/map_togo/`) : 5 régions, 39 préfectures, contour du pays = union des régions. En repli : COD-AB HDX via `boundaries.admin_source: hdx`.
 - **Cantons** : COD-AB Togo (OCHA/HDX, v02 du 2021-01-07, CC BY-IGO), rattachés à la préfecture officielle qui les recouvre le plus.
 - **Sites pilotes** : disque de 10 km de rayon autour du point du front, calculé en UTM 31N, puis **découpé par la frontière du Togo**. Lomé et Aného perdent ainsi la partie en mer ; Kpalimé, la partie au Ghana.
 
@@ -66,9 +66,9 @@ Pluie : cumul, uniquement si tous les mois sont présents. NDVI et LST : moyenne
 
 ## 9. Limites à afficher
 
-1. **IMERG** : estimation satellitaire, pas un pluviomètre. Maille de 11 km.
+1. **IMERG** : estimation satellitaire, pas un pluviomètre. Maille de 11 km. Sur la côte, IMERG donne ~20 % de plus que les pluviomètres (Lomé : 1 010 mm/an contre 830 mm ; Aného : 1 071 contre 909 ; normales OMM 1991-2020, NOAA/NCEI), surtout en mois peu pluvieux ; le cycle saisonnier est juste. Les anomalies **en %** sont peu touchées si le biais est multiplicatif ; les totaux et les anomalies **en mm** le sont (`notes/2026-11-14_validation-pluie-lome.md`).
 2. **NDVI** : en saison des pluies, les nuages réduisent la couverture, surtout sur la côte ; `valid_frac` le montre.
 3. **LST** : c'est la température du sol et des toits, pas de l'air. Elle n'est mesurée que par ciel clair.
-4. **Dérive orbitale de Terra** : depuis 2022, Terra passe plus tôt le matin. La LST de jour peut baisser artificiellement et le NDVI être légèrement affecté. Les tendances qui finissent après 2022 sont à lire avec prudence. Piste de correction : comparer avec Aqua (MYD) ou s'arrêter à 2021 pour la LST.
+4. **Dérive orbitale de Terra** : après sa dernière manœuvre (27/02/2020), Terra passe de plus en plus tôt. Le contrôle Terra / Aqua (`control-lst`, mêmes mois) montre que l'écart Terra − Aqua dérive sur 2003-2025 (jour : −0,33 °C/décennie, nuit : +0,17, médianes) mais pas sur 2003-2020. Les **tendances LST s'arrêtent donc à 2020** (`trend.last_year`, D27). Sur 2003-2020, la hausse de la LST de nuit est confirmée par Aqua dans 85 % des unités et les 5 régions (~+0,5 °C/décennie) ; celle de jour seulement dans 30 % des unités. Le NDVI peut aussi être légèrement touché (non contrôlé).
 5. **MERRA-2** (air 2 m) : réanalyse de ~55 km. Une valeur représente toute une zone, pas une ville.
 6. **NASADEM** : altitude de la surface en 2000, canopée et bâtiments compris.

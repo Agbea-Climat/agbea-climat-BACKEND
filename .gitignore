@@ -33,3 +33,7 @@ data/api/
 # ── Divers ──
 logs/
 .playwright-mcp/
+
+# ── Dossier temporaire (kits à partager hors Git, essais) ──
+/temp/
+.ipynb_checkpoints/

@@ -48,7 +48,7 @@ C'est contraire au guide (§7) et aux slides 9-10 du pitch (« status shown hone
 
 ## Ressources locales réutilisées
 
-- **MAP TOGO** : limites PRISE (geodata.gouv.tg) **et** COD-AB HDX. On reprend **HDX** (licence CC BY-IGO). Le README de MAP TOGO rappelle que la réutilisation publique des données geodata.gouv.tg « peut être soumise à une contrepartie financière ».
+- **MAP TOGO** : limites PRISE (geodata.gouv.tg) **et** COD-AB HDX. On reprend **HDX** (licence CC BY-IGO).
 - **CARTO TOGO / 3dMaps** : MNT TessaDEM et analyse hydrologique (HAND, drainage) pour la région Maritime. C'est une piste pour une couche « zones basses / stagnation » plus tard ; pas utilisé pour l'instant, car ce n'est pas une source NASA.
 
 ## Questions ouvertes pour l'équipe

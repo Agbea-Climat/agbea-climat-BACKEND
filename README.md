@@ -43,7 +43,7 @@ Documentation interactive : http://localhost:8000/docs
 - `MISSIONS.md` — fiche technique, mission par mission
 - `docs/AGBEA_CLIMAT_missions_*.pdf` — tests humains API + front (FR / EN)
 - `tests/` — tests automatiques ; une mission est finie quand `pytest -m mXX` passe
-- `tests/front/` — explorateur web des données (front de test, pas le front de l'application)
+- `tests/notebooks/` — notebooks Jupyter d'exploration et de contrôle des données traitées (`docker compose --profile notebooks up -d notebooks`)
 - `docs/data/` — contrat de données, méthodologie, accès aux sources NASA
 - `notes/`, `changelogs/` — analyses, décisions, historique
 

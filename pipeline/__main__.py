@@ -7,11 +7,13 @@
   dem                         NASADEM → altitude ~90 m
   ndvi  [--start Y --end Y]   MODIS MOD13A1 → cubes mensuels NDVI
   lst   [--start Y --end Y]   MODIS MOD11A2 → cubes mensuels LST jour/nuit
+  lst-aqua [--start Y --end Y] MODIS MYD11A2 (Aqua) → cubes LST de contrôle (hors livrable, hors « all »)
   imerg [--start Y --end Y]   GPM IMERG mensuel Final (compte Earthdata requis) → cube pluie
   imerg-daily [--days N]      GPM IMERG journalier Late (compte Earthdata requis) → pluie 30 jours
   analyse                     zonal + mensuel/saisonnier/climatologie/tendances
   export                      publie data/api/ (livrable complet)
   export-backend              livrable P2 du backend : data/regions.geojson, data/processed/{monthly.parquet,static.json}
+  control-lst                 compare les tendances LST Terra / Aqua → data/interim/work/controls/ (hors « all »)
   all                         tout, dans l'ordre (saute IMERG proprement sans identifiants)
 """
 from __future__ import annotations
@@ -31,7 +33,7 @@ def main(argv=None) -> int:
     p = argparse.ArgumentParser(prog="pipeline", description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("step", choices=["boundaries", "power", "dem", "ndvi", "lst", "imerg",
-                                    "imerg-daily", "analyse", "export", "export-backend", "all"])
+                                    "imerg-daily", "analyse", "export", "export-backend", "lst-aqua", "control-lst", "all"])
     p.add_argument("--hdx-dir", type=Path, help="dossier contenant tgo_admin{0..3}_em.geojson")
     p.add_argument("--map-togo-dir", type=Path, help="dossier web/data du projet MAP TOGO (regions/prefectures.geojson)")
     p.add_argument("--start", type=int)
@@ -42,7 +44,7 @@ def main(argv=None) -> int:
     config.ensure_dirs()
     t0 = time.time()
 
-    from . import analysis, backend_export, boundaries, export
+    from . import analysis, backend_export, boundaries, controls, export
     from .sources import imerg, modis, nasadem, power
 
     def step_imerg():
@@ -66,6 +68,8 @@ def main(argv=None) -> int:
         "dem": lambda: nasadem.fetch(force=a.force),
         "ndvi": lambda: modis.fetch("ndvi", a.start, a.end, force=a.force),
         "lst": lambda: modis.fetch("lst", a.start, a.end, force=a.force),
+        "lst-aqua": lambda: modis.fetch("lst_aqua", a.start or 2002, a.end, force=a.force),
+        "control-lst": controls.lst_terra_aqua,
         "imerg": step_imerg,
         "imerg-daily": step_imerg_daily,
         "analyse": analysis.run,

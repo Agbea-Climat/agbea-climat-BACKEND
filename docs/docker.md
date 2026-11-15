@@ -1,6 +1,6 @@
 # Docker
 
-Deux images et un seul `docker-compose.yml` à la racine. Les données vivent sur l'hôte, dans `./data`, montées dans les conteneurs : **le pipeline écrit, l'API lit**.
+Trois images et un seul `docker-compose.yml` à la racine. Les données vivent sur l'hôte, dans `./data`, montées dans les conteneurs : **le pipeline écrit, l'API lit**.
 
 | Service | Image | Rôle | Lancement |
 |---|---|---|---|
@@ -9,7 +9,7 @@ Deux images et un seul `docker-compose.yml` à la racine. Les données vivent su
 | `pipeline` (profil `pipeline`) | `agbea-pipeline` (`docker/pipeline.Dockerfile`) | `python -m pipeline <étape>` | `docker compose run --rm pipeline <étape>` |
 | `api-tests` (profil `test`) | `agbea-api` | `pytest` de l'API (`tests/` monté en lecture seule) | `docker compose --profile test run --rm api-tests` |
 | `pipeline-tests` (profil `test`) | `agbea-pipeline` | `pytest pipeline/tests` | `docker compose --profile test run --rm pipeline-tests` |
-| `front-test` (profil `front`) | nginx | explorateur de toutes les données (`tests/front`) | `docker compose --profile front up -d front-test` → <http://localhost:8089> |
+| `notebooks` (profil `notebooks`) | `agbea-notebooks` (`docker/notebooks.Dockerfile`) | JupyterLab : notebooks d'exploration de toutes les données (`tests/notebooks`), `data/` en lecture seule, port publié sur 127.0.0.1 seulement | `docker compose --profile notebooks up -d notebooks` → <http://localhost:8888> |
 | `data-server` (profil `serve`) | nginx | `data/api/` en HTTP statique, CORS ouvert | `docker compose --profile serve up -d data-server` → <http://localhost:8088> |
 
 `docker compose up -d` ne démarre que l'API et sa base (`db`). Les autres services ne partent qu'à la demande : on cible un service explicitement, ou on passe son profil.
@@ -17,7 +17,8 @@ Deux images et un seul `docker-compose.yml` à la racine. Les données vivent su
 ## Commandes courantes
 
 ```powershell
-docker compose build                                   # les deux images
+docker compose build                                   # images api et pipeline
+docker compose --profile notebooks build notebooks     # image des notebooks
 docker compose up -d                                   # API
 docker compose run --rm pipeline all                   # tout le pipeline (≈ 1 h la première fois)
 docker compose run --rm pipeline imerg                 # pluie mensuelle (jeton Earthdata requis)
@@ -28,7 +29,7 @@ docker compose run --rm pipeline export-backend        # régénère le livrable
 docker compose restart api                             # l'API recharge data/ au démarrage
 ```
 
-Secrets et paramètres : `.env`, lu par tous les services (`env_file`). Il n'est **jamais copié dans une image**, car `.env` est exclu par `.dockerignore`. Ports : `AGBEA_API_PORT`, `AGBEA_FRONT_TEST_PORT`, `AGBEA_DATA_PORT`.
+Secrets et paramètres : `.env`, lu par tous les services (`env_file`). Il n'est **jamais copié dans une image**, car `.env` est exclu par `.dockerignore`. Ports : `AGBEA_API_PORT`, `AGBEA_NOTEBOOKS_PORT`, `AGBEA_DATA_PORT`.
 
 ## Dépendances
 
