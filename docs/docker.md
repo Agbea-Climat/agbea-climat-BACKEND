@@ -56,21 +56,24 @@ Les builds utilisent un cache pip BuildKit : un build interrompu reprend sans re
 
 ## Production : Dokploy (mode « Raw »)
 
-`docker/dokploy.compose.yml` se colle tel quel dans un service *Compose* Dokploy (fournisseur *Raw*). Il ne contient
-**aucune variable** : `api` lit le fichier `.env` que Dokploy écrit à partir de l'onglet *Environment*.
-La base est un service *PostgreSQL* Dokploy créé à part, avec l'image `pgvector/pgvector:pg17` (l'image
-`postgres` standard n'a pas l'extension `vector` : la migration échouerait). `api` la joint par `dokploy-network`.
+`docker/dokploy.compose.yml` se colle tel quel dans un service *Compose* Dokploy (fournisseur *Raw*). Il contient
+la base (`db`, image `pgvector/pgvector:pg17`, volume `pgdata`) et l'API (`api`, image GHCR). Pas de base Dokploy
+séparée. Les deux services lisent le `.env` que Dokploy écrit à partir de l'onglet *Environment*. Le compose force
+`POSTGRES_HOST=db`, `POSTGRES_PORT=5432` et vide `DATABASE_URL` pour `api` : la connexion à la base ne dépend que
+de `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB`.
 
 1. Image : publiée automatiquement par la CI (voir « CI/CD » ci-dessous). À la main, si besoin :
    ```bash
    docker build -f docker/api.prod.Dockerfile -t ghcr.io/kessa99/agbea-api:latest .
    docker push ghcr.io/kessa99/agbea-api:latest
    ```
-   Package GHCR privé : ajouter le registre dans Dokploy (*Settings → Registry*).
-2. Onglet *Environment* (toutes obligatoires sauf mention) :
+   Package GHCR privé : ajouter le registre dans Dokploy (*Settings → Registry*, `ghcr.io`, utilisateur GitHub,
+   jeton avec `read:packages`), ou rendre le package public.
+2. Onglet *Environment* (puis *Save*) :
    ```
-   DATABASE_URL=<« Internal Connection URL » du service PostgreSQL, ex. postgresql://user:pass@agbea-abgea-gcemlk:5432/agbea>
-   DATA_DIR=data
+   POSTGRES_USER=agbea
+   POSTGRES_PASSWORD=<mot de passe fort, lettres et chiffres>
+   POSTGRES_DB=agbea
    CORS_ORIGINS=https://agbea-climat.vercel.app
    LLM_PROVIDER=openrouter
    LLM_API_KEY=sk-or-...              # une seule clé OpenRouter : assistant et voix
@@ -78,11 +81,11 @@ La base est un service *PostgreSQL* Dokploy créé à part, avec l'image `pgvect
    VOICE_MODEL=                       # facultatif, modèle OpenRouter acceptant l'audio
    VOICE_LANGUAGES=fr,en
    ```
-   `DATABASE_URL` : à copier depuis *General → Internal Credentials* du service PostgreSQL (hôte interne, port `5432`,
-   pas l'URL externe). `postgres://` / `postgresql://` sont convertis en driver psycopg 3. Caractères spéciaux du
-   mot de passe (`@ : / #`) à encoder (`%40`…). Il prime sur les `POSTGRES_*`, qui restent possibles à la place.
-3. Onglet *Domains* : service `api`, port `8000`. Puis *Deploy*.
-4. Après le premier déploiement (et après chaque nouvelle image avec un corpus modifié) :
+   `POSTGRES_*` ne sont lus qu'à la **première** initialisation du volume `pgdata` : pour changer le mot de
+   passe ensuite, supprimer le volume (base vide) ou le changer dans PostgreSQL.
+3. Onglet *Domains* : service `api`, port `8000`, HTTPS + Let's Encrypt. Puis *Deploy*.
+4. Logs de `api` : `Running upgrade -> 53d09e0345da` puis `Uvicorn running on http://0.0.0.0:8000`.
+5. Après le premier déploiement (et après chaque nouvelle image avec un corpus modifié) :
    `curl -X POST https://<domaine>/api/v1/admin/rag/ingest`.
 
 ## CI/CD (`.github/workflows/ci-cd.yml`)
