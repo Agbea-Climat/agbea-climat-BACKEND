@@ -41,6 +41,13 @@ python -m venv .venv
 | `export` | `data/api/` : livrable complet (voir contrat-donnees.md) | ~1 min | refait tout |
 | `export-backend` | **livrable P2** : `data/regions.geojson`, `data/processed/monthly.parquet`, `data/processed/static.json` | 3 s | refait tout |
 
+Contrôles (hors livrable, hors `all`, rien n'est publié) :
+
+| Étape | Rôle | Durée | Reprise |
+|---|---|---|---|
+| `lst-aqua [--start AAAA --end AAAA]` | MODIS **Aqua** MYD11A2 → `cubes/lst_day_aqua/`, `cubes/lst_night_aqua/` (début par défaut : 2002) | 1 à 3 min / an (49 min pour 2002-2026 le 14/11) | comme `lst` |
+| `control-lst` | tendances LST Terra vs Aqua sur les mêmes mois, 2003-2020 (décision) et 2003-2025 (diagnostic), + tendance de l'écart Terra − Aqua → `data/interim/work/controls/lst_terra_aqua*.{parquet,csv}` + résumé. **Robuste** = significative et de même signe chez les deux sur 2003-2020 (D25) | ~3 min | refait tout |
+
 Mise à jour régulière (ex. hebdomadaire) : `ndvi --start <année courante>`, `lst --start <année courante>`, `imerg`, `imerg-daily`, `analyse`, `export`, `export-backend`.
 
 ## Architecture
@@ -63,6 +70,7 @@ pipeline/
   export.py             data/api/ : tables, fiches JSON, GeoJSON, couches, catalogue
   backend_export.py     livrable P2 au format attendu par backend/
   validate.py           contrôles automatiques → data/api/validation.json
+  controls.py           contrôles scientifiques hors livrable (tendances LST Terra / Aqua)
   __main__.py           CLI : python -m pipeline <étape>
   tests/                tests hors réseau (pytest pipeline/tests)
 data/

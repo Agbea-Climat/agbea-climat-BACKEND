@@ -29,16 +29,62 @@ def _indicator_meta(ind: str) -> dict:
 
 # ----------------------------------------------------------------------------- mensuel
 
-def monthly_from_cubes(indicators: list[str] | None = None) -> pd.DataFrame:
+def expected_composites(period_days: int, year: int, month: int) -> int:
+    """Nombre de composites MODIS dont le milieu tombe dans le mois (calendrier : DOY 1, 1 + période…,
+    remis à zéro chaque année ; même règle d'affectation que sources/modis.process_year)."""
+    import datetime as _dt
+    half = period_days // 2
+    start, n = _dt.date(year, 1, 1), 0
+    while start.year == year:
+        mid = start + _dt.timedelta(days=half)
+        n += mid.year == year and mid.month == month
+        start += _dt.timedelta(days=period_days)
+    return n
+
+
+def month_incomplete(year: int, month: int, n_composites: int | None, period_days: int | None,
+                     today=None) -> str | None:
+    """Raison d'écarter un mois incomplet, sinon None.
+
+    - mois en cours (ou futur) : jamais publié ;
+    - mois précédent : écarté s'il lui manque des composites MODIS (pas encore publiés).
+    Les mois plus anciens sont gardés même avec un composite manquant (vraie lacune de la mission,
+    déjà signalée par valid_frac)."""
+    import datetime as _dt
+    today = today or _dt.date.today()
+    age = (today.year * 12 + today.month) - (year * 12 + month)
+    if age <= 0:
+        return "mois en cours"
+    if age == 1 and n_composites is not None and period_days:
+        exp = expected_composites(period_days, year, month)
+        if n_composites < exp:
+            return f"{n_composites}/{exp} composites"
+    return None
+
+
+def _composite_days() -> dict[str, int]:
+    from .sources import modis
+    return {ind: 2 * p.half_period_days for p in modis.PRODUCTS.values() for ind, _, _ in p.outputs}
+
+
+def monthly_from_cubes(indicators: list[str] | None = None, cubes: dict[str, str] = CUBES) -> pd.DataFrame:
+    import rasterio
     frames = []
-    for ind in indicators or CUBES:
+    periods = _composite_days()
+    for ind in indicators or cubes:
         d = config.INTERIM / "cubes" / ind
         files = sorted(d.glob("[0-9][0-9][0-9][0-9]-[0-9][0-9].tif"))
         if not files:
             continue
-        w = build_weights(get_grid(CUBES[ind]))
+        w = build_weights(get_grid(cubes[ind]))
         for f in files:
             y, m = map(int, re.match(r"(\d{4})-(\d{2})", f.stem).groups())
+            with rasterio.open(f) as src:
+                n = src.tags().get("n_composites")
+            why = month_incomplete(y, m, int(n) if n else None, periods.get(ind))
+            if why:
+                print(f"  {ind} {y:04d}-{m:02d} écarté : mois incomplet ({why})")
+                continue
             df = zonal_mean(read_tif(f, 1), w)
             df["indicator"], df["year"], df["month"] = ind, y, m
             frames.append(df)
@@ -161,12 +207,16 @@ def mann_kendall_sen(years: np.ndarray, values: np.ndarray, alpha: float) -> dic
     }
 
 
-def trends(season_df: pd.DataFrame) -> pd.DataFrame:
+def trends(season_df: pd.DataFrame, apply_last_year: bool = True) -> pd.DataFrame:
+    """apply_last_year : coupe les séries à `trend.last_year` (settings.yaml). Les contrôles le désactivent."""
     s = config.settings()
     min_n, alpha = s["completeness"]["min_years_trend"], s["trend"]["alpha"]
+    last_year = s["trend"].get("last_year") or {} if apply_last_year else {}
     recs = []
     for (uid, ind, season), g in season_df.groupby(["unit_id", "indicator", "season"]):
         g = g.dropna(subset=["value"])
+        if ind in last_year:
+            g = g[g.year <= last_year[ind]]
         if len(g) < min_n:
             continue
         r = mann_kendall_sen(g.year.to_numpy(), g.value.to_numpy(), alpha)

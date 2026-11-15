@@ -49,6 +49,11 @@ seasons:
 # Seuil de significativité du test de Mann-Kendall
 trend:
   alpha: 0.05
+  # Dernière année des tendances, par indicateur. LST : dérive d'orbite de Terra après 2020 ; le contrôle
+  # Terra / Aqua (control-lst) montre un écart Terra − Aqua qui dérive sur 2003-2025, pas sur 2003-2020 (D27).
+  last_year:
+    lst_day: 2020
+    lst_night: 2020
 
 # Téléchargements
 network:

@@ -26,7 +26,7 @@ FeatureCollection de 5 polygones (limites officielles geodata.gouv.tg via MAP TO
 |---|---|---|
 | `region_id` | str | `maritime` … `savanes` |
 | `indicator` | str | `precipitation` (IMERG, mm/mois), `ndvi`, `lst_day` (°C) |
-| `date` | str `YYYY-MM` | 2001-01 → dernier mois disponible (pluie : IMERG Final, ~3 mois de latence) |
+| `date` | str `YYYY-MM` | 2001-01 → dernier mois **complet** (pluie : IMERG Final, 3 à 4 mois de latence en temps normal ; série arrêtée en 2025-09 le 15/11). Le mois en cours n'est jamais publié ; le mois précédent ne l'est que si tous ses composites MODIS sont parus (D28) |
 | `value` | float \| null | moyenne pondérée des pixels **visibles** de la région, arrondie (pluie 1 déc., NDVI 3, LST 1). `null` seulement si aucun pixel n'est visible |
 | `valid_frac` | float 0–1 | part de la région couverte par des pixels valides (les nuages font baisser NDVI et LST) |
 | `low_coverage` | bool | `valid_frac < 0,5` : valeur peu représentative, **à signaler à l'utilisateur** |
@@ -112,6 +112,8 @@ La source des limites se règle dans `pipeline/settings/settings.yaml → bounda
 
 `air_temp` et `rainfall_merra2` n'existent **que pour les 7 sites** (API POWER par point).
 
+Le catalogue (`catalog.json → indicators`) liste aussi `lst_day_aqua` et `lst_night_aqua` avec `control: true` : ce sont des indicateurs de **contrôle** (MODIS Aqua, étape `control-lst`), absents des tables, fiches et couches. Le backend doit ignorer tout indicateur `control: true`.
+
 `nature` reprend la règle du pitch (slide 10) : **observed** = mesure satellite ; **derived** = calcul ou réanalyse. Le pipeline ne produit **jamais** d'`interpreted` ni de `predicted` : ces deux catégories relèvent du backend et de l'IA, et doivent rester séparées à l'affichage.
 
 ## Tables
@@ -159,6 +161,8 @@ Règles de complétude (`pipeline/settings/settings.yaml`) : pluie = tous les mo
 | `kendall_tau`, `p_value` | test de Mann-Kendall |
 | `significant` | `p_value < 0.05` |
 | `direction` | `hausse` / `baisse` / `pas de tendance significative` |
+
+**LST** (`lst_day`, `lst_night`) : les tendances s'arrêtent à **2020** (`last_year = 2020`), à cause de la dérive d'orbite de Terra (D27). Les séries mensuelles et annuelles, elles, vont jusqu'au dernier mois disponible.
 
 **Règle d'affichage** : ne parler de « tendance » que si `significant = true`. Sinon, dire « pas de tendance nette sur la période ». C'est l'exigence n° 7 du guide d'équipe.
 

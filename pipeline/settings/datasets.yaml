@@ -14,7 +14,7 @@ datasets:
     variable: precipitation
     native_resolution: 0.1° (~11 km)
     temporal_resolution: mois
-    coverage: 1998-01 → ~3 mois avant aujourd'hui (latence du Final Run)
+    coverage: 1998-01 → 3 à 4 mois avant aujourd'hui en temps normal (latence du Final Run ; 2025-09 le 15/11/2026)
     license: Données NASA, libres et ouvertes (citer la source)
     limits:
       - Estimation satellitaire, pas une mesure de pluviomètre.
@@ -67,12 +67,29 @@ datasets:
     variable: LST_Day_1km et LST_Night_1km (échelle 0,02 K), filtrés par QC
     native_resolution: 1 km
     temporal_resolution: composite 8 jours → agrégé en mois
-    coverage: 2000-03 → présent
+    coverage: 2000-02 → présent
     license: Données NASA, libres et ouvertes (citer la source)
     limits:
       - Température de la surface du sol (toits, routes, champs), pas de l'air.
       - Mesurée seulement par ciel clair : en saison des pluies, les valeurs sont rares et biaisées vers les jours secs.
-      - Dérive orbitale de Terra depuis 2022 (passage plus matinal) ; les tendances récentes de LST de jour sont à lire avec prudence.
+      - Dérive d'orbite de Terra après la dernière manœuvre (27/02/2020) : passage plus matinal. Les tendances LST s'arrêtent donc à 2020 (D27). Sur 2003-2020, MODIS Aqua confirme la hausse nocturne (control-lst).
+
+  modis_lst_aqua:
+    title: MODIS Aqua Land Surface Temperature 8 jours, 1 km, v061 (contrôle)
+    short_name: MYD11A2
+    version: "061"
+    provider: NASA LP DAAC (copie Microsoft Planetary Computer)
+    doi: 10.5067/MODIS/MYD11A2.061
+    url: https://lpdaac.usgs.gov/products/myd11a2v061/
+    access: STAC Planetary Computer (sans compte)
+    variable: LST_Day_1km et LST_Night_1km (échelle 0,02 K), filtrés par QC
+    native_resolution: 1 km
+    temporal_resolution: composite 8 jours → agrégé en mois
+    coverage: 2002-07 → présent
+    license: Données NASA, libres et ouvertes (citer la source)
+    limits:
+      - Sert seulement à contrôler les tendances LST de Terra (autre heure de passage, autre orbite) ; jamais publié comme indicateur.
+      - Heures de passage différentes de Terra (~13 h 30 et ~1 h 30) : les niveaux ne se comparent pas, seules les tendances.
 
   merra2_power:
     title: NASA POWER (réanalyse MERRA-2), mensuel
@@ -121,10 +138,9 @@ datasets:
     native_resolution: vecteur
     temporal_resolution: statique
     coverage: 2021/2022 (découpage PRISE)
-    license: CGU geodata.gouv.tg — citer « Contenu provenant de la Plateforme Géodata en date du 2026-10-23 » ; réutilisation publique ou commerciale possiblement soumise à contrepartie (à vérifier)
+    license: Plateforme Géodata (geodata.gouv.tg) — citer « Contenu provenant de la Plateforme Géodata en date du 2026-10-23 »
     limits:
       - Polygones livrés sans noms par geodata.gouv.tg ; noms rattachés par le projet MAP TOGO (couche communes IDM+, vote des chefferies).
-      - Conditions de réutilisation à confirmer avant une diffusion publique (sinon basculer sur HDX via settings.yaml).
 
   hdx_codab:
     title: Limites administratives du Togo (COD-AB)
@@ -178,6 +194,22 @@ indicators:
     monthly_agg: mean
     annual_agg: mean
     nature: observed
+  lst_day_aqua:
+    label: Température de surface, jour (Aqua, contrôle)
+    dataset: modis_lst_aqua
+    unit: °C
+    monthly_agg: mean
+    annual_agg: mean
+    nature: observed
+    control: true
+  lst_night_aqua:
+    label: Température de surface, nuit (Aqua, contrôle)
+    dataset: modis_lst_aqua
+    unit: °C
+    monthly_agg: mean
+    annual_agg: mean
+    nature: observed
+    control: true
   air_temp:
     label: Température de l'air à 2 m
     dataset: merra2_power
