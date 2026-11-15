@@ -21,7 +21,7 @@ services:
       retries: 10
 
   api:
-    image: ghcr.io/agbea-climat/agbea-api:latest
+    image: ghcr.io/kessa99/agbea-api:latest
     pull_policy: always        # chaque redéploiement récupère la dernière image publiée par la CI
     restart: unless-stopped
     env_file:

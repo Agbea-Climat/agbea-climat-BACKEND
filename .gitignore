@@ -1,0 +1,39 @@
+# ── Python ──
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# ── Secrets ──
+.env
+
+# ── Fichiers locaux, non versionnés ──
+# Agents IA : règles et réglages locaux, gardés sur chaque poste, jamais en ligne
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+# Fiche des missions
+/MISSIONS.md
+# Archive et copie extraite de la base du projet
+*.zip
+agbea-climat-BACKEND/
+# Collection Insomnia (envoyée directement au testeur)
+/docs/insomnia_*.json
+
+# ── Données ──
+# Versionnés : data/reference/ (limites), data/regions.geojson, data/processed/ (livrable P2), data/corpus/
+# Régénérables par le pipeline (python -m pipeline all) :
+data/raw/
+data/interim/
+data/api/
+*.tmp.tif
+*.part
+
+# ── Divers ──
+logs/
+.playwright-mcp/
+
+# ── Dossier temporaire (kits à partager hors Git, essais) ──
+/temp/
+.ipynb_checkpoints/

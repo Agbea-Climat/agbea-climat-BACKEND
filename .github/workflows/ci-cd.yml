@@ -1,0 +1,215 @@
+# AGBÉA CLIMAT — CI/CD de l'API (voir docs/docker.md, section « CI/CD »).
+#
+#   test           : PR et push. PostgreSQL 17 + pgvector, migrations Alembic, pytest -m "not llm"
+#   pipeline-tests : PR et push. pytest pipeline/tests (sans réseau)
+#   image          : construit docker/api.prod.Dockerfile ; sur main / tag v* : pousse sur GHCR
+#   deploy         : push sur main. Redéploie le compose Dokploy, attend /health, relance l'ingestion RAG
+
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.12"
+  IMAGE: ghcr.io/${{ github.repository_owner }}/agbea-api
+
+jobs:
+  # ───────────────────────────── Tests de l'API ─────────────────────────────
+  test:
+    name: Tests API
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      db:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_USER: agbea
+          POSTGRES_PASSWORD: agbea
+          POSTGRES_DB: agbea
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U agbea -d agbea"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      POSTGRES_USER: agbea
+      POSTGRES_PASSWORD: agbea
+      POSTGRES_DB: agbea
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: "5432"
+      DATA_DIR: data
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements/api.txt
+
+      - name: Dépendances
+        run: pip install -r requirements/api.txt
+
+      - name: Migrations Alembic
+        run: |
+          alembic upgrade head
+          alembic check   # échoue si models.py a changé sans migration
+
+      - name: pytest (sans LLM)
+        run: python -m pytest -m "not llm" -p no:cacheprovider
+
+  # ───────────────────────────── Tests du pipeline ─────────────────────────────
+  pipeline-tests:
+    name: Tests pipeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements/pipeline.lock
+
+      - name: Dépendances
+        run: pip install -r requirements/pipeline.lock
+
+      - name: pytest pipeline/tests
+        run: python -m pytest -p no:cacheprovider pipeline/tests
+
+  # ───────────────────────────── Image de production ─────────────────────────────
+  image:
+    name: Image Docker
+    needs: [test, pipeline-tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    env:
+      PUSH: ${{ github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Connexion à GHCR
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=sha-
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+          labels: |
+            org.opencontainers.image.title=agbea-api
+            org.opencontainers.image.description=AGBÉA CLIMAT — API FastAPI (données P2 et corpus RAG embarqués)
+
+      - name: Build (et push sur main / tag)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/api.prod.Dockerfile
+          push: ${{ env.PUSH == 'true' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ───────────────────────────── Déploiement Dokploy ─────────────────────────────
+  deploy:
+    name: Déploiement
+    needs: image
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: ${{ vars.API_URL }}
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    env:
+      DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
+      DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+      DOKPLOY_COMPOSE_ID: ${{ secrets.DOKPLOY_COMPOSE_ID }}
+      API_URL: ${{ vars.API_URL }}
+    steps:
+      - name: Vérifie la configuration
+        id: cfg
+        run: |
+          missing=""
+          for v in DOKPLOY_URL DOKPLOY_API_KEY DOKPLOY_COMPOSE_ID; do
+            [ -n "${!v}" ] || missing="$missing $v"
+          done
+          if [ -n "$missing" ]; then
+            echo "::warning::Déploiement sauté, secrets absents de l'environnement production :$missing (l'image est publiée)."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Redéploie le compose Dokploy
+        if: steps.cfg.outputs.ok == 'true'
+        run: |
+          code=$(curl -sS -o response.txt -w '%{http_code}' -X POST \
+            "${DOKPLOY_URL%/}/api/compose.deploy" \
+            -H "x-api-key: ${DOKPLOY_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "{\"composeId\": \"${DOKPLOY_COMPOSE_ID}\"}")
+          echo "Dokploy HTTP $code"
+          if [ "$code" -ge 300 ]; then
+            cat response.txt
+            exit 1
+          fi
+
+      - name: Attend /api/v1/health
+        if: steps.cfg.outputs.ok == 'true' && env.API_URL != ''
+        run: |
+          # Dokploy met le déploiement en file : on laisse le temps au pull et au redémarrage.
+          sleep 30
+          for i in $(seq 1 40); do
+            if curl -fsS --max-time 5 "${API_URL%/}/api/v1/health" > /dev/null; then
+              echo "API en ligne (essai $i)"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::${API_URL%/}/api/v1/health ne répond pas après ~7 min"
+          exit 1
+
+      - name: Ingestion du corpus RAG
+        if: steps.cfg.outputs.ok == 'true' && env.API_URL != ''
+        run: |
+          code=$(curl -sS -o response.txt -w '%{http_code}' --max-time 600 -X POST \
+            "${API_URL%/}/api/v1/admin/rag/ingest")
+          echo "Ingestion HTTP $code"
+          cat response.txt; echo
+          if [ "$code" -ge 300 ]; then
+            echo "::warning::Ingestion RAG en échec (HTTP $code) : l'API est déployée, relancer POST /api/v1/admin/rag/ingest."
+          fi

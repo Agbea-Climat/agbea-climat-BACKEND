@@ -61,8 +61,8 @@ Les builds utilisent un cache pip BuildKit : un build interrompu reprend sans re
 
 1. Image : publiée automatiquement par la CI (voir « CI/CD » ci-dessous). À la main, si besoin :
    ```bash
-   docker build -f docker/api.prod.Dockerfile -t ghcr.io/agbea-climat/agbea-api:latest .
-   docker push ghcr.io/agbea-climat/agbea-api:latest
+   docker build -f docker/api.prod.Dockerfile -t ghcr.io/kessa99/agbea-api:latest .
+   docker push ghcr.io/kessa99/agbea-api:latest
    ```
    Package GHCR privé : ajouter le registre dans Dokploy (*Settings → Registry*).
 2. Onglet *Environment* (toutes obligatoires sauf mention) :
@@ -90,8 +90,9 @@ Les builds utilisent un cache pip BuildKit : un build interrompu reprend sans re
 | Job | Quand | Ce qu'il fait |
 |---|---|---|
 | `test` | PR et push | PostgreSQL 17 + pgvector en service, `alembic upgrade head` + `alembic check`, `pytest -m "not llm"` |
-| `image` | après `test` | construit `docker/api.prod.Dockerfile` ; sur `main` / tag `v*` : pousse `ghcr.io/agbea-climat/agbea-api` (`latest`, `sha-<commit>`, `X.Y.Z`) |
-| `deploy` | push sur `main`, après `image` | `POST <DOKPLOY_URL>/api/compose.deploy`, attend `/api/v1/health`, relance l'ingestion RAG |
+| `pipeline-tests` | PR et push | `pytest pipeline/tests` (Python 3.12, `requirements/pipeline.lock`) |
+| `image` | après `test` et `pipeline-tests` | construit `docker/api.prod.Dockerfile` ; sur `main` / tag `v*` : pousse `ghcr.io/kessa99/agbea-api` (`latest`, `sha-<commit>`, `X.Y.Z`, `X.Y`) ; sur PR : build seul |
+| `deploy` | push sur `main`, après `image` | `POST <DOKPLOY_URL>/api/compose.deploy` (en-tête `x-api-key`), attend `/api/v1/health`, relance l'ingestion RAG (échec = avertissement) |
 
 Réglages GitHub (*Settings → Secrets and variables → Actions*), dans l'environnement **`production`** :
 
