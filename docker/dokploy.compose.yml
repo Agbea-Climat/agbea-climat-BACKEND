@@ -22,6 +22,7 @@ services:
 
   api:
     image: ghcr.io/agbea-climat/agbea-api:latest
+    pull_policy: always        # chaque redéploiement récupère la dernière image publiée par la CI
     restart: unless-stopped
     env_file:
       - .env

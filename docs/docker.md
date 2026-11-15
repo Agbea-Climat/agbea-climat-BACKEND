@@ -59,7 +59,7 @@ Les builds utilisent un cache pip BuildKit : un build interrompu reprend sans re
 `docker/dokploy.compose.yml` se colle tel quel dans un service *Compose* Dokploy (fournisseur *Raw*). Il ne contient
 **aucune variable** : `db` et `api` lisent le fichier `.env` que Dokploy écrit à partir de l'onglet *Environment*.
 
-1. Construire et pousser l'image (données P2 et corpus RAG inclus) :
+1. Image : publiée automatiquement par la CI (voir « CI/CD » ci-dessous). À la main, si besoin :
    ```bash
    docker build -f docker/api.prod.Dockerfile -t ghcr.io/agbea-climat/agbea-api:latest .
    docker push ghcr.io/agbea-climat/agbea-api:latest
@@ -84,3 +84,20 @@ Les builds utilisent un cache pip BuildKit : un build interrompu reprend sans re
 3. Onglet *Domains* : service `api`, port `8000`. Puis *Deploy*.
 4. Après le premier déploiement (et après chaque nouvelle image avec un corpus modifié) :
    `curl -X POST https://<domaine>/api/v1/admin/rag/ingest`.
+
+## CI/CD (`.github/workflows/ci-cd.yml`)
+
+| Job | Quand | Ce qu'il fait |
+|---|---|---|
+| `test` | PR et push | PostgreSQL 17 + pgvector en service, `alembic upgrade head` + `alembic check`, `pytest -m "not llm"` |
+| `image` | après `test` | construit `docker/api.prod.Dockerfile` ; sur `main` / tag `v*` : pousse `ghcr.io/agbea-climat/agbea-api` (`latest`, `sha-<commit>`, `X.Y.Z`) |
+| `deploy` | push sur `main`, après `image` | `POST <DOKPLOY_URL>/api/compose.deploy`, attend `/api/v1/health`, relance l'ingestion RAG |
+
+Réglages GitHub (*Settings → Secrets and variables → Actions*), dans l'environnement **`production`** :
+
+- secrets : `DOKPLOY_URL` (URL du panneau Dokploy), `DOKPLOY_API_KEY` (Dokploy → *Settings → Profile → API/CLI*),
+  `DOKPLOY_COMPOSE_ID` (identifiant du service compose, visible dans son URL Dokploy) ;
+- variable : `API_URL` (domaine public de l'API, sans `/api/v1`).
+
+Sans ces secrets, `deploy` est sauté avec un avertissement : l'image est quand même publiée. Le service `api` du
+compose a `pull_policy: always`, donc chaque redéploiement récupère la dernière image `latest`.
