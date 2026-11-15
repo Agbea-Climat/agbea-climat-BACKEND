@@ -40,6 +40,7 @@ python -m venv .venv
 | `analyse` | zonal + tables → `data/interim/work/tables/*.parquet` | ~1 min | refait tout |
 | `export` | `data/api/` : livrable complet (voir contrat-donnees.md) | ~1 min | refait tout |
 | `export-backend` | **livrable P2** : `data/regions.geojson`, `data/processed/monthly.parquet`, `data/processed/static.json` | 3 s | refait tout |
+| `corpus` | fiches du corpus RAG à partir de `data/api/` (pays, 5 régions, 39 préfectures, 7 sites) → `data/corpus/fiches/`, copie de la méthodologie, mise à jour de `data/corpus/sources.json` (D31, guide : `docs/chatbot-corpus.md`) | < 10 s | refait tout |
 
 Contrôles (hors livrable, hors `all`, rien n'est publié) :
 

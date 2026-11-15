@@ -103,5 +103,760 @@
       "ndvi",
       "lst_day"
     ]
+  },
+  {
+    "file": "glossaire_faq.md",
+    "title": "Glossaire et questions fr\u00e9quentes AGB\u00c9A CLIMAT (normale, \u00e9cart, tendance, faible couverture, limites)",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/glossaire_faq.md",
+    "region_ids": [],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/pays_togo.md",
+    "title": "Fiche climatique AGB\u00c9A : Togo (pays)",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/pays_togo.md",
+    "region_ids": [
+      "maritime",
+      "plateaux",
+      "centrale",
+      "kara",
+      "savanes"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/region_maritime.md",
+    "title": "Fiche climatique AGB\u00c9A : r\u00e9gion Maritime",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/region_maritime.md",
+    "region_ids": [
+      "maritime"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/region_plateaux.md",
+    "title": "Fiche climatique AGB\u00c9A : r\u00e9gion Plateaux",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/region_plateaux.md",
+    "region_ids": [
+      "plateaux"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/region_centrale.md",
+    "title": "Fiche climatique AGB\u00c9A : r\u00e9gion Centrale",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/region_centrale.md",
+    "region_ids": [
+      "centrale"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/region_kara.md",
+    "title": "Fiche climatique AGB\u00c9A : r\u00e9gion Kara",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/region_kara.md",
+    "region_ids": [
+      "kara"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/region_savanes.md",
+    "title": "Fiche climatique AGB\u00c9A : r\u00e9gion Savanes",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/region_savanes.md",
+    "region_ids": [
+      "savanes"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_agoe-nyive.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Ago\u00e8-Nyiv\u00e9",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_agoe-nyive.md",
+    "region_ids": [
+      "maritime"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_ave.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Av\u00e9",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_ave.md",
+    "region_ids": [
+      "maritime"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_bas-mono.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Bas-Mono",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_bas-mono.md",
+    "region_ids": [
+      "maritime"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_golfe.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Golfe",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_golfe.md",
+    "region_ids": [
+      "maritime"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_lacs.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Lacs",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_lacs.md",
+    "region_ids": [
+      "maritime"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_vo.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Vo",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_vo.md",
+    "region_ids": [
+      "maritime"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_yoto.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Yoto",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_yoto.md",
+    "region_ids": [
+      "maritime"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_zio.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Zio",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_zio.md",
+    "region_ids": [
+      "maritime"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_agou.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Agou",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_agou.md",
+    "region_ids": [
+      "plateaux"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_akebou.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Ak\u00e9bou",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_akebou.md",
+    "region_ids": [
+      "plateaux"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_amou.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Amou",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_amou.md",
+    "region_ids": [
+      "plateaux"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_anie.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Ani\u00e9",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_anie.md",
+    "region_ids": [
+      "plateaux"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_danyi.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Danyi",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_danyi.md",
+    "region_ids": [
+      "plateaux"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_est-mono.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Est-Mono",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_est-mono.md",
+    "region_ids": [
+      "plateaux"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_haho.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Haho",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_haho.md",
+    "region_ids": [
+      "plateaux"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_kloto.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Kloto",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_kloto.md",
+    "region_ids": [
+      "plateaux"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_kpele.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Kp\u00e9l\u00e9",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_kpele.md",
+    "region_ids": [
+      "plateaux"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_moyen-mono.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Moyen-Mono",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_moyen-mono.md",
+    "region_ids": [
+      "plateaux"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_ogou.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Ogou",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_ogou.md",
+    "region_ids": [
+      "plateaux"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_wawa.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Wawa",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_wawa.md",
+    "region_ids": [
+      "plateaux"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_blitta.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Blitta",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_blitta.md",
+    "region_ids": [
+      "centrale"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_mo.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture M\u00f4",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_mo.md",
+    "region_ids": [
+      "centrale"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_sotouboua.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Sotouboua",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_sotouboua.md",
+    "region_ids": [
+      "centrale"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_tchamba.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Tchamba",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_tchamba.md",
+    "region_ids": [
+      "centrale"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_tchaoudjo.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Tchaoudjo",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_tchaoudjo.md",
+    "region_ids": [
+      "centrale"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_assoli.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Assoli",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_assoli.md",
+    "region_ids": [
+      "kara"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_bassar.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Bassar",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_bassar.md",
+    "region_ids": [
+      "kara"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_binah.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Binah",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_binah.md",
+    "region_ids": [
+      "kara"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_dankpen.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Dankpen",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_dankpen.md",
+    "region_ids": [
+      "kara"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_doufelgou.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Doufelgou",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_doufelgou.md",
+    "region_ids": [
+      "kara"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_keran.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture K\u00e9ran",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_keran.md",
+    "region_ids": [
+      "kara"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_kozah.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Kozah",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_kozah.md",
+    "region_ids": [
+      "kara"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_cinkasse.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Cinkass\u00e9",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_cinkasse.md",
+    "region_ids": [
+      "savanes"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_kpendjal.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Kpendjal",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_kpendjal.md",
+    "region_ids": [
+      "savanes"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_kpendjal-ouest.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Kpendjal-Ouest",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_kpendjal-ouest.md",
+    "region_ids": [
+      "savanes"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_oti.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Oti",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_oti.md",
+    "region_ids": [
+      "savanes"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_oti-sud.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Oti-Sud",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_oti-sud.md",
+    "region_ids": [
+      "savanes"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_tandjoare.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture Tandjoar\u00e9",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_tandjoare.md",
+    "region_ids": [
+      "savanes"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/prefecture_tone.md",
+    "title": "Fiche climatique AGB\u00c9A : pr\u00e9fecture T\u00f4ne",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/prefecture_tone.md",
+    "region_ids": [
+      "savanes"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/site_grand-lome-lagune.md",
+    "title": "Fiche climatique AGB\u00c9A : site pilote Grand Lom\u00e9 & Lagune",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/site_grand-lome-lagune.md",
+    "region_ids": [
+      "maritime"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/site_aneho-littoral-de-kpeme.md",
+    "title": "Fiche climatique AGB\u00c9A : site pilote An\u00e9ho & Littoral de Kp\u00e9m\u00e9",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/site_aneho-littoral-de-kpeme.md",
+    "region_ids": [
+      "maritime"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/site_kpalime-mont-agou.md",
+    "title": "Fiche climatique AGB\u00c9A : site pilote Kpalim\u00e9 & Mont Agou",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/site_kpalime-mont-agou.md",
+    "region_ids": [
+      "plateaux"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/site_sokode-corridor-fazao.md",
+    "title": "Fiche climatique AGB\u00c9A : site pilote Sokod\u00e9 & Corridor Fazao",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/site_sokode-corridor-fazao.md",
+    "region_ids": [
+      "centrale"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/site_kara-massif-de-defale.md",
+    "title": "Fiche climatique AGB\u00c9A : site pilote Kara & Massif de D\u00e9fal\u00e9",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/site_kara-massif-de-defale.md",
+    "region_ids": [
+      "kara"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/site_dapaong-confins-saheliens.md",
+    "title": "Fiche climatique AGB\u00c9A : site pilote Dapaong & Confins Sah\u00e9liens",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/site_dapaong-confins-saheliens.md",
+    "region_ids": [
+      "savanes"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "fiches/site_mango-bassin-fluvial-de-l-oti.md",
+    "title": "Fiche climatique AGB\u00c9A : site pilote Mango & Bassin Fluvial de l'Oti",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/data/corpus/fiches/site_mango-bassin-fluvial-de-l-oti.md",
+    "region_ids": [
+      "savanes"
+    ],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day",
+      "elevation"
+    ]
+  },
+  {
+    "file": "methodologie_agbea.md",
+    "title": "M\u00e9thodologie des donn\u00e9es AGB\u00c9A CLIMAT (calculs, contr\u00f4les, limites)",
+    "source_url": "https://github.com/Agbea-Climat/agbea-climat-BACKEND/blob/main/docs/data/methodologie.md",
+    "region_ids": [],
+    "indicators": [
+      "precipitation",
+      "ndvi",
+      "lst_day"
+    ]
   }
 ]

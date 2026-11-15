@@ -89,6 +89,7 @@ services:
     volumes:
       - ./data:/app/data
       - ./pipeline/settings:/app/pipeline/settings:ro
+      - ./docs:/app/docs:ro            # étape corpus : copie de docs/data/methodologie.md
     command: ["all"]
 
   pipeline-tests:

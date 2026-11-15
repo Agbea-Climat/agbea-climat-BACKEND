@@ -14,6 +14,7 @@
   export                      publie data/api/ (livrable complet)
   export-backend              livrable P2 du backend : data/regions.geojson, data/processed/{monthly.parquet,static.json}
   control-lst                 compare les tendances LST Terra / Aqua → data/interim/work/controls/ (hors « all »)
+  corpus                      fiches du corpus RAG (data/corpus/fiches/) à partir de data/api/ + méthodologie
   all                         tout, dans l'ordre (saute IMERG proprement sans identifiants)
 """
 from __future__ import annotations
@@ -33,7 +34,7 @@ def main(argv=None) -> int:
     p = argparse.ArgumentParser(prog="pipeline", description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("step", choices=["boundaries", "power", "dem", "ndvi", "lst", "imerg",
-                                    "imerg-daily", "analyse", "export", "export-backend", "lst-aqua", "control-lst", "all"])
+                                    "imerg-daily", "analyse", "export", "export-backend", "corpus", "lst-aqua", "control-lst", "all"])
     p.add_argument("--hdx-dir", type=Path, help="dossier contenant tgo_admin{0..3}_em.geojson")
     p.add_argument("--map-togo-dir", type=Path, help="dossier web/data du projet MAP TOGO (regions/prefectures.geojson)")
     p.add_argument("--start", type=int)
@@ -44,7 +45,7 @@ def main(argv=None) -> int:
     config.ensure_dirs()
     t0 = time.time()
 
-    from . import analysis, backend_export, boundaries, controls, export
+    from . import analysis, backend_export, boundaries, controls, corpus, export
     from .sources import imerg, modis, nasadem, power
 
     def step_imerg():
@@ -75,8 +76,9 @@ def main(argv=None) -> int:
         "analyse": analysis.run,
         "export": export.run,
         "export-backend": backend_export.run,
+        "corpus": corpus.run,
     }
-    order = ["boundaries", "power", "dem", "imerg", "imerg-daily", "ndvi", "lst", "analyse", "export", "export-backend"]
+    order = ["boundaries", "power", "dem", "imerg", "imerg-daily", "ndvi", "lst", "analyse", "export", "export-backend", "corpus"]
     for name in (order if a.step == "all" else [a.step]):
         print(f"\n=== {name} ===", flush=True)
         steps[name]()

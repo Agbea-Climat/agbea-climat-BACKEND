@@ -196,3 +196,24 @@ def test_publication_cutoff_lst():
     assert analysis.publication_cutoff("lst_night") == "2022-12"
     assert analysis.publication_cutoff("rainfall") is None
     assert analysis.publication_cutoff("ndvi") is None
+
+
+def test_corpus_fiche_format():
+    """Étape corpus (D31) : nombres au format français, tendance seulement si significative, pas de « -0,0 »."""
+    from pipeline import corpus
+    assert corpus.fr(-0.04, 1) == "0,0" and corpus.fr(1234.5, 1) == "1\u202f234,5"
+    s = {"unit": {"id": "X", "level": "prefecture", "name": "Test", "parent_id": "TG-A", "area_km2": 100.0,
+                  "centroid": [1.2, 6.2]},
+         "elevation_m": {"mean": 20.0, "min": 1.0, "max": 50.0, "pct_below_10m": 12.0},
+         "trends": {"rainfall": {"annual": {"first_year": 2001, "last_year": 2024, "significant": False,
+                                            "sen_slope_per_decade": 5.0}},
+                    "lst_night": {"annual": {"first_year": 2001, "last_year": 2020, "significant": True,
+                                             "sen_slope_per_decade": 0.8, "sen_ci95_low_per_decade": 0.5,
+                                             "sen_ci95_high_per_decade": 1.1}}},
+         "latest": {}}
+    idx = {"TG-A": {"id": "TG-A", "level": "region", "name": "Maritime", "parent_id": "TG"}}
+    txt = corpus.fiche(s, idx, pd.DataFrame(columns=["indicator", "month", "clim_mean"]), "2026-11-15")
+    assert "hausse de 0,80 °C par décennie" in txt
+    assert "Pas de tendance significative pour : pluie (sur l'année, 2001-2024)" in txt
+    assert "((" not in txt and "ANAMET" in txt
+    assert corpus.region_slugs(s["unit"], idx) == ["maritime"]
