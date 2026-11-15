@@ -1,14 +1,10 @@
-# CI/CD de l'API AGBÉA CLIMAT
+# AGBÉA CLIMAT — CI/CD de l'API (voir docs/docker.md, section « CI/CD »).
 #
-#   test   : pytest (hors LLM) + alembic check contre PostgreSQL 17 + pgvector     — PR et push
-#   image  : construit docker/api.prod.Dockerfile ; publie sur GHCR après les tests — push main / tag v*
-#            (sur PR : construction seule, pour vérifier le Dockerfile)
-#   deploy : redéploie le compose Dokploy, attend /health, réingère le corpus RAG   — push main
-#
-# Réglages GitHub (Settings → Secrets and variables → Actions), environnement « production » :
-#   secrets   DOKPLOY_URL (ex. https://dokploy.exemple.com), DOKPLOY_API_KEY, DOKPLOY_COMPOSE_ID
-#   variable  API_URL (ex. https://api.agbea-climat.exemple.com) — sans /api/v1
-# Sans DOKPLOY_API_KEY, l'étape de déploiement est sautée (l'image est quand même publiée).
+#   test           : PR et push. PostgreSQL 17 + pgvector, migrations Alembic, pytest -m "not llm"
+#   pipeline-tests : PR et push. pytest pipeline/tests (sans réseau)
+#   image          : construit docker/api.prod.Dockerfile ; sur main / tag v* : pousse sur GHCR
+#   deploy         : push sur main. Redéploie le compose Dokploy, attend /health, relance l'ingestion RAG
+
 name: CI/CD
 
 on:
@@ -18,17 +14,19 @@ on:
   pull_request:
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 concurrency:
   group: ci-cd-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+permissions:
+  contents: read
+
 env:
-  IMAGE: ghcr.io/agbea-climat/agbea-api
+  PYTHON_VERSION: "3.12"
+  IMAGE: ghcr.io/${{ github.repository_owner }}/agbea-api
 
 jobs:
+  # ───────────────────────────── Tests de l'API ─────────────────────────────
   test:
     name: Tests API
     runs-on: ubuntu-latest
@@ -38,89 +36,116 @@ jobs:
         image: pgvector/pgvector:pg17
         env:
           POSTGRES_USER: agbea
-          POSTGRES_PASSWORD: agbea-ci
+          POSTGRES_PASSWORD: agbea
           POSTGRES_DB: agbea
-        ports: ["5432:5432"]
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd "pg_isready -U agbea -d agbea"
-          --health-interval 5s --health-timeout 3s --health-retries 10
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
     env:
+      POSTGRES_USER: agbea
+      POSTGRES_PASSWORD: agbea
+      POSTGRES_DB: agbea
       POSTGRES_HOST: localhost
       POSTGRES_PORT: "5432"
-      POSTGRES_USER: agbea
-      POSTGRES_PASSWORD: agbea-ci
-      POSTGRES_DB: agbea
       DATA_DIR: data
-      LLM_API_KEY: ""          # tests IA en mode gabarits ; les tests `llm` sont ignorés
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@v6
         with:
-          python-version: "3.12"     # même version que l'image (python:3.12-slim)
+          python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
           cache-dependency-path: requirements/api.txt
 
       - name: Dépendances
         run: pip install -r requirements/api.txt
 
-      - name: Migrations
+      - name: Migrations Alembic
         run: |
           alembic upgrade head
-          alembic check
+          alembic check   # échoue si models.py a changé sans migration
 
-      - name: Tests
-        run: python -m pytest -m "not llm"
+      - name: pytest (sans LLM)
+        run: python -m pytest -m "not llm" -p no:cacheprovider
 
+  # ───────────────────────────── Tests du pipeline ─────────────────────────────
+  pipeline-tests:
+    name: Tests pipeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements/pipeline.lock
+
+      - name: Dépendances
+        run: pip install -r requirements/pipeline.lock
+
+      - name: pytest pipeline/tests
+        run: python -m pytest -p no:cacheprovider pipeline/tests
+
+  # ───────────────────────────── Image de production ─────────────────────────────
   image:
     name: Image Docker
-    needs: test
+    needs: [test, pipeline-tests]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
       contents: read
       packages: write
-    outputs:
-      digest: ${{ steps.build.outputs.digest }}
+    env:
+      PUSH: ${{ github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v5
 
-      - uses: docker/setup-buildx-action@v4
+      - uses: docker/setup-buildx-action@v3
 
       - name: Connexion à GHCR
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v4
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Tags de l'image
+      - name: Tags
         id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.IMAGE }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha,prefix=sha-
             type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+          labels: |
+            org.opencontainers.image.title=agbea-api
+            org.opencontainers.image.description=AGBÉA CLIMAT — API FastAPI (données P2 et corpus RAG embarqués)
 
-      - name: Construction (et publication hors PR)
-        id: build
-        uses: docker/build-push-action@v7
+      - name: Build (et push sur main / tag)
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: docker/api.prod.Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ env.PUSH == 'true' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  # ───────────────────────────── Déploiement Dokploy ─────────────────────────────
   deploy:
-    name: Déploiement Dokploy
+    name: Déploiement
     needs: image
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment:
@@ -135,35 +160,59 @@ jobs:
       DOKPLOY_COMPOSE_ID: ${{ secrets.DOKPLOY_COMPOSE_ID }}
       API_URL: ${{ vars.API_URL }}
     steps:
-      - name: Vérifier la configuration
+      - name: Vérifie la configuration
         id: cfg
         run: |
-          if [ -z "$DOKPLOY_API_KEY" ] || [ -z "$DOKPLOY_URL" ] || [ -z "$DOKPLOY_COMPOSE_ID" ]; then
-            echo "::warning::Secrets Dokploy absents : déploiement sauté (image publiée sur GHCR)."
-            echo "ready=false" >> "$GITHUB_OUTPUT"
+          missing=""
+          for v in DOKPLOY_URL DOKPLOY_API_KEY DOKPLOY_COMPOSE_ID; do
+            [ -n "${!v}" ] || missing="$missing $v"
+          done
+          if [ -z "$API_URL" ]; then
+            echo "::warning::Variable API_URL absente de l'environnement production : vérification /health et ingestion RAG sautées."
+          fi
+          if [ -n "$missing" ]; then
+            echo "::warning::Déploiement sauté, secrets absents de l'environnement production :$missing (l'image est publiée)."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
           else
-            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "ok=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Redéployer le compose
-        if: steps.cfg.outputs.ready == 'true'
+      - name: Redéploie le compose Dokploy
+        if: steps.cfg.outputs.ok == 'true'
         run: |
-          curl --fail-with-body -sS -X POST "${DOKPLOY_URL%/}/api/compose.deploy" \
-            -H "accept: application/json" -H "Content-Type: application/json" \
+          code=$(curl -sS -o response.txt -w '%{http_code}' -X POST \
+            "${DOKPLOY_URL%/}/api/compose.deploy" \
             -H "x-api-key: ${DOKPLOY_API_KEY}" \
-            -d "{\"composeId\": \"${DOKPLOY_COMPOSE_ID}\"}"
+            -H "Content-Type: application/json" \
+            -d "{\"composeId\": \"${DOKPLOY_COMPOSE_ID}\"}")
+          echo "Dokploy HTTP $code"
+          if [ "$code" -ge 300 ]; then
+            cat response.txt
+            exit 1
+          fi
 
-      - name: Attendre l'API (/health)
-        if: steps.cfg.outputs.ready == 'true' && env.API_URL != ''
+      - name: Attend /api/v1/health
+        if: steps.cfg.outputs.ok == 'true' && env.API_URL != ''
         run: |
-          for i in $(seq 1 36); do
-            if curl -fsS "${API_URL%/}/api/v1/health" | grep -q '"status":"ok"'; then
-              echo "API en ligne"; exit 0
+          # Dokploy met le déploiement en file : on laisse le temps au pull et au redémarrage.
+          sleep 30
+          for i in $(seq 1 40); do
+            if curl -fsS --max-time 5 "${API_URL%/}/api/v1/health" > /dev/null; then
+              echo "API en ligne (essai $i)"
+              exit 0
             fi
-            sleep 5
+            sleep 10
           done
-          echo "::error::L'API ne répond pas après 3 minutes"; exit 1
+          echo "::error::${API_URL%/}/api/v1/health ne répond pas après ~7 min"
+          exit 1
 
-      - name: Réingérer le corpus RAG
-        if: steps.cfg.outputs.ready == 'true' && env.API_URL != ''
-        run: curl --fail-with-body -sS -X POST "${API_URL%/}/api/v1/admin/rag/ingest"
+      - name: Ingestion du corpus RAG
+        if: steps.cfg.outputs.ok == 'true' && env.API_URL != ''
+        run: |
+          code=$(curl -sS -o response.txt -w '%{http_code}' --max-time 600 -X POST \
+            "${API_URL%/}/api/v1/admin/rag/ingest")
+          echo "Ingestion HTTP $code"
+          cat response.txt; echo
+          if [ "$code" -ge 300 ]; then
+            echo "::warning::Ingestion RAG en échec (HTTP $code) : l'API est déployée, relancer POST /api/v1/admin/rag/ingest."
+          fi

@@ -57,22 +57,21 @@ Les builds utilisent un cache pip BuildKit : un build interrompu reprend sans re
 ## Production : Dokploy (mode « Raw »)
 
 `docker/dokploy.compose.yml` se colle tel quel dans un service *Compose* Dokploy (fournisseur *Raw*). Il ne contient
-**aucune variable** : `db` et `api` lisent le fichier `.env` que Dokploy écrit à partir de l'onglet *Environment*.
+que l'API (`api`, image GHCR), qui lit le `.env` que Dokploy écrit à partir de l'onglet *Environment*.
+La base est un service *PostgreSQL* Dokploy créé à part, **avec l'image `pgvector/pgvector:pg17`** (choisie à la
+création : elle n'est plus modifiable ensuite ; l'image `postgres` standard n'a pas l'extension `vector`), et
+**démarré**. `api` la joint par `dokploy-network`.
 
 1. Image : publiée automatiquement par la CI (voir « CI/CD » ci-dessous). À la main, si besoin :
    ```bash
-   docker build -f docker/api.prod.Dockerfile -t ghcr.io/agbea-climat/agbea-api:latest .
-   docker push ghcr.io/agbea-climat/agbea-api:latest
+   docker build -f docker/api.prod.Dockerfile -t ghcr.io/kessa99/agbea-api:latest .
+   docker push ghcr.io/kessa99/agbea-api:latest
    ```
-   Package GHCR privé : ajouter le registre dans Dokploy (*Settings → Registry*).
-2. Onglet *Environment* (toutes obligatoires sauf mention) :
+   Package GHCR privé : ajouter le registre dans Dokploy (*Settings → Registry*, `ghcr.io`, utilisateur GitHub,
+   jeton avec `read:packages`), ou rendre le package public.
+2. Onglet *Environment* du compose (puis *Save*) :
    ```
-   POSTGRES_USER=agbea
-   POSTGRES_PASSWORD=<mot de passe fort>
-   POSTGRES_DB=agbea
-   POSTGRES_HOST=db
-   POSTGRES_PORT=5432
-   DATA_DIR=data
+   DATABASE_URL=<« Internal Connection URL » du service PostgreSQL, ex. postgresql://user:pass@agbea-agbea-xxxxxx:5432/agbea>
    CORS_ORIGINS=https://agbea-climat.vercel.app
    LLM_PROVIDER=openrouter
    LLM_API_KEY=sk-or-...              # une seule clé OpenRouter : assistant et voix
@@ -80,9 +79,12 @@ Les builds utilisent un cache pip BuildKit : un build interrompu reprend sans re
    VOICE_MODEL=                       # facultatif, modèle OpenRouter acceptant l'audio
    VOICE_LANGUAGES=fr,en
    ```
-   `POSTGRES_HOST=db` et `POSTGRES_PORT=5432` : l'API joint la base par le réseau interne du compose.
-3. Onglet *Domains* : service `api`, port `8000`. Puis *Deploy*.
-4. Après le premier déploiement (et après chaque nouvelle image avec un corpus modifié) :
+   `DATABASE_URL` : hôte **interne** (pas l'URL externe), port `5432`. `postgres://` / `postgresql://` sont convertis
+   en driver psycopg 3. Caractères spéciaux du mot de passe (`@ : / #`) à encoder (`%40`…), `$` à doubler.
+   Il prime sur les `POSTGRES_*` (inutiles ici).
+3. Onglet *Domains* : service `api`, port `8000`, HTTPS + Let's Encrypt. Puis *Deploy*.
+4. Logs de `api` : `Running upgrade -> 53d09e0345da` puis `Uvicorn running on http://0.0.0.0:8000`.
+5. Après le premier déploiement (et après chaque nouvelle image avec un corpus modifié) :
    `curl -X POST https://<domaine>/api/v1/admin/rag/ingest`.
 
 ## CI/CD (`.github/workflows/ci-cd.yml`)
@@ -90,8 +92,9 @@ Les builds utilisent un cache pip BuildKit : un build interrompu reprend sans re
 | Job | Quand | Ce qu'il fait |
 |---|---|---|
 | `test` | PR et push | PostgreSQL 17 + pgvector en service, `alembic upgrade head` + `alembic check`, `pytest -m "not llm"` |
-| `image` | après `test` | construit `docker/api.prod.Dockerfile` ; sur `main` / tag `v*` : pousse `ghcr.io/agbea-climat/agbea-api` (`latest`, `sha-<commit>`, `X.Y.Z`) |
-| `deploy` | push sur `main`, après `image` | `POST <DOKPLOY_URL>/api/compose.deploy`, attend `/api/v1/health`, relance l'ingestion RAG |
+| `pipeline-tests` | PR et push | `pytest pipeline/tests` (Python 3.12, `requirements/pipeline.lock`) |
+| `image` | après `test` et `pipeline-tests` | construit `docker/api.prod.Dockerfile` ; sur `main` / tag `v*` : pousse `ghcr.io/kessa99/agbea-api` (`latest`, `sha-<commit>`, `X.Y.Z`, `X.Y`) ; sur PR : build seul |
+| `deploy` | push sur `main`, après `image` | `POST <DOKPLOY_URL>/api/compose.deploy` (en-tête `x-api-key`), attend `/api/v1/health`, relance l'ingestion RAG (échec = avertissement) |
 
 Réglages GitHub (*Settings → Secrets and variables → Actions*), dans l'environnement **`production`** :
 

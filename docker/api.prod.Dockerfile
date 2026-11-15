@@ -3,8 +3,8 @@
 # Contrairement à docker/api.Dockerfile (dev, données montées depuis ./data), cette image
 # EMBARQUE les données de l'API (livrable P2) : elle tourne sans aucun fichier sur le serveur.
 #
-#   docker build -f docker/api.prod.Dockerfile -t ghcr.io/agbea-climat/agbea-api:latest .
-#   docker push ghcr.io/agbea-climat/agbea-api:latest
+#   docker build -f docker/api.prod.Dockerfile -t ghcr.io/kessa99/agbea-api:latest .
+#   docker push ghcr.io/kessa99/agbea-api:latest
 #
 # Fichiers exclus du build : docker/api.prod.Dockerfile.dockerignore (prioritaire sur .dockerignore).
 FROM python:3.12-slim
