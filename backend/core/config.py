@@ -35,9 +35,13 @@ class Settings(BaseSettings):
     # Notes vocales (AGBÉA Voice, M21 — encore en développement : POST /voice/transcribe répond 501).
     # Même compte OpenRouter que l'assistant : LLM_API_KEY et LLM_BASE_URL servent aussi à la voix.
     voice_model: str = ""        # id OpenRouter d'un modèle acceptant l'audio ; vide = voix désactivée
-    voice_language: str = "fr"   # langue attendue des notes vocales
+    voice_languages: str = "fr,en"   # langues acceptées (codes de Lang) ; l'éwé (ee) viendra plus tard
     embedding_model: str = ""
     embedding_dim: int = 1024
+
+    @property
+    def voice_languages_list(self) -> list[str]:
+        return [lang.strip() for lang in self.voice_languages.split(",") if lang.strip()]
 
     @property
     def cors_origins_list(self) -> list[str]:
