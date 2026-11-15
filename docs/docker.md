@@ -57,7 +57,9 @@ Les builds utilisent un cache pip BuildKit : un build interrompu reprend sans re
 ## Production : Dokploy (mode « Raw »)
 
 `docker/dokploy.compose.yml` se colle tel quel dans un service *Compose* Dokploy (fournisseur *Raw*). Il ne contient
-**aucune variable** : `db` et `api` lisent le fichier `.env` que Dokploy écrit à partir de l'onglet *Environment*.
+**aucune variable** : `api` lit le fichier `.env` que Dokploy écrit à partir de l'onglet *Environment*.
+La base est un service *PostgreSQL* Dokploy créé à part, avec l'image `pgvector/pgvector:pg17` (l'image
+`postgres` standard n'a pas l'extension `vector` : la migration échouerait). `api` la joint par `dokploy-network`.
 
 1. Image : publiée automatiquement par la CI (voir « CI/CD » ci-dessous). À la main, si besoin :
    ```bash
@@ -67,11 +69,7 @@ Les builds utilisent un cache pip BuildKit : un build interrompu reprend sans re
    Package GHCR privé : ajouter le registre dans Dokploy (*Settings → Registry*).
 2. Onglet *Environment* (toutes obligatoires sauf mention) :
    ```
-   POSTGRES_USER=agbea
-   POSTGRES_PASSWORD=<mot de passe fort>
-   POSTGRES_DB=agbea
-   POSTGRES_HOST=db
-   POSTGRES_PORT=5432
+   DATABASE_URL=<« Internal Connection URL » du service PostgreSQL, ex. postgresql://user:pass@agbea-abgea-gcemlk:5432/agbea>
    DATA_DIR=data
    CORS_ORIGINS=https://agbea-climat.vercel.app
    LLM_PROVIDER=openrouter
@@ -80,7 +78,9 @@ Les builds utilisent un cache pip BuildKit : un build interrompu reprend sans re
    VOICE_MODEL=                       # facultatif, modèle OpenRouter acceptant l'audio
    VOICE_LANGUAGES=fr,en
    ```
-   `POSTGRES_HOST=db` et `POSTGRES_PORT=5432` : l'API joint la base par le réseau interne du compose.
+   `DATABASE_URL` : à copier depuis *General → Internal Credentials* du service PostgreSQL (hôte interne, port `5432`,
+   pas l'URL externe). `postgres://` / `postgresql://` sont convertis en driver psycopg 3. Caractères spéciaux du
+   mot de passe (`@ : / #`) à encoder (`%40`…). Il prime sur les `POSTGRES_*`, qui restent possibles à la place.
 3. Onglet *Domains* : service `api`, port `8000`. Puis *Deploy*.
 4. Après le premier déploiement (et après chaque nouvelle image avec un corpus modifié) :
    `curl -X POST https://<domaine>/api/v1/admin/rag/ingest`.

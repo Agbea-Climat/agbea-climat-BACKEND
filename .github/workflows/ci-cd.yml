@@ -167,6 +167,9 @@ jobs:
           for v in DOKPLOY_URL DOKPLOY_API_KEY DOKPLOY_COMPOSE_ID; do
             [ -n "${!v}" ] || missing="$missing $v"
           done
+          if [ -z "$API_URL" ]; then
+            echo "::warning::Variable API_URL absente de l'environnement production : vérification /health et ingestion RAG sautées."
+          fi
           if [ -n "$missing" ]; then
             echo "::warning::Déploiement sauté, secrets absents de l'environnement production :$missing (l'image est publiée)."
             echo "ok=false" >> "$GITHUB_OUTPUT"
