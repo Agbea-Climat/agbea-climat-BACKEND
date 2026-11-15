@@ -30,6 +30,9 @@
 - [ ] Équipe : trancher l'usage des chiffres du corpus (règle 5) ; vider `EMBEDDING_MODEL` sur Dokploy.
 - [ ] Corpus : ajouter des résumés sourcés (CDN 2021, PNACC, 4e Communication nationale, WACA).
 
+- [ ] Atlas du front : relancer `export-front` et recopier `public/atlas/` à chaque mise à jour des données (ou l'automatiser).
+- [ ] Chatbot : configurer `LLM_API_KEY` (OpenRouter) pour des réponses rédigées ; le mode gabarits reste le repli.
+
 ## Prochaines étapes
 
 - [ ] Tendances de pluie de signe opposé : IMERG ne montre aucune tendance (2001-2024), alors que MERRA-2 PRECTOTCORR affiche +100 à +200 mm/décennie\* sur plusieurs sites. Probablement des artefacts de la réanalyse (changements dans les observations assimilées). Ne jamais présenter la tendance MERRA-2 ; le garder comme contrôle des niveaux seulement (accord ±22 %).

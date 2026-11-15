@@ -15,6 +15,7 @@
   export-backend              livrable P2 du backend : data/regions.geojson, data/processed/{monthly.parquet,static.json}
   control-lst                 compare les tendances LST Terra / Aqua → data/interim/work/controls/ (hors « all »)
   corpus                      fiches du corpus RAG (data/corpus/fiches/) à partir de data/api/ + méthodologie
+  export-front [--front-dir D] atlas statique du front (cartes et fiches des notebooks) → data/api/front/atlas/ (hors « all »)
   all                         tout, dans l'ordre (saute IMERG proprement sans identifiants)
 """
 from __future__ import annotations
@@ -34,18 +35,19 @@ def main(argv=None) -> int:
     p = argparse.ArgumentParser(prog="pipeline", description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("step", choices=["boundaries", "power", "dem", "ndvi", "lst", "imerg",
-                                    "imerg-daily", "analyse", "export", "export-backend", "corpus", "lst-aqua", "control-lst", "all"])
+                                    "imerg-daily", "analyse", "export", "export-backend", "corpus", "export-front", "lst-aqua", "control-lst", "all"])
     p.add_argument("--hdx-dir", type=Path, help="dossier contenant tgo_admin{0..3}_em.geojson")
     p.add_argument("--map-togo-dir", type=Path, help="dossier web/data du projet MAP TOGO (regions/prefectures.geojson)")
     p.add_argument("--start", type=int)
     p.add_argument("--end", type=int)
     p.add_argument("--days", type=int, default=45)
     p.add_argument("--force", action="store_true", help="refait même si les fichiers existent")
+    p.add_argument("--front-dir", type=Path, help="export-front : dossier public/ du dépôt front (sinon data/api/front)")
     a = p.parse_args(argv)
     config.ensure_dirs()
     t0 = time.time()
 
-    from . import analysis, backend_export, boundaries, controls, corpus, export
+    from . import analysis, backend_export, boundaries, controls, corpus, export, front_export
     from .sources import imerg, modis, nasadem, power
 
     def step_imerg():
@@ -77,6 +79,7 @@ def main(argv=None) -> int:
         "export": export.run,
         "export-backend": backend_export.run,
         "corpus": corpus.run,
+        "export-front": lambda: front_export.run(a.front_dir),
     }
     order = ["boundaries", "power", "dem", "imerg", "imerg-daily", "ndvi", "lst", "analyse", "export", "export-backend", "corpus"]
     for name in (order if a.step == "all" else [a.step]):

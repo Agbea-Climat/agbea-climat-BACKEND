@@ -90,7 +90,7 @@ def test_chat_latest_values_are_dated(client):
         if s["nature"] == "observed" and s["source_ids"][0].startswith("computed:"):
             y, m = s["source_ids"][0].rsplit(":", 1)[1].split("-")
             assert y in s["text"], f"valeur non datée : {s['text']}"
-    assert "Données les plus récentes" in r["answer"]
+    assert "les mesures les plus récentes datent" in r["answer"]
 
 
 @pytest.mark.m26
@@ -126,7 +126,7 @@ def test_disclaimer_off_topic_chat_and_stream(client):
 @pytest.mark.real_data
 def test_chat_english(client):
     r = _chat(client, message="How much rain fell in Savanes in August 2025?", lang="en")
-    assert "Rainfall in August 2025" in r["answer"] and DISCLAIMER_EN in r["answer"]
+    assert "In August 2025, 191.6 mm of rain fell" in r["answer"] and DISCLAIMER_EN in r["answer"]
     assert r["disclaimer"] == DISCLAIMER
     assert "région" not in r["answer"]
 
@@ -148,7 +148,7 @@ def test_chat_calendar(client, _):
         pytest.skip("PostgreSQL injoignable")
     client.post(f"{API}/admin/rag/ingest")
     r = _chat(client, message="Quand semer le maïs dans les Plateaux ?")
-    assert "Semis : mars-avril" in r["answer"]
+    assert "semis en mars-avril" in r["answer"]
     docs = [s for s in r["sources"] if s["kind"] == "document"]
     assert len({s["title"] for s in docs}) == len(docs), "une source par document"
     quoted = [s for s in r["statements"] if s["nature"] == "interpreted"]
@@ -271,7 +271,7 @@ def test_chat_llm_fails_mid_stream(client, monkeypatch):
     monkeypatch.setattr(llm_client, "stream_text", broken)
     evs = sse_events(client.post(f"{API}/chat/stream", json={"message": "Il a plu combien à Lomé en juillet 2024 ?"}).text)
     text = "".join(e["content"] for e in evs if e["type"] == "token")
-    assert "interrompue" in text and "Pluie en juillet 2024" in text and DISCLAIMER in text
+    assert "interrompue" in text and "En juillet 2024, il est tombé 31,8 mm" in text and DISCLAIMER in text
     assert evs[-1]["type"] == "done"
 
 

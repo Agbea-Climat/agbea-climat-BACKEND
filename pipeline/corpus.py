@@ -91,56 +91,66 @@ def region_slugs(u: dict, idx: dict) -> list[str]:
     return [REGION_SLUGS[cur["id"]]] if cur["id"] in REGION_SLUGS else ALL_REGIONS
 
 
+SAISON_PHRASE = {"annual": "Sur l'ensemble de l'année", "jfm": "En saison sèche (janvier-mars)",
+                 "mjjaso": "En saison des pluies (mai-octobre)"}
+SAISON_COURT = {"annual": "sur l'année", "jfm": "en saison sèche", "mjjaso": "en saison des pluies"}
+NOM_PHRASE = {"rainfall": "la pluie", "ndvi": "la verdure de la végétation (NDVI)",
+              "lst_day": "la température du sol en journée", "lst_night": "la température du sol la nuit"}
+
+
+def _liste(items: list[str]) -> str:
+    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " et " + items[-1]
+
+
 def _climat(clim: pd.DataFrame) -> list[str]:
     out = []
     r = clim[clim.indicator == "rainfall"].set_index("month").clim_mean
     if len(r) == 12:
-        wet = r.sort_values(ascending=False)
-        out.append(f"- Pluie : environ {fr(r.sum(), 0)} mm par an. Mois les plus pluvieux : "
-                   + ", ".join(f"{MOIS[m - 1]} ({fr(v, 0)} mm)" for m, v in wet.head(3).items())
-                   + f". Mois le plus sec : {MOIS[r.idxmin() - 1]} ({fr(r.min(), 1)} mm).")
+        wet = [f"{MOIS[m - 1]} ({fr(v, 0)} mm)" for m, v in r.sort_values(ascending=False).head(3).items()]
+        out.append(f"Il tombe en moyenne environ {fr(r.sum(), 0)} mm de pluie par an. Les mois les plus pluvieux "
+                   f"sont {_liste(wet)}, et le plus sec est {MOIS[r.idxmin() - 1]} ({fr(r.min(), 1)} mm).")
     n = clim[clim.indicator == "ndvi"].set_index("month").clim_mean
     if len(n) == 12:
-        out.append(f"- Végétation (NDVI, de -1 à 1) : la plus verte en {MOIS[n.idxmax() - 1]} ({fr(n.max(), 2)}), "
-                   f"la moins verte en {MOIS[n.idxmin() - 1]} ({fr(n.min(), 2)}).")
+        out.append(f"La végétation est la plus verte en {MOIS[n.idxmax() - 1]} (indice NDVI de {fr(n.max(), 2)}) "
+                   f"et la moins verte en {MOIS[n.idxmin() - 1]} ({fr(n.min(), 2)}).")
     t = clim[clim.indicator == "lst_day"].set_index("month").clim_mean
     if len(t) == 12:
-        out.append(f"- Température du sol le jour : la plus chaude en {MOIS[t.idxmax() - 1]} ({fr(t.max(), 1)} °C), "
-                   f"la plus fraîche en {MOIS[t.idxmin() - 1]} ({fr(t.min(), 1)} °C).")
+        out.append(f"En journée, le sol est le plus chaud en {MOIS[t.idxmax() - 1]} ({fr(t.max(), 1)} °C) "
+                   f"et le plus frais en {MOIS[t.idxmin() - 1]} ({fr(t.min(), 1)} °C).")
     return out
 
 
 def _tendances(trends: dict, level: str) -> list[str]:
-    sig, non = [], []
+    sig, non = [], {}
     for ind in ["rainfall", "ndvi", "lst_day", "lst_night"]:
         for season, t in (trends.get(ind) or {}).items():
             if season not in SAISON or not t:
                 continue
-            per = f"{t['first_year']}-{t['last_year']}"
-            label = f"{NOM_COURT[ind]} ({SAISON[season]}, {per})"
             if t.get("significant"):
                 nd, u = DEC_PENTE[ind], UNITE_PENTE[ind]
                 unit = f" {u}" if u else ""
-                pct = (f", soit {fr(t['sen_slope_pct_per_decade'], 1)} %"
+                pct = (f", soit {fr(abs(t['sen_slope_pct_per_decade']), 1)} %"
                        if ind == "rainfall" and t.get("sen_slope_pct_per_decade") is not None else "")
                 sens = "hausse" if t["sen_slope_per_decade"] > 0 else "baisse"
-                sig.append(f"- {NOM_IND[ind]} ({SAISON[season]}, {per}) : {sens} de "
-                           f"{fr(abs(t['sen_slope_per_decade']), nd)}{unit} par décennie{pct} "
-                           f"(intervalle de confiance à 95 % : {fr(t['sen_ci95_low_per_decade'], nd)} à "
+                sig.append(f"{SAISON_PHRASE[season]}, entre {t['first_year']} et {t['last_year']}, "
+                           f"{NOM_PHRASE[ind]} est en {sens} d'environ {fr(abs(t['sen_slope_per_decade']), nd)}{unit} "
+                           f"par décennie{pct} (fourchette probable : {fr(t['sen_ci95_low_per_decade'], nd)} à "
                            f"{fr(t['sen_ci95_high_per_decade'], nd)}{unit}).")
             else:
-                non.append(label)
-    out = ["Test de Mann-Kendall au seuil de 5 %, pente de Sen. On ne parle de tendance que si le test est "
-           "significatif."]
-    out += [""] + (sig or ["- Aucune tendance significative."])
-    if non:
-        out.append("- Pas de tendance significative pour : " + " ; ".join(non) + ".")
+                non.setdefault(ind, []).append(SAISON_COURT[season])
+    out = ["Les tendances sont vérifiées avec le test de Mann-Kendall au seuil de 5 % et mesurées par la pente de "
+           "Sen : on ne parle de tendance que si le test est significatif.", ""]
+    for line in sig or ["Aucune tendance nette n'apparaît dans cette zone."]:
+        out += [line, ""]
+    for ind, seasons in non.items():
+        out += [f"Pas de tendance nette pour {NOM_PHRASE[ind]} ({', '.join(seasons)}).", ""]
     # lignes vides : chaque remarque est une unité citable à part (chatbot/tools/retrieve._units)
-    out += ["", "Les tendances de température du sol s'arrêtent en 2020 (dérive d'orbite du satellite Terra)."]
+    out += ["Les tendances de température du sol s'arrêtent en 2020, à cause de la dérive d'orbite du satellite "
+            "Terra.", ""]
     if level in ("prefecture", "site"):
-        out += [""]
         out.append("À l'échelle des préfectures et des sites, des dizaines de séries sont testées : environ une sur "
-                   "vingt peut paraître significative par hasard. Une tendance isolée est à confirmer avec les zones voisines.")
+                   "vingt peut paraître significative par hasard. Une tendance isolée est à confirmer avec les "
+                   "zones voisines.")
     return out
 
 
@@ -148,23 +158,25 @@ def _dernieres(latest: dict) -> list[str]:
     out = []
     r = latest.get("rainfall")
     if r and r.get("value") is not None:
-        ecart = f", écart {'+' if r['anomaly_pct'] > 0 else ''}{fr(r['anomaly_pct'], 1)} %" if r.get("anomaly_pct") is not None else ""
-        out.append(f"- Pluie, {mois_annee(r['date'])} : {fr(r['value'], 1)} mm (normale du mois : "
-                   f"{fr(r['clim_mean'], 1)} mm{ecart}). La série de pluie (IMERG Final) s'arrête pour l'instant à ce mois.")
-    for ind, unit, nd in (("ndvi", "", 3), ("lst_day", " °C", 1)):
-        v = latest.get(ind)
-        if v and v.get("value") is not None:
-            ecart = v["value"] - v["clim_mean"]
-            txt = (f"- {NOM_IND[ind]}, {mois_annee(v['date'])} : {fr(v['value'], nd)}{unit} (normale du mois : "
-                   f"{fr(v['clim_mean'], nd)}{unit}, écart {'+' if ecart > 0 else ''}{fr(ecart, nd)}{unit}).")
-            if ind == "lst_day":
-                txt += " Température du sol publiée jusqu'en décembre 2022."
-            if (v.get("valid_frac") or 1) < 0.5:
-                txt += " Attention : moins de la moitié de la zone visible (nuages), valeur peu fiable."
-            out.append(txt)
+        ecart = (f" (écart de {'+' if r['anomaly_pct'] > 0 else ''}{fr(r['anomaly_pct'], 1)} %)"
+                 if r.get("anomaly_pct") is not None else "")
+        out.append(f"En {mois_annee(r['date'])}, dernier mois disponible pour la pluie, il est tombé "
+                   f"{fr(r['value'], 1)} mm, contre {fr(r['clim_mean'], 1)} mm en moyenne pour ce mois{ecart}.")
+    v = latest.get("ndvi")
+    if v and v.get("value") is not None:
+        txt = (f"En {mois_annee(v['date'])}, l'indice de verdure de la végétation (NDVI) était de "
+               f"{fr(v['value'], 3)}, contre {fr(v['clim_mean'], 3)} en moyenne pour ce mois.")
+        out.append(txt + (" Attention : les nuages cachaient plus de la moitié de la zone, valeur peu fiable."
+                          if (v.get("valid_frac") or 1) < 0.5 else ""))
+    v = latest.get("lst_day")
+    if v and v.get("value") is not None:
+        txt = (f"En {mois_annee(v['date'])}, dernier mois publié pour la température du sol, elle était en journée "
+               f"de {fr(v['value'], 1)} °C, contre {fr(v['clim_mean'], 1)} °C en moyenne pour ce mois.")
+        out.append(txt + (" Attention : les nuages cachaient plus de la moitié de la zone, valeur peu fiable."
+                          if (v.get("valid_frac") or 1) < 0.5 else ""))
     if out:
-        out.insert(0, "Dernière valeur fiable de chaque indicateur (au moins la moitié de la zone visible) :")
-    return out
+        out.insert(0, "Dernières valeurs fiables, quand au moins la moitié de la zone était visible :")
+    return [x for line in out for x in (line, "")]
 
 
 def fiche(s: dict, idx: dict, clim: pd.DataFrame, today: str) -> str:
@@ -186,12 +198,13 @@ def fiche(s: dict, idx: dict, clim: pd.DataFrame, today: str) -> str:
     ]
     if e:
         lines += ["## Relief (NASADEM)", "",
-                  f"Altitude moyenne {fr(e['mean'], 0)} m (de {fr(e['min'], 0)} à {fr(e['max'], 0)} m). "
-                  f"{fr(e['pct_below_10m'], 1)} % du territoire est à moins de 10 m d'altitude"
-                  + (" (zones basses, exposées aux inondations et à la mer)." if e["pct_below_10m"] >= 5 else "."), ""]
+                  f"L'altitude moyenne est de {fr(e['mean'], 0)} m, de {fr(e['min'], 0)} à {fr(e['max'], 0)} m. "
+                  f"{fr(e['pct_below_10m'], 1)} % du territoire se trouve à moins de 10 m d'altitude"
+                  + (" : ce sont des zones basses, exposées aux inondations et à la mer." if e["pct_below_10m"] >= 5
+                     else "."), ""]
     c = _climat(clim)
     if c:
-        lines += ["## Climat habituel (normales 2001-2020)", "", *c, ""]
+        lines += ["## Climat habituel (normales 2001-2020)", "", *[x for line in c for x in (line, "")]]
     lines += ["## Tendances observées", "", *_tendances(s.get("trends") or {}, lvl), ""]
     d = _dernieres(s.get("latest") or {})
     if d:

@@ -41,6 +41,7 @@ python -m venv .venv
 | `export` | `data/api/` : livrable complet (voir contrat-donnees.md) | ~1 min | refait tout |
 | `export-backend` | **livrable P2** : `data/regions.geojson`, `data/processed/monthly.parquet`, `data/processed/static.json` | 3 s | refait tout |
 | `corpus` | fiches du corpus RAG à partir de `data/api/` (pays, 5 régions, 39 préfectures, 7 sites) → `data/corpus/fiches/`, copie de la méthodologie, mise à jour de `data/corpus/sources.json` (D31, guide : `docs/chatbot-corpus.md`) | < 10 s | refait tout |
+| `export-front [--front-dir D]` | atlas statique du front (D32) : contours des régions, préfectures, cantons et sites, `values.json` (normale 2001-2020, dernière année complète, écart, tendance par zone × indicateur × saison), séries annuelles par zone, fiches → `data/api/front/atlas/` (ou `D/atlas/`). À copier dans `public/atlas/` du dépôt front ; page « Atlas des données » (`/donnees`) | ~1,5 min | refait tout |
 
 Contrôles (hors livrable, hors `all`, rien n'est publié) :
 

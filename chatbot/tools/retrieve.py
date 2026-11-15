@@ -133,6 +133,22 @@ def _clean(text: str) -> str:
     return " ".join(text.replace("**", "").split())
 
 
+def _row_sentence(header: list[str], cells: list[str]) -> str:
+    """Rangée de tableau en phrase lisible.
+
+    Calendrier : « Maïs de saison principale : semis en mars-avril, récolte en août-septembre. »
+    Zones : « Maritime, Plateaux (zone guinéenne (sud), climat plus humide) : deux saisons… ; pluie annuelle… »
+    Autres : « En-tête : valeur, en-tête : valeur. »"""
+    row = {h.strip().lower(): c.strip() for h, c in zip(header, cells)}
+    if {"culture", "semis", "récolte"} <= row.keys():
+        return f"{row['culture']} : semis en {row['semis']}, récolte en {row['récolte']}."
+    if "région" in row and "saisons des pluies" in row:
+        rain = next((v for k, v in row.items() if k.startswith("pluie")), "")
+        text = f"{row['région']}, zone {row.get('zone', '')} : {row['saisons des pluies']}"
+        return text + (f", et {rain} de pluie par an." if rain else ".")
+    return ", ".join(f"{h} : {c}" for h, c in zip(header, cells)) + "."
+
+
 def _units(content: str, with_heading: bool = False) -> list:
     """Découpe un morceau en unités citables : paragraphe, puce, ou rangée de tableau avec son en-tête.
 
@@ -174,7 +190,7 @@ def _units(content: str, with_heading: bool = False) -> list:
                     continue
                 header = None
             if header and len(header) == len(cells):
-                out.append((heading, _clean(" ; ".join(f"{h} : {c}" for h, c in zip(header, cells)))))
+                out.append((heading, _clean(_row_sentence(header, cells))))
             # rangée sans son en-tête (morceau coupé dans le tableau) : sens perdu, non citée
             continue
         in_table, header = False, None
@@ -202,6 +218,30 @@ def unit_score(heading: str, unit: str, kws: dict[str, int]) -> int:
     return _score(unit, kws) + 2 * _score(heading, kws)
 
 
+def best_passages(chunks: list[Chunk], question: str, max_n: int = 2) -> list[tuple[Chunk, str]]:
+    """Les lignes les mieux notées (score ≥ meilleur score − 1, au moins 1), dans l'ordre du document :
+    les puces d'une section qui répond (« 8. Tendances » → Mann-Kendall, Theil-Sen…), pas les lignes qui ne
+    citent le mot qu'en passant."""
+    kws = keywords(question)
+    scored = []
+    for ci, c in enumerate(chunks):
+        for ui, (h, u) in enumerate(_units(c.content, with_heading=True)):
+            if not u.startswith(("Source :", "Sources :")):
+                scored.append((unit_score(h, u, kws), ci, ui, c, u))
+    if not scored:
+        return []
+    top = max(s[0] for s in scored)
+    if top <= 0:
+        return []
+    seen, out = set(), []
+    floor = max(1, top - 1)
+    for s, ci, ui, c, u in sorted(scored, key=lambda x: (x[1], x[2])):
+        if s >= floor and u not in seen:
+            seen.add(u)
+            out.append((c, u))
+    return out[:max_n]
+
+
 def passages(chunks: list[Chunk], question: str, region_id: Optional[str] = None,
              max_n: int = 5) -> list[tuple[Chunk, str]]:
     """Passages les plus pertinents (score > 0), dans l'ordre du document, sans doublon."""
@@ -209,7 +249,7 @@ def passages(chunks: list[Chunk], question: str, region_id: Optional[str] = None
     scored, seen = [], set()
     for ci, c in enumerate(chunks):
         for ui, (h, u) in enumerate(_units(c.content, with_heading=True)):
-            if u in seen or u.startswith("Source :"):   # ligne de provenance : déjà dans la source citée
+            if u in seen or u.startswith(("Source :", "Sources :")):   # provenance : déjà dans la source citée
                 continue
             seen.add(u)
             s = unit_score(h, u, kws)

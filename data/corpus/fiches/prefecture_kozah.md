@@ -8,34 +8,48 @@ Préfecture Kozah, région Kara. Superficie : 1078 km². Centre : longitude 1,14
 
 ## Relief (NASADEM)
 
-Altitude moyenne 347 m (de 180 à 792 m). 0,0 % du territoire est à moins de 10 m d'altitude.
+L'altitude moyenne est de 347 m, de 180 à 792 m. 0,0 % du territoire se trouve à moins de 10 m d'altitude.
 
 ## Climat habituel (normales 2001-2020)
 
-- Pluie : environ 1291 mm par an. Mois les plus pluvieux : septembre (258 mm), août (250 mm), juillet (225 mm). Mois le plus sec : décembre (1,6 mm).
-- Végétation (NDVI, de -1 à 1) : la plus verte en septembre (0,68), la moins verte en janvier (0,30).
-- Température du sol le jour : la plus chaude en mars (37,3 °C), la plus fraîche en juillet (28,8 °C).
+Il tombe en moyenne environ 1291 mm de pluie par an. Les mois les plus pluvieux sont septembre (258 mm), août (250 mm) et juillet (225 mm), et le plus sec est décembre (1,6 mm).
+
+La végétation est la plus verte en septembre (indice NDVI de 0,68) et la moins verte en janvier (0,30).
+
+En journée, le sol est le plus chaud en mars (37,3 °C) et le plus frais en juillet (28,8 °C).
 
 ## Tendances observées
 
-Test de Mann-Kendall au seuil de 5 %, pente de Sen. On ne parle de tendance que si le test est significatif.
+Les tendances sont vérifiées avec le test de Mann-Kendall au seuil de 5 % et mesurées par la pente de Sen : on ne parle de tendance que si le test est significatif.
 
-- Végétation (NDVI) (mai-octobre, saison des pluies, 2002-2026) : hausse de 0,010 par décennie (intervalle de confiance à 95 % : 0,001 à 0,018).
-- Température du sol la nuit (sur l'année, 2001-2020) : hausse de 0,56 °C par décennie (intervalle de confiance à 95 % : 0,28 à 0,77 °C).
-- Température du sol la nuit (janvier-mars, saison sèche, 2001-2020) : hausse de 0,51 °C par décennie (intervalle de confiance à 95 % : 0,16 à 0,95 °C).
-- Température du sol la nuit (mai-octobre, saison des pluies, 2001-2020) : hausse de 0,69 °C par décennie (intervalle de confiance à 95 % : 0,37 à 0,97 °C).
-- Pas de tendance significative pour : pluie (sur l'année, 2001-2024) ; pluie (janvier-mars, saison sèche, 2001-2025) ; pluie (mai-octobre, saison des pluies, 2001-2024) ; végétation (NDVI) (sur l'année, 2001-2025) ; végétation (NDVI) (janvier-mars, saison sèche, 2001-2026) ; température du sol le jour (sur l'année, 2001-2020) ; température du sol le jour (janvier-mars, saison sèche, 2001-2020) ; température du sol le jour (mai-octobre, saison des pluies, 2001-2020).
+En saison des pluies (mai-octobre), entre 2002 et 2026, la verdure de la végétation (NDVI) est en hausse d'environ 0,010 par décennie (fourchette probable : 0,001 à 0,018).
 
-Les tendances de température du sol s'arrêtent en 2020 (dérive d'orbite du satellite Terra).
+Sur l'ensemble de l'année, entre 2001 et 2020, la température du sol la nuit est en hausse d'environ 0,56 °C par décennie (fourchette probable : 0,28 à 0,77 °C).
+
+En saison sèche (janvier-mars), entre 2001 et 2020, la température du sol la nuit est en hausse d'environ 0,51 °C par décennie (fourchette probable : 0,16 à 0,95 °C).
+
+En saison des pluies (mai-octobre), entre 2001 et 2020, la température du sol la nuit est en hausse d'environ 0,69 °C par décennie (fourchette probable : 0,37 à 0,97 °C).
+
+Pas de tendance nette pour la pluie (sur l'année, en saison sèche, en saison des pluies).
+
+Pas de tendance nette pour la verdure de la végétation (NDVI) (sur l'année, en saison sèche).
+
+Pas de tendance nette pour la température du sol en journée (sur l'année, en saison sèche, en saison des pluies).
+
+Les tendances de température du sol s'arrêtent en 2020, à cause de la dérive d'orbite du satellite Terra.
 
 À l'échelle des préfectures et des sites, des dizaines de séries sont testées : environ une sur vingt peut paraître significative par hasard. Une tendance isolée est à confirmer avec les zones voisines.
 
 ## Dernières observations
 
-Dernière valeur fiable de chaque indicateur (au moins la moitié de la zone visible) :
-- Pluie, septembre 2025 : 228,4 mm (normale du mois : 257,9 mm, écart -11,5 %). La série de pluie (IMERG Final) s'arrête pour l'instant à ce mois.
-- Végétation (NDVI), octobre 2026 : 0,667 (normale du mois : 0,650, écart +0,018).
-- Température du sol le jour, décembre 2022 : 33,1 °C (normale du mois : 34,9 °C, écart -1,8 °C). Température du sol publiée jusqu'en décembre 2022.
+Dernières valeurs fiables, quand au moins la moitié de la zone était visible :
+
+En septembre 2025, dernier mois disponible pour la pluie, il est tombé 228,4 mm, contre 257,9 mm en moyenne pour ce mois (écart de -11,5 %).
+
+En octobre 2026, l'indice de verdure de la végétation (NDVI) était de 0,667, contre 0,650 en moyenne pour ce mois.
+
+En décembre 2022, dernier mois publié pour la température du sol, elle était en journée de 33,1 °C, contre 34,9 °C en moyenne pour ce mois.
+
 
 ## À retenir
 

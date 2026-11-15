@@ -213,7 +213,7 @@ def test_corpus_fiche_format():
          "latest": {}}
     idx = {"TG-A": {"id": "TG-A", "level": "region", "name": "Maritime", "parent_id": "TG"}}
     txt = corpus.fiche(s, idx, pd.DataFrame(columns=["indicator", "month", "clim_mean"]), "2026-11-15")
-    assert "hausse de 0,80 °C par décennie" in txt
-    assert "Pas de tendance significative pour : pluie (sur l'année, 2001-2024)" in txt
+    assert "en hausse d'environ 0,80 °C par décennie" in txt
+    assert "Pas de tendance nette pour la pluie (sur l'année)" in txt
     assert "((" not in txt and "ANAMET" in txt
     assert corpus.region_slugs(s["unit"], idx) == ["maritime"]

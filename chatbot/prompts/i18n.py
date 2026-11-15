@@ -81,12 +81,13 @@ def region_phrase(region_name: str, lang: str | None) -> str:
 TEXT = {
     "intro": {"fr": "Observations satellites (NASA) pour la région {region} :",
               "en": "NASA satellite observations for the {region} region:"},
-    "need_region": {"fr": "Précisez une région du Togo (Maritime, Plateaux, Centrale, Kara ou Savanes) pour que je "
-                          "vous donne les observations satellites correspondantes.",
-                    "en": "Please name a region of Togo (Maritime, Plateaux, Centrale, Kara or Savanes) so I can "
-                          "give you the matching satellite observations."},
+    "need_region": {"fr": "Précisez une région du Togo (Maritime, Plateaux, Centrale, Kara ou Savanes), une "
+                          "préfecture ou une ville, et je vous donne ce que les satellites y ont observé.",
+                    "en": "Tell me a region of Togo (Maritime, Plateaux, Centrale, Kara or Savanes), a prefecture or "
+                          "a town, and I will tell you what the satellites observed there."},
     "more": {"fr": "Pour en savoir plus : « {title} ».", "en": "To learn more (in French): \"{title}\"."},
-    "latest": {"fr": "Données les plus récentes : {items}.", "en": "Most recent data: {items}."},
+    "latest": {"fr": "À noter : les mesures les plus récentes datent {items}.",
+               "en": "Note: the latest measurements are from {items}."},
     "no_forecast": {
         "fr": "AGBÉA CLIMAT ne fait pas de prévision météo : pour savoir s'il va pleuvoir, consultez la météo "
               "nationale (ANAMET, Agence nationale de la météorologie du Togo). Je peux seulement vous montrer "
@@ -97,11 +98,9 @@ TEXT = {
     "future": {"fr": "{month} est dans le futur : AGBÉA CLIMAT ne montre que des observations passées et ne fait "
                      "pas de prévision.",
                "en": "{month} is in the future: AGBÉA CLIMAT only shows past observations and makes no forecast."},
-    "calendar_intro": {"fr": "D'après le document « {title} » :", "en": "According to the document \"{title}\" "
-                                                                        "(quoted in French):"},
-    "zone_intro": {"fr": "D'après la fiche « {title} » (calculée à partir des mêmes données satellites) :",
-                   "en": "According to the fact sheet \"{title}\" (computed from the same satellite data, quoted "
-                         "in French):"},
+    "calendar_intro": {"fr": "D'après {title} :", "en": "According to {title} (in French):"},
+    "zone_intro": {"fr": "D'après notre fiche sur {title}, calculée à partir des mêmes données satellites :",
+                   "en": "According to our fact sheet on {title}, computed from the same satellite data (in French):"},
     "calendar_none": {"fr": "Je n'ai pas trouvé le calendrier agricole dans le corpus de documents.",
                       "en": "I could not find the agricultural calendar in the document corpus."},
     "calendar_caveat": {"fr": "Les dates exactes changent chaque année avec le démarrage des pluies : confirmez-les "
@@ -115,12 +114,18 @@ TEXT = {
     "trend_note": {"fr": "Une comparaison entre deux décennies décrit le passé ; elle ne dit pas ce qui va se passer.",
                    "en": "A comparison between two decades describes the past; it does not say what will happen."},
     "off_topic": {
-        "fr": "Je suis l'assistant d'AGBÉA CLIMAT : je réponds aux questions sur le climat et l'environnement "
-              "du Togo (pluie, végétation, température du sol, altitude) à partir des données satellites de la "
-              "NASA. Posez-moi par exemple : « Comment évolue la pluie dans les Savanes ? »",
-        "en": "I am the AGBÉA CLIMAT assistant: I answer questions about climate and the environment in Togo "
-              "(rain, vegetation, land temperature, elevation) from NASA satellite data. Try: \"How is rainfall "
-              "changing in Savanes?\""},
+        "fr": "Je suis l'assistant d'AGBÉA CLIMAT. Je réponds aux questions sur le climat et l'environnement du "
+              "Togo à partir des données satellites de la NASA : pluie, végétation, température du sol et relief. "
+              "Vous pouvez par exemple me demander combien il a plu à Kara en août 2025, ou comment évolue la "
+              "végétation dans les Savanes.",
+        "en": "I am the AGBÉA CLIMAT assistant. I answer questions about climate and the environment in Togo from "
+              "NASA satellite data: rainfall, vegetation, land temperature and terrain. You can ask me, for "
+              "example, how much it rained in Kara in August 2025, or how vegetation is changing in Savanes."},
+    "greeting": {"fr": "Bonjour ! ", "en": "Hello! "},
+    "zone_region": {"fr": "Les valeurs mois par mois ne sont disponibles que par région : voici celles de la "
+                          "région {region}, où se trouve {zone}.",
+                    "en": "Month-by-month values are only available per region: here are those of the {region} "
+                          "region, where {zone} is located."},
     "interrupted": {"fr": "(La réponse rédigée a été interrompue. Voici les données calculées :)",
                     "en": "(The written answer was interrupted. Here is the computed data:)"},
     "doc_pointer": {"fr": "Pour comprendre cet indicateur, voir « {title} ».",

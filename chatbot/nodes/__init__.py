@@ -56,6 +56,20 @@ TOPIC_WORDS = {"saison", "saisons", "semis", "semer", "sol", "sols", "eau", "nas
                "anomalie", "champ", "champs", "planter", "region", "regions", "carte", "donnee", "donnees",
                "cultiver", "recoltes", "elevage", "season", "seasons", "soil", "water", "farm", "farming"}
 FOLLOW_UP_FIRST = {"et", "and"}
+# « Qu'est-ce qu'une normale ? », « c'est quoi le NDVI », « what is… » : réponse depuis le glossaire
+DEFINITION = re.compile(r"\b(qu est[ -]ce|c est quoi|que veut dire|que signifie|signification|definition|definir|"
+                        r"what is|what does|meaning of)\b")
+GREETINGS = {"bonjour", "bonsoir", "salut", "hello", "hi", "hey", "coucou", "yo"}
+# Nom lisible d'un document du corpus dans une phrase (« D'après notre glossaire : »)
+DOC_LABELS = {
+    "glossaire_faq.md": ("notre glossaire", "our glossary"),
+    "methodologie_agbea.md": ("la méthodologie d'AGBÉA CLIMAT", "the AGBÉA CLIMAT methodology"),
+    "limites_donnees_agbea.md": ("notre page sur les limites des données", "our page on the data limits"),
+    "calendrier_agricole_togo.md": ("le calendrier agricole de la FAO et de l'UNICEF",
+                                    "the FAO and UNICEF crop calendar"),
+    "climat_togo_tendances.md": ("le rapport de l'UNICEF sur le climat du Togo",
+                                 "the UNICEF report on Togo's climate"),
+}
 # Température de nuit : absente de l'API (lst_day seulement), présente dans les fiches de zone (tendances)
 NIGHT_WORDS = {"nuit", "nuits", "nocturne", "nocturnes", "night", "nights", "nighttime"}
 
@@ -204,7 +218,7 @@ async def retrieve_docs(state: ChatState) -> dict:
     passages_raw: list[tuple[retrieve.Chunk, str]] = []
     if intent == "calendar":
         cal = retrieve.search(f"{msg} calendrier semis récolte saison des pluies", k=4, files=[retrieve.CALENDAR_FILE])
-        passages_raw = retrieve.passages(cal, msg, region_id)
+        passages_raw = _calendar_passages(cal, msg, region_id)
         chunks += cal
     limits: list[retrieve.Chunk] = []
     if intent == "trend" and "lst_day" in (inds or ind_service.TS_INDICATORS):
@@ -223,7 +237,12 @@ async def retrieve_docs(state: ChatState) -> dict:
         fc = retrieve.search(msg, k=3, files=[fiche])
         zone_raw = retrieve.passages(fc, _fiche_query(state, fiche), None, max_n=4)
         if state.get("night"):   # question sur la nuit : pas les lignes de température de jour
-            zone_raw = [(c, u) for c, u in zone_raw if "le jour" not in u]
+            zone_raw = [(c, u) for c, u in zone_raw if "le jour" not in u and "en journée" not in u]
+        topic = {"precipitation": ("pluie", "pluvieux"), "ndvi": ("végétation", "verdure", "NDVI", "verte"),
+                 "lst_day": ("température",), "lst_night": ("nuit",), "elevation": ("altitude", "mètres", " m ")}
+        words = [w for i in inds for w in topic.get(i, ())]
+        if words:                # question sur un indicateur : pas les lignes des autres
+            zone_raw = [(c, u) for c, u in zone_raw if any(w.lower() in u.lower() for w in words)] or zone_raw
         chunks = fc + chunks
     general = retrieve.search(msg, k=5, indicator=inds[0] if len(inds) == 1 else None, region_id=region_id,
                               exclude_fiches=True)
@@ -235,7 +254,10 @@ async def retrieve_docs(state: ChatState) -> dict:
         kws = retrieve.keywords(msg)
         # 3 documents les plus proches, lus en entier (jusqu'à 4 morceaux) : on garde celui dont la meilleure
         # ligne répond le mieux à la question (à égalité : le plus proche dans la recherche)
-        candidates = {f: retrieve.search(msg, k=4, files=[f]) for f in list(dict.fromkeys(c.file for c in general))[:3]}
+        files = list(dict.fromkeys(c.file for c in general))[:3]
+        if DEFINITION.search(question.normalize(msg)) and "glossaire_faq.md" not in files:
+            files.insert(0, "glossaire_faq.md")
+        candidates = {f: retrieve.search(msg, k=4, files=[f]) for f in files}
 
         def best_line(f: str) -> int:
             return max((retrieve.unit_score(h, u, kws) for c in candidates[f]
@@ -243,8 +265,9 @@ async def retrieve_docs(state: ChatState) -> dict:
         # à score égal : les documents qui expliquent l'application (glossaire, méthodologie, limites, indicateurs)
         # passent avant les documents de contexte (rapport UNICEF, calendrier) ; puis le plus proche
         explains = lambda f: f in retrieve.APP_DOCS or f.startswith(("comprendre_", "fiche_"))  # noqa: E731
-        chosen = max(candidates, key=lambda f: (best_line(f), explains(f)))
-        doc_raw = retrieve.passages(candidates[chosen], msg, None, max_n=3)
+        definition = bool(DEFINITION.search(question.normalize(msg)))
+        chosen = max(candidates, key=lambda f: (best_line(f), definition and f == "glossaire_faq.md", explains(f)))
+        doc_raw = retrieve.best_passages(candidates[chosen], msg, max_n=3)
         chunks += [c for c in candidates[chosen] if c not in chunks]
     # Une source par document : l'id du premier morceau retenu de chaque fichier
     file_ids: dict[str, str] = {}
@@ -265,6 +288,19 @@ async def retrieve_docs(state: ChatState) -> dict:
         if quoted:
             d["snippet"] = " … ".join(quoted)
     return {"docs": docs, "passages": passages, "notes": notes}
+
+
+def _calendar_passages(cal: list, msg: str, region_id: Optional[str]) -> list:
+    rows = retrieve.passages(cal, msg, region_id, max_n=12)
+    crops = question.crops(msg)
+    region = region_service.get_region(region_id).name if region_id else None
+    crop_rows = [(c, u) for c, u in rows if "semis en" in u and any(cr in question.normalize(u) for cr in crops)]
+    zone_rows = [(c, u) for c, u in rows if ", zone " in u and region and region in u]
+    caveat = [(c, u) for c, u in rows if u.startswith("Attention, les deux sources") and region_id in ("centrale", "kara")]
+    chosen = crop_rows[:2] + zone_rows[:1] + caveat
+    if not crop_rows and crops:   # culture absente du calendrier : rangées de toutes les cultures
+        chosen = [(c, u) for c, u in rows if "semis en" in u][:3] + zone_rows[:1] + caveat
+    return chosen or rows[:3]
 
 
 def _fiche_query(state: ChatState, fiche: str) -> str:
@@ -293,39 +329,59 @@ def _template_answer(state: ChatState, with_disclaimer: bool = True) -> str:
         parts.append(i18n.t("no_forecast", lang))
     all_passages = state.get("passages") or []
     zone_p = [p for p in all_passages if p.get("kind") == "zone"]
+    if state.get("date_req") and state.get("facts") and not state.get("night"):
+        zone_p = []   # mois ou année précis déjà répondu par les données : la fiche n'ajoute que du bruit
     doc_p = [p for p in all_passages if p.get("kind") == "doc"]
     if intent == "calendar":
         passages = [p for p in all_passages if p.get("kind", "calendar") == "calendar"]
         if passages:
-            parts.append(i18n.t("calendar_intro", lang, title=passages[0]["title"]))
-            parts += [f"— {p['text']}" for p in passages]
+            parts.append(i18n.t("calendar_intro", lang, title=_doc_label(passages[0], lang)))
+            parts += [p["text"] for p in passages]
             parts.append(i18n.t("calendar_caveat", lang))
         else:
             parts.append(i18n.t("calendar_none", lang))
     facts = state.get("facts") or []
+    zone = state.get("zone")
+    if region_id and facts and zone and zone.get("level") in ("prefecture", "site")             and any(f.get("has_value") for f in facts):
+        # préfecture ou site cité : dire que les chiffres du mois sont ceux de la région qui le contient
+        parts.append(i18n.t("zone_region", lang, region=region_service.get_region(region_id).name,
+                            zone=_zone_name(zone["title"])))
     if region_id and facts:
-        parts.append(i18n.t("intro", lang, region=region_service.get_region(region_id).name))
         parts += [f["text"] for f in facts]
         if state.get("recency"):
             parts.append(state["recency"])
     if zone_p:
-        parts.append(i18n.t("zone_intro", lang, title=zone_p[0]["title"]))
-        parts += [f"— {p['text']}" for p in zone_p]
+        parts.append(i18n.t("zone_intro", lang, title=_zone_name(zone_p[0]["title"])))
+        parts += [p["text"] for p in zone_p]
     if doc_p:
-        parts.append(i18n.t("calendar_intro", lang, title=doc_p[0]["title"]))
-        parts += [f"— {p['text']}" for p in doc_p]
+        parts.append(i18n.t("calendar_intro", lang, title=_doc_label(doc_p[0], lang)))
+        parts += [p["text"] for p in doc_p]
     if not region_id and intent != "calendar" and not zone_p and not doc_p:
         parts.append(i18n.t("need_region", lang))
     parts += [n["text"] for n in state.get("notes", []) if n not in _passage_notes(state)]
     if intent == "trend" and facts:
         parts.append(i18n.t("trend_note", lang))
-    quoted = {p["file"] for p in all_passages}
-    docs = [d for d in state.get("docs", []) if d["file"] not in quoted]
-    if docs:
-        parts.append(i18n.t("more", lang, title=docs[0]["title"]))
     if with_disclaimer:
         parts.append(i18n.disclaimer_text(lang))
     return "\n".join(parts)
+
+
+def _zone_name(title: str) -> str:
+    """« Fiche climatique AGBÉA : site pilote Kpalimé & Mont Agou » → « le site pilote Kpalimé et Mont Agou »."""
+    name = title.split(":", 1)[-1].strip().replace(" & ", " et ")
+    if name.startswith(("préfecture", "site", "Togo")):
+        return ("le " if name.startswith("site") else "la " if name.startswith("préfecture") else "le ") + name
+    if name.startswith("région"):
+        return "la " + name
+    return name
+
+
+def _doc_label(passage: dict, lang: str) -> str:
+    fr, en = DOC_LABELS.get(passage["file"], (None, None))
+    if fr:
+        return fr if lang != "en" else en
+    title = passage["title"].split(" (")[0]
+    return (f"le document {title}" if lang != "en" else f"the document {title}")
 
 
 def _passage_notes(state: ChatState) -> list[dict]:
@@ -386,7 +442,8 @@ async def generate(state: ChatState) -> dict:
     write = get_stream_writer()
     lang = state.get("lang", "fr")
     if state.get("off_topic"):
-        answer = f"{i18n.t('off_topic', lang)}\n\n{i18n.disclaimer_text(lang)}"
+        hello = i18n.t("greeting", lang) if set(question.words(state["message"])) & GREETINGS else ""
+        answer = f"{hello}{i18n.t('off_topic', lang)}\n\n{i18n.disclaimer_text(lang)}"
         _emit_words(write, answer)
         return {"answer": answer, "statements": [], "sources": [],
                 "history": [{"role": "user", "content": state["message"]}, {"role": "assistant", "content": answer}]}

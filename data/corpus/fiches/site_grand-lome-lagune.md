@@ -8,33 +8,46 @@ Site pilote Grand Lomé & Lagune, dans la préfecture Golfe (région Maritime). 
 
 ## Relief (NASADEM)
 
-Altitude moyenne 21 m (de -5 à 58 m). 26,2 % du territoire est à moins de 10 m d'altitude (zones basses, exposées aux inondations et à la mer).
+L'altitude moyenne est de 21 m, de -5 à 58 m. 26,2 % du territoire se trouve à moins de 10 m d'altitude : ce sont des zones basses, exposées aux inondations et à la mer.
 
 ## Climat habituel (normales 2001-2020)
 
-- Pluie : environ 1008 mm par an. Mois les plus pluvieux : juin (192 mm), mai (162 mm), octobre (124 mm). Mois le plus sec : janvier (12,8 mm).
-- Végétation (NDVI, de -1 à 1) : la plus verte en juillet (0,38), la moins verte en février (0,25).
-- Température du sol le jour : la plus chaude en avril (36,6 °C), la plus fraîche en janvier (32,1 °C).
+Il tombe en moyenne environ 1008 mm de pluie par an. Les mois les plus pluvieux sont juin (192 mm), mai (162 mm) et octobre (124 mm), et le plus sec est janvier (12,8 mm).
+
+La végétation est la plus verte en juillet (indice NDVI de 0,38) et la moins verte en février (0,25).
+
+En journée, le sol est le plus chaud en avril (36,6 °C) et le plus frais en janvier (32,1 °C).
 
 ## Tendances observées
 
-Test de Mann-Kendall au seuil de 5 %, pente de Sen. On ne parle de tendance que si le test est significatif.
+Les tendances sont vérifiées avec le test de Mann-Kendall au seuil de 5 % et mesurées par la pente de Sen : on ne parle de tendance que si le test est significatif.
 
-- Température du sol la nuit (sur l'année, 2001-2020) : hausse de 0,79 °C par décennie (intervalle de confiance à 95 % : 0,56 à 1,02 °C).
-- Température du sol la nuit (janvier-mars, saison sèche, 2001-2020) : hausse de 1,22 °C par décennie (intervalle de confiance à 95 % : 0,78 à 1,70 °C).
-- Température du sol la nuit (mai-octobre, saison des pluies, 2001-2020) : hausse de 0,65 °C par décennie (intervalle de confiance à 95 % : 0,35 à 0,94 °C).
-- Pas de tendance significative pour : pluie (sur l'année, 2001-2024) ; pluie (janvier-mars, saison sèche, 2001-2025) ; pluie (mai-octobre, saison des pluies, 2001-2024) ; végétation (NDVI) (janvier-mars, saison sèche, 2001-2026) ; température du sol le jour (sur l'année, 2002-2020) ; température du sol le jour (janvier-mars, saison sèche, 2001-2020).
+Sur l'ensemble de l'année, entre 2001 et 2020, la température du sol la nuit est en hausse d'environ 0,79 °C par décennie (fourchette probable : 0,56 à 1,02 °C).
 
-Les tendances de température du sol s'arrêtent en 2020 (dérive d'orbite du satellite Terra).
+En saison sèche (janvier-mars), entre 2001 et 2020, la température du sol la nuit est en hausse d'environ 1,22 °C par décennie (fourchette probable : 0,78 à 1,70 °C).
+
+En saison des pluies (mai-octobre), entre 2001 et 2020, la température du sol la nuit est en hausse d'environ 0,65 °C par décennie (fourchette probable : 0,35 à 0,94 °C).
+
+Pas de tendance nette pour la pluie (sur l'année, en saison sèche, en saison des pluies).
+
+Pas de tendance nette pour la verdure de la végétation (NDVI) (en saison sèche).
+
+Pas de tendance nette pour la température du sol en journée (sur l'année, en saison sèche).
+
+Les tendances de température du sol s'arrêtent en 2020, à cause de la dérive d'orbite du satellite Terra.
 
 À l'échelle des préfectures et des sites, des dizaines de séries sont testées : environ une sur vingt peut paraître significative par hasard. Une tendance isolée est à confirmer avec les zones voisines.
 
 ## Dernières observations
 
-Dernière valeur fiable de chaque indicateur (au moins la moitié de la zone visible) :
-- Pluie, septembre 2025 : 83,5 mm (normale du mois : 111,7 mm, écart -25,3 %). La série de pluie (IMERG Final) s'arrête pour l'instant à ce mois.
-- Végétation (NDVI), mai 2026 : 0,354 (normale du mois : 0,325, écart +0,029).
-- Température du sol le jour, décembre 2022 : 33,5 °C (normale du mois : 33,4 °C, écart +0,1 °C). Température du sol publiée jusqu'en décembre 2022.
+Dernières valeurs fiables, quand au moins la moitié de la zone était visible :
+
+En septembre 2025, dernier mois disponible pour la pluie, il est tombé 83,5 mm, contre 111,7 mm en moyenne pour ce mois (écart de -25,3 %).
+
+En mai 2026, l'indice de verdure de la végétation (NDVI) était de 0,354, contre 0,325 en moyenne pour ce mois.
+
+En décembre 2022, dernier mois publié pour la température du sol, elle était en journée de 33,5 °C, contre 33,4 °C en moyenne pour ce mois.
+
 
 ## À retenir
 

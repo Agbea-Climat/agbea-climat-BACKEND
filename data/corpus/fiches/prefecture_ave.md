@@ -8,36 +8,48 @@ Préfecture Avé, région Maritime. Superficie : 1020 km². Centre : longitude 0
 
 ## Relief (NASADEM)
 
-Altitude moyenne 88 m (de 11 à 149 m). 0,0 % du territoire est à moins de 10 m d'altitude.
+L'altitude moyenne est de 88 m, de 11 à 149 m. 0,0 % du territoire se trouve à moins de 10 m d'altitude.
 
 ## Climat habituel (normales 2001-2020)
 
-- Pluie : environ 1066 mm par an. Mois les plus pluvieux : juin (171 mm), mai (153 mm), octobre (135 mm). Mois le plus sec : janvier (14,8 mm).
-- Végétation (NDVI, de -1 à 1) : la plus verte en juin (0,75), la moins verte en février (0,41).
-- Température du sol le jour : la plus chaude en février (33,5 °C), la plus fraîche en juin (27,9 °C).
+Il tombe en moyenne environ 1066 mm de pluie par an. Les mois les plus pluvieux sont juin (171 mm), mai (153 mm) et octobre (135 mm), et le plus sec est janvier (14,8 mm).
+
+La végétation est la plus verte en juin (indice NDVI de 0,75) et la moins verte en février (0,41).
+
+En journée, le sol est le plus chaud en février (33,5 °C) et le plus frais en juin (27,9 °C).
 
 ## Tendances observées
 
-Test de Mann-Kendall au seuil de 5 %, pente de Sen. On ne parle de tendance que si le test est significatif.
+Les tendances sont vérifiées avec le test de Mann-Kendall au seuil de 5 % et mesurées par la pente de Sen : on ne parle de tendance que si le test est significatif.
 
-- Végétation (NDVI) (janvier-mars, saison sèche, 2001-2026) : hausse de 0,038 par décennie (intervalle de confiance à 95 % : 0,012 à 0,063).
-- Température du sol le jour (sur l'année, 2002-2020) : hausse de 0,59 °C par décennie (intervalle de confiance à 95 % : 0,02 à 0,98 °C).
-- Température du sol le jour (janvier-mars, saison sèche, 2001-2020) : hausse de 0,67 °C par décennie (intervalle de confiance à 95 % : 0,08 à 1,40 °C).
-- Température du sol la nuit (sur l'année, 2001-2020) : hausse de 0,69 °C par décennie (intervalle de confiance à 95 % : 0,50 à 0,88 °C).
-- Température du sol la nuit (janvier-mars, saison sèche, 2001-2020) : hausse de 1,13 °C par décennie (intervalle de confiance à 95 % : 0,68 à 1,79 °C).
-- Température du sol la nuit (mai-octobre, saison des pluies, 2001-2020) : hausse de 0,61 °C par décennie (intervalle de confiance à 95 % : 0,32 à 0,92 °C).
-- Pas de tendance significative pour : pluie (sur l'année, 2001-2024) ; pluie (janvier-mars, saison sèche, 2001-2025) ; pluie (mai-octobre, saison des pluies, 2001-2024).
+En saison sèche (janvier-mars), entre 2001 et 2026, la verdure de la végétation (NDVI) est en hausse d'environ 0,038 par décennie (fourchette probable : 0,012 à 0,063).
 
-Les tendances de température du sol s'arrêtent en 2020 (dérive d'orbite du satellite Terra).
+Sur l'ensemble de l'année, entre 2002 et 2020, la température du sol en journée est en hausse d'environ 0,59 °C par décennie (fourchette probable : 0,02 à 0,98 °C).
+
+En saison sèche (janvier-mars), entre 2001 et 2020, la température du sol en journée est en hausse d'environ 0,67 °C par décennie (fourchette probable : 0,08 à 1,40 °C).
+
+Sur l'ensemble de l'année, entre 2001 et 2020, la température du sol la nuit est en hausse d'environ 0,69 °C par décennie (fourchette probable : 0,50 à 0,88 °C).
+
+En saison sèche (janvier-mars), entre 2001 et 2020, la température du sol la nuit est en hausse d'environ 1,13 °C par décennie (fourchette probable : 0,68 à 1,79 °C).
+
+En saison des pluies (mai-octobre), entre 2001 et 2020, la température du sol la nuit est en hausse d'environ 0,61 °C par décennie (fourchette probable : 0,32 à 0,92 °C).
+
+Pas de tendance nette pour la pluie (sur l'année, en saison sèche, en saison des pluies).
+
+Les tendances de température du sol s'arrêtent en 2020, à cause de la dérive d'orbite du satellite Terra.
 
 À l'échelle des préfectures et des sites, des dizaines de séries sont testées : environ une sur vingt peut paraître significative par hasard. Une tendance isolée est à confirmer avec les zones voisines.
 
 ## Dernières observations
 
-Dernière valeur fiable de chaque indicateur (au moins la moitié de la zone visible) :
-- Pluie, septembre 2025 : 113,0 mm (normale du mois : 135,1 mm, écart -16,4 %). La série de pluie (IMERG Final) s'arrête pour l'instant à ce mois.
-- Végétation (NDVI), octobre 2026 : 0,705 (normale du mois : 0,737, écart -0,032).
-- Température du sol le jour, décembre 2022 : 30,6 °C (normale du mois : 29,9 °C, écart +0,6 °C). Température du sol publiée jusqu'en décembre 2022.
+Dernières valeurs fiables, quand au moins la moitié de la zone était visible :
+
+En septembre 2025, dernier mois disponible pour la pluie, il est tombé 113,0 mm, contre 135,1 mm en moyenne pour ce mois (écart de -16,4 %).
+
+En octobre 2026, l'indice de verdure de la végétation (NDVI) était de 0,705, contre 0,737 en moyenne pour ce mois.
+
+En décembre 2022, dernier mois publié pour la température du sol, elle était en journée de 30,6 °C, contre 29,9 °C en moyenne pour ce mois.
+
 
 ## À retenir
 
